@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import os from "node:os";
 
 export type LeadKind = "analisis" | "contacto" | "talento" | "descarga" | "rental";
 
@@ -77,22 +78,31 @@ export async function storeLead(lead: LeadInput): Promise<void> {
     return;
   }
 
-  // Dev fallback: append to .data/leads.json
-  const dir = path.join(process.cwd(), ".data");
-  const file = path.join(dir, "leads.json");
-  await fs.mkdir(dir, { recursive: true });
-  let existing: unknown[] = [];
-  try {
-    existing = JSON.parse(await fs.readFile(file, "utf8"));
-  } catch {
-    existing = [];
+  // Sin Supabase configurado: guarda en disco si se puede (dev), sin romper en
+  // serverless (Vercel tiene FS de solo lectura salvo /tmp). NUNCA lanza error,
+  // para que el aviso por correo siga funcionando aunque no haya base de datos.
+  console.warn(
+    `[lead:${lead.kind}] SIN SUPABASE — configura SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY en Vercel para persistir.`
+  );
+  const record = { ...lead, created_at: new Date().toISOString() };
+  const dirs = [path.join(process.cwd(), ".data"), path.join(os.tmpdir(), "bushido")];
+  for (const dir of dirs) {
+    try {
+      await fs.mkdir(dir, { recursive: true });
+      const file = path.join(dir, "leads.json");
+      let existing: unknown[] = [];
+      try {
+        existing = JSON.parse(await fs.readFile(file, "utf8"));
+      } catch {
+        existing = [];
+      }
+      existing.push(record);
+      await fs.writeFile(file, JSON.stringify(existing, null, 2), "utf8");
+      return;
+    } catch {
+      // intenta el siguiente directorio
+    }
   }
-  existing.push({ ...lead, created_at: new Date().toISOString() });
-  await fs.writeFile(file, JSON.stringify(existing, null, 2), "utf8");
-  console.log(`[lead:${lead.kind}] stored locally (no Supabase configured):`, {
-    name: lead.name,
-    email: lead.email,
-  });
 }
 
 // ── Cotización interna: clasificación automática por tipo de proyecto ──

@@ -153,9 +153,9 @@ export const NAV = [
 export const WHATSAPP = "573008923390";
 export const EMAIL = "servicios@bushidoav.com";
 
-// Redes sociales (footer). ⚠️ Cambia los handles por los reales de Bushido.
+// Redes sociales (footer).
 export const SOCIAL = {
-  instagram: "https://instagram.com/bushidoav",
-  facebook: "https://facebook.com/bushidoav",
-  tiktok: "https://tiktok.com/@bushidoav",
+  instagram: "https://www.instagram.com/bushido.aa/",
+  tiktok: "https://www.tiktok.com/@bushido.aa",
+  youtube: "https://www.youtube.com/@BushidoAgenciaAudiovisual",
 };
