@@ -2,11 +2,17 @@ import Link from "next/link";
 import AnalisisButton from "./AnalisisButton";
 import HeroVideo from "./HeroVideo";
 
+// ── Interruptor del fondo del hero ──────────────────────────────────
+// false = degradado cinematográfico (provisional, para presentar hoy).
+// true  = video a pantalla completa (public/hero/hero.mp4).
+// Cuando Maick tenga el clip definitivo: pon USE_VIDEO en true y reemplaza el .mp4.
+const USE_VIDEO = false;
+
 export default function Hero() {
   return (
-    <section className="hero-v2 hero-vid" id="top">
+    <section className={"hero-v2 hero-vid" + (USE_VIDEO ? "" : " hero-vid--flat")} id="top">
       <div className="hero-vid-bg" aria-hidden="true">
-        <HeroVideo />
+        {USE_VIDEO ? <HeroVideo /> : <div className="hero-vid-gradient" />}
         <div className="hero-vid-overlay" />
         <div className="hero-vid-grain" />
       </div>
