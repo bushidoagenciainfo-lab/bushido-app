@@ -81,3 +81,22 @@ Tu dominio tiene otros registros que **NO debes tocar**:
 
 Cuando llegues a este punto lo revisamos juntos. Si algo sale en rojo, mándame
 captura y lo destrabo.
+
+---
+
+## 🧯 Problema común: "Invalid Configuration" + "Failed to generate cert"
+
+Si Vercel muestra el apex en rojo y el `www` falla el certificado, casi siempre es esto:
+
+**1. Sobra un registro AAAA (IPv6) viejo de Hostinger que choca con la A de Vercel.**
+→ En Hostinger, **BORRA** el registro `AAAA · @ · 2a02:4780:84::32`.
+(Deja el `A · @ · 216.198.79.1` — ese es el de Vercel, correcto.)
+
+**2. El `www` apunta mal.**
+→ El CNAME `www` debe tener Contenido **`cname.vercel-dns.com`** (no `bushidoav.com`).
+→ Si creaste por error un registro llamado `cname.vercel-dns.com`, **bórralo**.
+
+**NO borres:** los `MX` (mx1/mx2.hostinger.com) ni el `TXT @` SPF → son tu correo.
+Tampoco `send`, `resend._domainkey`, `_dmarc`, `hostingermail-*`, `autodiscover`, `autoconfig`.
+
+Luego en Vercel → **Refresh** en las dos filas. Espera unos minutos (propagación).

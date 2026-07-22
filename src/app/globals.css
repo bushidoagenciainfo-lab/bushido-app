@@ -2063,3 +2063,73 @@ body.drawer-open { overflow: hidden; }
   .radial-wrap { display: none; }
   .services-tiles-mobile { display: grid; }
 }
+
+/* ══════════════ FASE 2 · PORTAFOLIO · MEDIO CÍRCULO (scrub con cursor) ══════════════ */
+.arc-wrap { position: relative; height: 620px; overflow: hidden; margin-top: 10px; }
+.arc-stage { position: absolute; left: 50%; top: 120px; width: 0; height: 0; }
+.arc-card {
+  position: absolute; left: 0; top: 0;
+  width: 210px; height: 290px; margin-left: -105px; margin-top: -145px;
+  border-radius: 16px; overflow: hidden; cursor: pointer;
+  border: 1px solid rgba(237,231,218,0.14);
+  box-shadow: 0 26px 54px -18px rgba(0,0,0,0.7);
+  background: var(--ink-2);
+  will-change: transform, opacity;
+}
+.arc-card .a-img { position: absolute; inset: 0; background-size: cover; background-position: center; filter: saturate(.9); transition: filter .4s var(--e-out); }
+.arc-card.focus .a-img { filter: saturate(1.05); }
+.arc-card .a-scrim { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 42%, rgba(10,10,11,0.92) 100%); }
+.arc-card .a-lock {
+  position: absolute; top: 12px; right: 12px;
+  font-family: var(--mono); font-size: 8px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--gold); background: rgba(10,10,11,0.55);
+  border: 1px solid rgba(201,162,74,0.35); border-radius: 999px; padding: 4px 9px;
+}
+.arc-card .a-body { position: absolute; left: 0; right: 0; bottom: 0; padding: 16px 18px; z-index: 2; opacity: 0; transform: translateY(6px); transition: opacity .3s var(--e-out), transform .3s var(--e-out); }
+.arc-card.focus .a-body { opacity: 1; transform: translateY(0); }
+.arc-card.focus { border-color: var(--sepp); }
+.arc-card .a-cat { font-family: var(--mono); font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: var(--sepp); margin-bottom: 6px; }
+.arc-card .a-title { font-family: var(--serif); font-size: 24px; line-height: 1; color: var(--bone); letter-spacing: -.01em; }
+.arc-card .a-client { font-family: var(--mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--bone-dim); margin-top: 6px; }
+.arc-hint {
+  text-align: center; font-family: var(--mono); font-size: 11px; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--bone-ghost); margin-top: 4px;
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+}
+.arc-hint .dash { width: 34px; height: 1px; background: var(--bone-ghost); opacity: .5; }
+
+/* fallback móvil: fila con scroll */
+.arc-mobile { display: none; }
+@media (max-width: 820px) {
+  .arc-wrap { display: none; }
+  .arc-mobile {
+    display: flex; gap: 14px; overflow-x: auto; padding: 6px 4px 20px;
+    scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+  }
+  .arc-mobile .am-card {
+    flex: 0 0 auto; width: 190px; height: 264px; scroll-snap-align: center;
+    position: relative; border-radius: 14px; overflow: hidden; cursor: pointer;
+    border: 1px solid var(--hairline); background: var(--ink-2);
+  }
+  .arc-mobile .am-card .a-img { position: absolute; inset: 0; background-size: cover; background-position: center; }
+  .arc-mobile .am-card .a-scrim { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 45%, rgba(10,10,11,0.9) 100%); }
+  .arc-mobile .am-card .a-body { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px; }
+}
+
+/* ══════════════ FASE 2 · HERO 3D (partículas análogo↔digital) ══════════════ */
+.hero-3d { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.hero-3d canvas { display: block; width: 100% !important; height: 100% !important; }
+/* el gradiente de respaldo queda más tenue porque ahora manda el 3D */
+.hero-v2 .hero-bg { opacity: 0.7; }
+
+.mode-caption {
+  display: inline-flex; align-items: center; gap: 12px;
+  margin-top: 40px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--bone-dim);
+  padding: 10px 18px; border: 1px solid var(--hairline); border-radius: 999px;
+  background: rgba(10,10,11,0.35); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+}
+.mode-caption .mc-arrows { color: var(--sepp); font-size: 14px; letter-spacing: 0; }
+.mode-caption .mc-hint { color: var(--bone-ghost); letter-spacing: 0.1em; text-transform: none; font-size: 10px; }
+@media (max-width: 520px) { .mode-caption .mc-hint { display: none; } }

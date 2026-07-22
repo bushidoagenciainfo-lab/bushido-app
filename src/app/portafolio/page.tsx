@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import PortfolioDeck from "@/components/PortfolioDeck";
-import PortfolioGrid from "@/components/PortfolioGrid";
+import PortfolioArc from "@/components/PortfolioArc";
 import AnalisisButton from "@/components/AnalisisButton";
 import Footer from "@/components/Footer";
 
@@ -26,8 +25,9 @@ export default function PortafolioPage() {
           </div>
         </div>
 
-        <PortfolioDeck />
-        <PortfolioGrid />
+        <section style={{ paddingTop: 40 }}>
+          <PortfolioArc />
+        </section>
 
         <section>
           <div className="price-cta">

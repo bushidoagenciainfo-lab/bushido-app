@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import ServicesRadial from "@/components/ServicesRadial";
+import ServiceList from "@/components/ServiceList";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = { title: "Servicios y precios · Bushido" };
@@ -23,8 +23,8 @@ export default function ServiciosPage() {
           </div>
         </div>
 
-        <section style={{ paddingTop: 40 }}>
-          <ServicesRadial />
+        <section style={{ paddingTop: 60 }}>
+          <ServiceList />
         </section>
       </main>
       <Footer />
