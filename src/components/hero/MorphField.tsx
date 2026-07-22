@@ -67,14 +67,14 @@ export default function MorphField() {
       const x = Math.sin(inc) * Math.cos(az);
       const y = Math.sin(inc) * Math.sin(az);
       const z = Math.cos(inc);
-      const R = 1.65;
+      const R = 1.35;
       a[i * 3] = x * R;
       a[i * 3 + 1] = y * R;
       a[i * 3 + 2] = z * R;
-      const rr = 1.4 + Math.random() * 1.5;
-      d[i * 3] = x * rr + (Math.random() - 0.5) * 0.8;
-      d[i * 3 + 1] = y * rr + (Math.random() - 0.5) * 0.8;
-      d[i * 3 + 2] = z * rr * 1.25 + (Math.random() - 0.5) * 0.8;
+      const rr = 1.8 + Math.random() * 2.4;
+      d[i * 3] = x * rr + (Math.random() - 0.5) * 1.6;
+      d[i * 3 + 1] = y * rr + (Math.random() - 0.5) * 1.6;
+      d[i * 3 + 2] = z * rr * 1.3 + (Math.random() - 0.5) * 1.6;
       r[i] = Math.random();
     }
     return { aAnalog: a, aDigital: d, aRand: r };
@@ -84,10 +84,10 @@ export default function MorphField() {
     () => ({
       uMorph: { value: 0 },
       uTime: { value: 0 },
-      uSize: { value: 2.4 },
+      uSize: { value: 3.6 },
       uPixelRatio: { value: typeof window !== "undefined" ? Math.min(window.devicePixelRatio, 2) : 1 },
-      uColorA: { value: new THREE.Color("#E8D6BE") }, // análogo · cálido
-      uColorB: { value: new THREE.Color("#4FD8E8") }, // digital · cian
+      uColorA: { value: new THREE.Color("#F0782E") }, // análogo · cálido ámbar
+      uColorB: { value: new THREE.Color("#38E1F5") }, // digital · cian
     }),
     []
   );
@@ -109,16 +109,18 @@ export default function MorphField() {
     const t = uniforms.uTime.value + delta;
     uniforms.uTime.value = t;
     // objetivo del morph: cursor X (o vaivén suave si no hay cursor / móvil)
-    const auto = 0.5 + 0.4 * Math.sin(t * 0.18);
-    const byPointer = pointer.current.x * 0.5 + 0.5;
+    // vaivén automático suave para que SIEMPRE se note el efecto,
+    // reforzado por el cursor (X mapea de análogo→digital)
+    const auto = 0.5 + 0.42 * Math.sin(t * 0.35);
+    const byPointer = Math.min(1, Math.max(0, pointer.current.x * 0.65 + 0.5));
     const targetMorph = reduce ? 0.5 : Math.abs(pointer.current.x) < 0.001 ? auto : byPointer;
-    morph.current += (targetMorph - morph.current) * (reduce ? 1 : 0.05);
+    morph.current += (targetMorph - morph.current) * (reduce ? 1 : 0.11);
     uniforms.uMorph.value = morph.current;
 
     const g = groupRef.current;
     if (g) {
-      g.rotation.y += (reduce ? 0 : 0.0016) + pointer.current.x * 0.0015;
-      g.rotation.x += (pointer.current.y * 0.15 - g.rotation.x) * 0.04;
+      g.rotation.y += (reduce ? 0 : 0.0022) + pointer.current.x * 0.004;
+      g.rotation.x += (pointer.current.y * 0.25 - g.rotation.x) * 0.05;
     }
   });
 

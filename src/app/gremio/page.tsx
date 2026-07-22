@@ -112,15 +112,6 @@ export default function GremioPage() {
           </div>
         </section>
 
-        {/* Cursos: próximamente */}
-        <section id="cursos">
-          <div className="coming-soon">
-            <div className="cs-tag">Cursos y talleres</div>
-            <h3>Próximamente.</h3>
-            <p>Estamos trabajando en ello. Muy pronto abrimos formación Bushido.</p>
-          </div>
-        </section>
-
         {/* Banco de talentos */}
         <section id="talento" style={{ paddingTop: 40 }}>
           <div className="brief-wrap" style={{ maxWidth: 1200 }}>

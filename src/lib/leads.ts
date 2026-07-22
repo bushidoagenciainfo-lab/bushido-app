@@ -95,7 +95,25 @@ export async function storeLead(lead: LeadInput): Promise<void> {
   });
 }
 
+// ── Cotización interna: clasificación automática por tipo de proyecto ──
+const CLASSIFY: Record<string, { cat: string; rango: string }> = {
+  "Videoclip musical": { cat: "Música · Videoclip", rango: "$3.000.000 – $5.000.000" },
+  "Cobertura de evento": { cat: "Eventos", rango: "$1.000.000 – $2.500.000" },
+  "Reels / contenido de marca": { cat: "Contenido · Reels", rango: "$500.000 – $2.400.000" },
+  "Mini comercial / campaña": { cat: "Campaña", rango: "$1.700.000 – $4.200.000" },
+  "Video corporativo": { cat: "Empresa", rango: "$2.800.000 – $6.500.000+" },
+  "Video de producto": { cat: "Producto", rango: "$550.000 – $3.000.000" },
+  "Fotografía editorial": { cat: "Editorial", rango: "cotización a medida" },
+  "Otro / múltiples": { cat: "General", rango: "cotización a medida" },
+};
+
+export function classifyProject(project?: string): { cat: string; rango: string } | null {
+  if (!project) return null;
+  return CLASSIFY[project] || { cat: "General", rango: "cotización a medida" };
+}
+
 function renderRows(lead: LeadInput): string {
+  const clasif = classifyProject(lead.project);
   const rows: [string, string | undefined][] = [
     ["Tipo", KIND_LABEL[lead.kind]],
     ["Nombre", lead.name],
@@ -110,6 +128,8 @@ function renderRows(lead: LeadInput): string {
     ["Reel", lead.reel],
     ["Otros links", lead.links],
     ["Proyecto", lead.project],
+    ["Clasificación", clasif ? clasif.cat : undefined],
+    ["Estimado sugerido", clasif ? clasif.rango : undefined],
     ["Pack", lead.pack],
     ["Mensaje", lead.message],
   ];
@@ -150,5 +170,51 @@ export async function notifyLead(lead: LeadInput): Promise<void> {
     subject,
     html,
     replyTo: lead.email,
+  });
+}
+
+/**
+ * Cotización interna automática: responde al CLIENTE al instante con un
+ * estimado según su tipo de proyecto y los siguientes pasos. Sin cotizador
+ * público. No-op si no hay Resend o email. (En modo prueba, Resend solo entrega
+ * al correo de la cuenta; funcionará del todo cuando el dominio esté verificado.)
+ */
+export async function sendClientAutoReply(lead: LeadInput): Promise<void> {
+  if (!hasEmail() || !lead.email) {
+    console.log(`[auto-reply skipped] kind=${lead.kind} email=${lead.email ?? "—"}`);
+    return;
+  }
+  const clasif = classifyProject(lead.project);
+  const resend = new Resend(RESEND_API_KEY as string);
+  const nombre = (lead.name || "").split(" ")[0] || "";
+  const estimateBlock = clasif
+    ? `<p style="margin:0 0 6px;color:#8A8784;font:12px monospace;letter-spacing:1px;text-transform:uppercase">Rango estimado · ${clasif.cat}</p>
+       <p style="margin:0 0 20px;color:#0A0A0B;font:600 24px Georgia,serif">${clasif.rango}</p>
+       <p style="margin:0 0 20px;color:#514E4A;font:14px/1.6 Helvetica,Arial">Es un rango de referencia — el valor final lo afinamos según tu idea, formato y alcance.</p>`
+    : `<p style="margin:0 0 20px;color:#514E4A;font:14px/1.6 Helvetica,Arial">Vamos a preparar una propuesta a la medida de lo que necesitas.</p>`;
+
+  const html = `
+    <div style="background:#0A0A0B;padding:30px">
+      <div style="max-width:560px;margin:0 auto;background:#EDE7DA;border-radius:10px;overflow:hidden">
+        <div style="background:#D5322E;color:#EDE7DA;padding:16px 24px;font:700 16px Helvetica;letter-spacing:2px">
+          BUSH<span style="color:#0A0A0B">I</span>DO
+        </div>
+        <div style="padding:28px 24px">
+          <p style="margin:0 0 16px;color:#0A0A0B;font:400 26px Georgia,serif">Hola ${nombre}, recibimos tu solicitud.</p>
+          <p style="margin:0 0 22px;color:#514E4A;font:14px/1.6 Helvetica,Arial">
+            Gracias por escribirnos. Un asesor de Bushido te contacta en menos de 24 horas
+            para afinar tu propuesta${lead.phone ? " por WhatsApp" : ""}.
+          </p>
+          ${estimateBlock}
+          <p style="margin:0;color:#8A8784;font:11px monospace;letter-spacing:1px">Criterio antes que equipo · bushidoav.com</p>
+        </div>
+      </div>
+    </div>`;
+
+  await resend.emails.send({
+    from: LEAD_FROM_EMAIL,
+    to: lead.email,
+    subject: "Recibimos tu solicitud · Bushido",
+    html,
   });
 }

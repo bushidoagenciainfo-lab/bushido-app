@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import PortfolioArc from "@/components/PortfolioArc";
+import PortfolioGrid from "@/components/PortfolioGrid";
 import AnalisisButton from "@/components/AnalisisButton";
 import Footer from "@/components/Footer";
 
@@ -25,8 +26,16 @@ export default function PortafolioPage() {
           </div>
         </div>
 
-        <section style={{ paddingTop: 40 }}>
+        <section style={{ paddingTop: 40, paddingBottom: 20 }}>
           <PortfolioArc />
+        </section>
+
+        <section style={{ paddingTop: 0 }}>
+          <div className="filter-lead">
+            <span className="fl-num">Explora</span>
+            <h2>Por <em>categoría</em>.</h2>
+          </div>
+          <PortfolioGrid />
         </section>
 
         <section>

@@ -2133,3 +2133,35 @@ body.drawer-open { overflow: hidden; }
 .mode-caption .mc-arrows { color: var(--sepp); font-size: 14px; letter-spacing: 0; }
 .mode-caption .mc-hint { color: var(--bone-ghost); letter-spacing: 0.1em; text-transform: none; font-size: 10px; }
 @media (max-width: 520px) { .mode-caption .mc-hint { display: none; } }
+
+/* ── contraste del texto del hero sobre las partículas ── */
+.hero-veil {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: radial-gradient(ellipse 56% 50% at 50% 44%,
+    rgba(10,10,11,0.6) 0%, rgba(10,10,11,0.18) 46%, transparent 72%);
+}
+.hero-v2 h1, .hero-v2 .sub, .hero-v2 .eyebrow {
+  text-shadow: 0 2px 30px rgba(0,0,0,0.75), 0 0 60px rgba(0,0,0,0.5);
+}
+
+/* ══════════════ Letterbox · parpadeo cinematográfico (carga y cambio de sección) ══════════════ */
+.lb { position: fixed; left: 0; right: 0; height: 52vh; background: #000; z-index: 400; pointer-events: none; }
+.lb-top { top: 0; animation: lbUp 0.8s cubic-bezier(0.65,0.05,0.35,1) forwards; }
+.lb-bot { bottom: 0; animation: lbDown 0.8s cubic-bezier(0.65,0.05,0.35,1) forwards; }
+@keyframes lbUp { from { transform: translateY(0); } to { transform: translateY(-101%); } }
+@keyframes lbDown { from { transform: translateY(0); } to { transform: translateY(101%); } }
+@media (prefers-reduced-motion: reduce) { .lb { display: none; } }
+
+/* ── cursor personalizado (anillo + punto) ── */
+.cursor-ring { transition: transform 0.13s ease-out, width 0.25s var(--e-out), height 0.25s var(--e-out), border-color 0.25s var(--e-out); }
+body.has-cursor, body.has-cursor * { cursor: none !important; }
+body.has-cursor .cursor-dot, body.has-cursor .cursor-ring, body.has-cursor .cursor-spot { display: block; }
+/* ocultos por defecto; el componente Cursor los activa solo en desktop */
+.cursor-dot, .cursor-ring, .cursor-spot { display: none; }
+
+/* encabezado del filtro por categoría en portafolio */
+.filter-lead { margin-bottom: 24px; }
+.filter-lead .fl-num { font-family: var(--mono); font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--sepp); display: inline-flex; align-items: center; gap: 10px; }
+.filter-lead .fl-num::before { content: ''; width: 24px; height: 1px; background: var(--sepp); }
+.filter-lead h2 { font-family: var(--serif); font-size: clamp(30px, 4vw, 52px); font-weight: 400; color: var(--bone); letter-spacing: -.02em; margin-top: 8px; }
+.filter-lead h2 em { font-style: italic; color: var(--bone-dim); }

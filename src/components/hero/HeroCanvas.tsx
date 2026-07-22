@@ -7,7 +7,7 @@ export default function HeroCanvas() {
   return (
     <div className="hero-3d" aria-hidden="true">
       <Canvas
-        camera={{ position: [0, 0, 5.2], fov: 45 }}
+        camera={{ position: [0, 0, 4.4], fov: 48 }}
         gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}
         dpr={[1, 2]}
       >

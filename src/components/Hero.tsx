@@ -14,14 +14,16 @@ export default function Hero() {
     <section className="hero-v2" id="top">
       <div className="hero-bg" aria-hidden="true" />
       <HeroCanvas />
+      <div className="hero-veil" aria-hidden="true" />
       <div className="inner">
         <div className="eyebrow">Agencia audiovisual · Bogotá · bushidoav.com</div>
         <h1>
-          Donde lo análogo se vuelve <span className="italic">inolvidable</span>.
+          Hacemos lo que la gente <span className="italic">recuerda</span>.
         </h1>
         <p className="sub">
-          La tecnología es la herramienta. <em>La mirada es nuestra.</em>{" "}
-          Criterio audiovisual para marcas y artistas.
+          No vendemos horas de cámara. Construimos <em>criterio visual</em> para
+          artistas, marcas y compañías que necesitan contenido que funcione — y
+          que se quede.
         </p>
         <div className="actions">
           <AnalisisButton className="btn btn-primary">

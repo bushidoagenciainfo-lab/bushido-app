@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { storeLead, notifyLead, type LeadInput } from "@/lib/leads";
+import {
+  storeLead,
+  notifyLead,
+  sendClientAutoReply,
+  classifyProject,
+  type LeadInput,
+} from "@/lib/leads";
 
 export const runtime = "nodejs";
 
@@ -64,8 +70,15 @@ export async function POST(request: Request) {
     );
   }
 
+  // Cotización interna: clasifica y guarda el estimado en el registro
+  const lead = data as LeadInput;
+  const clasif = classifyProject(lead.project);
+  if (clasif) {
+    lead.meta = { ...(lead.meta ?? {}), categoria: clasif.cat, rango: clasif.rango };
+  }
+
   try {
-    await storeLead(data as LeadInput);
+    await storeLead(lead);
   } catch (err) {
     console.error("storeLead error:", err);
     return NextResponse.json(
@@ -74,10 +87,13 @@ export async function POST(request: Request) {
     );
   }
 
-  // fire-and-forget the email so a mail hiccup never blocks the user
-  notifyLead(data as LeadInput).catch((err) =>
-    console.error("notifyLead error:", err)
-  );
+  // fire-and-forget: aviso a Bushido + auto-respuesta al cliente con su estimado
+  notifyLead(lead).catch((err) => console.error("notifyLead error:", err));
+  if (lead.kind === "contacto" || lead.kind === "analisis") {
+    sendClientAutoReply(lead).catch((err) =>
+      console.error("autoReply error:", err)
+    );
+  }
 
   return NextResponse.json({ ok: true });
 }

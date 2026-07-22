@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Nav from "@/components/Nav";
+import Cursor from "@/components/Cursor";
 import AnalisisModal from "@/components/AnalisisModal";
 
 export const metadata: Metadata = {
@@ -33,6 +34,7 @@ export default function RootLayout({
   return (
     <html lang="es" data-theme="dark">
       <body className="mode-analog">
+        <Cursor />
         <Nav />
         {children}
         <AnalisisModal />
