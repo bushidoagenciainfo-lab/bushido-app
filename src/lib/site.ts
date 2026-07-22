@@ -56,7 +56,37 @@ export interface Service {
 
 export const SERVICES: Service[] = [
   {
-    slug: "eventos", num: "01", cat: "Eventos", title: "Cobertura de", titleEm: "eventos",
+    slug: "redes", num: "01", cat: "Mensual · Insignia", title: "Paquetes de", titleEm: "redes",
+    description:
+      "Manejo integral de tus redes: estrategia, producción y campañas. Lo construimos con la data de tu marca y la data que ya hemos creado en tu nicho — no publicamos por publicar.",
+    packages: [
+      { name: "Esencial · /mes", price: "$2.000.000" },
+      { name: "Crecimiento · /mes", price: "$3.200.000", featured: true },
+      { name: "Posicionamiento · /mes", price: "$4.300.000" },
+    ],
+    benefits: [
+      "Reels, fotos, gráficas y stories cada mes",
+      "Gestión de perfiles + campañas Meta Ads",
+      "Estrategia con data de tu marca + nuestra data de nicho",
+      "Sesión estratégica mensual (planes superiores)",
+    ],
+    note: "Mínimo 3 meses · pauta publicitaria aparte (desde $800.000/mes recomendado).",
+  },
+  {
+    slug: "reels", num: "02", cat: "À la carte", title: "Reels", titleEm: "sueltos",
+    description:
+      "Piezas puntuales para una necesidad específica. Si publicas constante, el paquete mensual de redes te rinde mucho más por lo que incluye.",
+    packages: [
+      { name: "1 Reel", price: "$400.000" },
+      { name: "Pack 3 Reels", price: "$1.000.000", featured: true },
+      { name: "Pack 6 Reels", price: "$1.700.000" },
+      { name: "+ Guión y concepto", price: "+$200.000" },
+    ],
+    benefits: ["Hasta 60s por pieza", "Listo para publicar", "Dirección creativa incluida"],
+    note: "À la carte · para el flujo mensual, mira Paquetes de redes.",
+  },
+  {
+    slug: "eventos", num: "03", cat: "Eventos", title: "Cobertura de", titleEm: "eventos",
     description: "Fotografía + Reel highlight con entrega el mismo día. Conciertos, lanzamientos y corporativos.",
     packages: [
       { name: "Hasta 3 horas", price: "$1.000.000" },
@@ -68,19 +98,7 @@ export const SERVICES: Service[] = [
     note: "Ideal para prensa, giras y activaciones de marca.",
   },
   {
-    slug: "reels", num: "02", cat: "Contenido", title: "Reels de", titleEm: "marca",
-    description: "Grabación, dirección creativa y edición optimizada para Instagram y TikTok. Contenido que se comparte.",
-    packages: [
-      { name: "1 Reel", price: "$500.000" },
-      { name: "Pack 3 Reels", price: "$1.300.000", featured: true },
-      { name: "Pack 6 Reels", price: "$2.400.000" },
-      { name: "+ Guión y concepto", price: "+$200.000" },
-    ],
-    benefits: ["Hasta 60s por pieza", "Listo para publicar", "Dirección creativa incluida"],
-    note: "El pack más pedido por marcas que publican constante.",
-  },
-  {
-    slug: "comercial", num: "03", cat: "Campaña", title: "Mini", titleEm: "comercial",
+    slug: "comercial", num: "04", cat: "Campaña", title: "Mini", titleEm: "comercial",
     description: "Para lanzamientos de producto, marca y campañas digitales. Narrativa completa, hasta 90 segundos.",
     packages: [
       { name: "Básico", price: "$1.700.000" },
@@ -91,7 +109,7 @@ export const SERVICES: Service[] = [
     note: "Cuando el lanzamiento merece una pieza con historia.",
   },
   {
-    slug: "corporativo", num: "04", cat: "Empresa", title: "Video", titleEm: "corporativo",
+    slug: "corporativo", num: "05", cat: "Empresa", title: "Video", titleEm: "corporativo",
     description: "Institucional, testimoniales, capacitación y presentación de marca. Producción completa para empresas.",
     packages: [
       { name: "Corto (2–3 min)", price: "$2.800.000" },
@@ -102,7 +120,7 @@ export const SERVICES: Service[] = [
     note: "Para empresas que quieren verse a la altura de lo que hacen.",
   },
   {
-    slug: "producto", num: "05", cat: "Producto", title: "Video de", titleEm: "producto",
+    slug: "producto", num: "06", cat: "Producto", title: "Video de", titleEm: "producto",
     description: "Para e-commerce, redes y publicidad. Muestra el producto de forma que vende.",
     packages: [
       { name: "1 producto", price: "$550.000" },
@@ -113,7 +131,7 @@ export const SERVICES: Service[] = [
     note: "El detalle que hace que un producto se vea deseable.",
   },
   {
-    slug: "videoclip", num: "06", cat: "Música", title: "Video", titleEm: "clip",
+    slug: "videoclip", num: "07", cat: "Música", title: "Video", titleEm: "clip",
     description: "Concepto, locación, dirección y colorización. Para artistas que van al siguiente nivel.",
     packages: [
       { name: "Básico (1 locación)", price: "$3.000.000" },
@@ -134,3 +152,10 @@ export const NAV = [
 
 export const WHATSAPP = "573008923390";
 export const EMAIL = "servicios@bushidoav.com";
+
+// Redes sociales (footer). ⚠️ Cambia los handles por los reales de Bushido.
+export const SOCIAL = {
+  instagram: "https://instagram.com/bushidoav",
+  facebook: "https://facebook.com/bushidoav",
+  tiktok: "https://tiktok.com/@bushidoav",
+};

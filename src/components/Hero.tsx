@@ -1,21 +1,10 @@
-"use client";
-
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import AnalisisButton from "./AnalisisButton";
 
-const HeroCanvas = dynamic(() => import("./hero/HeroCanvas"), {
-  ssr: false,
-  loading: () => null,
-});
-
 export default function Hero() {
   return (
-    <section className="hero-v2" id="top">
-      <div className="hero-bg" aria-hidden="true" />
-      <HeroCanvas />
-      <div className="hero-veil" aria-hidden="true" />
-      <div className="inner">
+    <section className="hero-split" id="top">
+      <div className="hero-left">
         <div className="eyebrow">Agencia audiovisual · Bogotá · bushidoav.com</div>
         <h1>
           Hacemos lo que la gente <span className="italic">recuerda</span>.
@@ -33,16 +22,24 @@ export default function Hero() {
             Ver el portafolio <span className="arrow">→</span>
           </Link>
         </div>
-        <div className="mode-caption" aria-hidden="true">
-          <span>Análogo</span>
-          <span className="mc-arrows">⇄</span>
-          <span>Digital</span>
-          <span className="mc-hint">mueve el cursor</span>
-        </div>
       </div>
-      <div className="scrollcue" aria-hidden="true">
-        <span>Scroll</span>
-        <span className="line" />
+
+      <div className="crt-stage" aria-hidden="true">
+        <div className="crt">
+          <div className="crt-body" />
+          <div className="crt-screen">
+            <div className="crt-glow" />
+            <div className="crt-word">BUSHIDO</div>
+            <div className="crt-bar" />
+            <div className="crt-scan" />
+            <div className="crt-vignette" />
+          </div>
+          <div className="crt-led" />
+          <div className="crt-foot" />
+          <div className="crt-tag">
+            Análogo <em>⇄</em> Digital
+          </div>
+        </div>
       </div>
     </section>
   );
