@@ -25,7 +25,7 @@ export default function AnalisisModal() {
     const t = auto
       ? window.setTimeout(() => {
           if (!document.body.classList.contains("modal-open")) setOpen(true);
-        }, 6000)
+        }, 4000)
       : undefined;
 
     return () => {
