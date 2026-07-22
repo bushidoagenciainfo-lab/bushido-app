@@ -2008,3 +2008,58 @@ body.drawer-open { overflow: hidden; }
 .cat-back h2 { font-family: var(--serif); font-size: clamp(28px,4vw,44px); color: var(--bone); font-weight: 400; letter-spacing: -.01em; }
 .cat-back h2 em { font-style: italic; color: var(--sepp); }
 .cat-back .cb-count { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; color: var(--bone-ghost); }
+
+/* ══════════════ FASE 2 · SERVICIOS RADIALES ══════════════ */
+.radial-wrap { position: relative; display: grid; place-items: center; min-height: 640px; }
+.radial {
+  position: relative;
+  width: min(600px, 88vw); aspect-ratio: 1;
+  --radius: clamp(160px, 26vw, 250px);
+}
+.radial-orbit {
+  position: absolute; inset: 0; border-radius: 50%;
+  border: 1px solid var(--hairline);
+  background: radial-gradient(circle at 50% 50%, rgba(213,50,46,0.06), transparent 62%);
+}
+.radial-orbit::after {
+  content: ''; position: absolute; inset: 12%; border-radius: 50%;
+  border: 1px dashed var(--hairline-2);
+}
+.radial-spin { position: absolute; inset: 0; animation: radSpin 52s linear infinite; }
+@keyframes radSpin { to { transform: rotate(360deg); } }
+@keyframes radSpinRev { to { transform: rotate(-360deg); } }
+.radial:hover .radial-spin,
+.radial:hover .node-chip { animation-play-state: paused; }
+
+.radial-node { position: absolute; top: 50%; left: 50%; }
+.node-up { }
+.node-chip {
+  animation: radSpinRev 52s linear infinite;
+  display: inline-flex; flex-direction: column; align-items: center; gap: 4px;
+  transform-origin: center;
+  padding: 16px 20px; border-radius: 14px;
+  background: rgba(19,19,22,0.72); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  border: 1px solid var(--hairline);
+  cursor: pointer; white-space: nowrap;
+  transition: border-color .25s var(--e-out), background .25s var(--e-out), transform .25s var(--e-out);
+}
+.node-chip:hover { border-color: var(--sepp); background: rgba(26,26,31,0.9); transform: scale(1.06); }
+.node-chip .nc-num { font-family: var(--mono); font-size: 9px; letter-spacing: .18em; color: var(--sepp); }
+.node-chip .nc-name { font-family: var(--serif); font-size: 21px; line-height: 1; color: var(--bone); letter-spacing: -.01em; }
+
+.radial-center {
+  position: absolute; inset: 0; z-index: 5;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; pointer-events: none;
+}
+.radial-center .rc-label { font-family: var(--mono); font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--bone-ghost); margin-bottom: 10px; }
+.radial-center .rc-title { font-family: var(--serif); font-size: clamp(34px,4.5vw,54px); color: var(--bone); line-height: .95; letter-spacing: -.02em; }
+.radial-center .rc-title em { font-style: italic; color: var(--sepp); }
+.radial-center .rc-hint { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; color: var(--bone-ghost); margin-top: 14px; max-width: 200px; }
+
+/* radial solo en desktop; en móvil se usan los tiles */
+.services-tiles-mobile { display: none; }
+@media (max-width: 820px) {
+  .radial-wrap { display: none; }
+  .services-tiles-mobile { display: grid; }
+}

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { SERVICES, type Service } from "@/lib/site";
 import { openAnalisis } from "@/lib/ui";
 
-export default function ServiceList() {
+export default function ServicesRadial() {
   const [active, setActive] = useState<Service | null>(null);
   const open = active !== null;
 
@@ -17,16 +17,56 @@ export default function ServiceList() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
+  const step = 360 / SERVICES.length;
+
   return (
     <>
-      <div className="services-tiles">
+      {/* ── DESKTOP: carrusel radial ── */}
+      <div className="radial-wrap">
+        <div className="radial">
+          <div className="radial-orbit" />
+          <div className="radial-spin">
+            {SERVICES.map((s, i) => {
+              const a = i * step;
+              return (
+                <div
+                  key={s.slug}
+                  className="radial-node"
+                  style={{
+                    transform: `translate(-50%, -50%) rotate(${a}deg) translateY(calc(var(--radius) * -1))`,
+                  }}
+                >
+                  <div className="node-up" style={{ transform: `rotate(${-a}deg)` }}>
+                    <button
+                      type="button"
+                      className="node-chip"
+                      onClick={() => setActive(s)}
+                      aria-label={`${s.title} ${s.titleEm}`}
+                    >
+                      <span className="nc-num">{s.num}</span>
+                      <span className="nc-name">
+                        {s.title} {s.titleEm}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="radial-center">
+            <div className="rc-label">06 servicios · 360°</div>
+            <div className="rc-title">
+              Lo que <em>hacemos</em>
+            </div>
+            <div className="rc-hint">Pasa el cursor para pausar · clic en un servicio para ver paquetes</div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── MÓVIL: lista de tiles ── */}
+      <div className="services-tiles services-tiles-mobile">
         {SERVICES.map((s) => (
-          <button
-            key={s.slug}
-            type="button"
-            className="svc-tile"
-            onClick={() => setActive(s)}
-          >
+          <button key={s.slug} type="button" className="svc-tile" onClick={() => setActive(s)}>
             <div className="num">
               {s.num} / {s.cat}
             </div>
@@ -43,6 +83,7 @@ export default function ServiceList() {
         ))}
       </div>
 
+      {/* ── DRAWER compartido ── */}
       <div
         className={"drawer-backdrop" + (open ? " open" : "")}
         onClick={(e) => {
