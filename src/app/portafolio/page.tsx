@@ -1,0 +1,48 @@
+import type { Metadata } from "next";
+import PortfolioDeck from "@/components/PortfolioDeck";
+import PortfolioGrid from "@/components/PortfolioGrid";
+import AnalisisButton from "@/components/AnalisisButton";
+import Footer from "@/components/Footer";
+
+export const metadata: Metadata = { title: "Portafolio · Bushido" };
+
+export default function PortafolioPage() {
+  return (
+    <>
+      <main>
+        <div className="view-header">
+          <div className="view-header-inner">
+            <div>
+              <div className="view-header-eyebrow">01 · Portafolio</div>
+              <h1>
+                Trabajos que <em>hicimos</em>.
+              </h1>
+            </div>
+            <p>
+              Videoclips, campañas, cubrimiento en vivo, editorial y producción de
+              TV. El showreel completo se comparte con clientes que dejan sus
+              datos.
+            </p>
+          </div>
+        </div>
+
+        <PortfolioDeck />
+        <PortfolioGrid />
+
+        <section>
+          <div className="price-cta">
+            <div className="price-cta-text">
+              ¿Quieres ver el showreel <em>completo</em>?
+              <br />
+              Está reservado para clientes que dejan sus datos.
+            </div>
+            <AnalisisButton className="btn btn-primary">
+              Pedir acceso <span className="arrow">→</span>
+            </AnalisisButton>
+          </div>
+        </section>
+      </main>
+      <Footer />
+    </>
+  );
+}
