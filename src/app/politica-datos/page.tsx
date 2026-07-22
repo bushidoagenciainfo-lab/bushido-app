@@ -89,10 +89,6 @@ export default function PoliticaDatosPage() {
             esta política.
           </p>
 
-          <p className="legal-updated" style={{ marginTop: 40 }}>
-            Nota: este documento es una base y debería ser revisado por un asesor
-            legal antes de la publicación definitiva del sitio.
-          </p>
         </article>
       </main>
       <Footer />
