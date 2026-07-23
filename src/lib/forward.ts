@@ -10,7 +10,7 @@ export function hasWebhook(): boolean {
 }
 
 export async function forwardToServer(
-  event: "lead" | "event",
+  event: "lead" | "event" | "analisis",
   payload: Record<string, unknown>
 ): Promise<void> {
   if (!URL_) return;

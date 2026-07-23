@@ -9,6 +9,8 @@ import {
 } from "@/lib/leads";
 import { generarAnalisis, hasIA } from "@/lib/analizar";
 import { storeAnalisis, informeUrl, emailInformeListo } from "@/lib/analisis-store";
+import { alertaBushidoWhatsApp, sendClientWhatsApp } from "@/lib/whatsapp";
+import { forwardToServer } from "@/lib/forward";
 
 export const runtime = "nodejs";
 // El informe automático (Claude) corre en 2º plano con after(); dale aire.
@@ -96,10 +98,16 @@ export async function POST(request: Request) {
   // ejecuta, a diferencia del "dispara y olvida" que se moría al responder.
   // Así la persona ve "recibido" al instante y el correo + informe salen solos.
   after(async () => {
-    // 1) aviso a Bushido
+    // 1) avisos a Bushido: correo + WhatsApp (a tu número, para estar pendiente)
     await notifyLead(lead).catch((err) => console.error("notifyLead error:", err));
+    await alertaBushidoWhatsApp(
+      `🔔 Nuevo lead · ${lead.kind}\n` +
+        `${lead.name || "—"}${lead.company ? " · " + lead.company : ""}\n` +
+        `${lead.email || ""}${lead.phone ? " · +57 " + lead.phone : ""}\n` +
+        `${lead.social || ""}`
+    );
 
-    // 2) análisis: generar el informe con Claude y enviárselo al cliente
+    // 2) análisis: generar el informe con Claude y enviárselo al cliente (correo + WhatsApp)
     if (lead.kind === "analisis" && hasIA()) {
       try {
         const analisis = await generarAnalisis({
@@ -110,14 +118,22 @@ export async function POST(request: Request) {
         });
         if (analisis) {
           const id = await storeAnalisis(analisis, leadId ?? undefined);
+          const url = informeUrl(id);
+          // reenvía el análisis estructurado a tu servidor de data
+          forwardToServer("analisis", { leadId, ...analisis }).catch(() => {});
           if (lead.email) {
             await emailInformeListo({
               email: lead.email,
               nombre: lead.name,
               marca: analisis.marca,
-              url: informeUrl(id),
+              url,
             }).catch((e) => console.error("emailInforme error:", e));
           }
+          // WhatsApp al cliente con el link (canal directo). params: nombre, marca, link
+          await sendClientWhatsApp({
+            phone: lead.phone,
+            params: [(lead.name || "").split(" ")[0] || "hola", analisis.marca, url],
+          });
           return; // el informe reemplaza al auto-reply genérico
         }
       } catch (e) {
