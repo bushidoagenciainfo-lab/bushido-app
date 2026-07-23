@@ -170,10 +170,16 @@ export async function emailInformeListo(opts: {
         </div>
       </div>
     </div>`;
-  await resend.emails.send({
+  // Resend NO lanza si la API rechaza: devuelve { error }. Revisarlo (si no, falla mudo).
+  const { data, error } = await resend.emails.send({
     from: LEAD_FROM_EMAIL,
     to: opts.email,
     subject: `Tu análisis de ${opts.marca} está listo · Bushido`,
     html,
   });
+  if (error) {
+    console.error(`[informe] Resend rechazó (from="${LEAD_FROM_EMAIL}" to="${opts.email}"):`, error);
+    throw new Error(`Resend: ${error.message}`);
+  }
+  console.log(`[informe] enviado id=${data?.id} → ${opts.email}`);
 }

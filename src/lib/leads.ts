@@ -186,13 +186,19 @@ export async function notifyLead(lead: LeadInput): Promise<void> {
         </div>
       </div>
     </div>`;
-  await resend.emails.send({
+  // Resend NO lanza excepción si la API rechaza: devuelve { error }. Hay que revisarlo.
+  const { data, error } = await resend.emails.send({
     from: LEAD_FROM_EMAIL,
     to: LEAD_NOTIFY_EMAIL,
     subject,
     html,
     replyTo: lead.email,
   });
+  if (error) {
+    console.error(`[notifyLead] Resend rechazó (from="${LEAD_FROM_EMAIL}" to="${LEAD_NOTIFY_EMAIL}"):`, error);
+    throw new Error(`Resend: ${error.message}`);
+  }
+  console.log(`[notifyLead] enviado id=${data?.id} → ${LEAD_NOTIFY_EMAIL}`);
 }
 
 /**
@@ -233,10 +239,15 @@ export async function sendClientAutoReply(lead: LeadInput): Promise<void> {
       </div>
     </div>`;
 
-  await resend.emails.send({
+  const { data, error } = await resend.emails.send({
     from: LEAD_FROM_EMAIL,
     to: lead.email,
     subject: "Recibimos tu solicitud · Bushido",
     html,
   });
+  if (error) {
+    console.error(`[autoReply] Resend rechazó (from="${LEAD_FROM_EMAIL}" to="${lead.email}"):`, error);
+    throw new Error(`Resend: ${error.message}`);
+  }
+  console.log(`[autoReply] enviado id=${data?.id} → ${lead.email}`);
 }
