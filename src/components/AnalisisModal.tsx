@@ -5,6 +5,9 @@ import LeadForm from "./LeadForm";
 import { ANALISIS_EVENT } from "@/lib/ui";
 
 const SHOWN_KEY = "bushido_modal_shown_v2";
+// Segundos antes de que el pop-up aparezca solo (una vez por visitante).
+// Súbelo/bájalo aquí a gusto.
+const AUTO_OPEN_MS = 2500;
 
 export default function AnalisisModal() {
   const [open, setOpen] = useState(false);
@@ -25,7 +28,7 @@ export default function AnalisisModal() {
     const t = auto
       ? window.setTimeout(() => {
           if (!document.body.classList.contains("modal-open")) setOpen(true);
-        }, 4000)
+        }, AUTO_OPEN_MS)
       : undefined;
 
     return () => {

@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
-import AnalisisButton from "@/components/AnalisisButton";
 import Footer from "@/components/Footer";
+import DescargaCard, { type Gift } from "@/components/DescargaCard";
 
 export const metadata: Metadata = { title: "Descargables Bushido" };
 
-const GIFTS = [
-  { tag: "Color · 10 LUTs", title: "Pack de LUTs", desc: "Nuestro look base de color, listo para DaVinci, Premiere y FCP." },
-  { tag: "Foto · 12 presets", title: "Presets de foto", desc: "Revelado editorial de Bushido para Lightroom móvil y escritorio." },
-  { tag: "Diseño · 6 fuentes", title: "Tipografías", desc: "La selección de fuentes que usamos para títulos y subtítulos." },
-  { tag: "Video · overlays", title: "Overlays + plugins", desc: "Texturas de grano, film burn y transiciones para tus ediciones." },
+// Para ENTREGAR el archivo: pon el zip en bushido-app/public/descargables/ con
+// el nombre de `file`. Mientras no exista el archivo (file sin definir), la
+// tarjeta solo capta el correo y dice "te lo enviamos pronto".
+const GIFTS: Gift[] = [
+  { tag: "Color · 10 LUTs", title: "Pack de LUTs", desc: "Nuestro look base de color, listo para DaVinci, Premiere y FCP.", file: "/descargables/luts-bushido.zip" },
+  { tag: "Foto · 12 presets", title: "Presets de foto", desc: "Revelado editorial de Bushido para Lightroom móvil y escritorio.", file: "/descargables/presets-bushido.zip" },
+  { tag: "Diseño · 6 fuentes", title: "Tipografías", desc: "La selección de fuentes que usamos para títulos y subtítulos.", file: "/descargables/tipografias-bushido.zip" },
+  { tag: "Video · overlays", title: "Overlays + plugins", desc: "Texturas de grano, film burn y transiciones para tus ediciones.", file: "/descargables/overlays-bushido.zip" },
 ];
 
 export default function DescargablesPage() {
@@ -42,14 +45,7 @@ export default function DescargablesPage() {
 
           <div className="downloads-grid" style={{ marginTop: 28 }}>
             {GIFTS.map((g) => (
-              <AnalisisButton key={g.title} className="dl-card">
-                <div className="dl-tag">{g.tag}</div>
-                <h4>{g.title}</h4>
-                <p>{g.desc}</p>
-                <span className="dl-cta">
-                  Descargar gratis <span aria-hidden="true">↗</span>
-                </span>
-              </AnalisisButton>
+              <DescargaCard key={g.title} gift={g} />
             ))}
           </div>
         </section>

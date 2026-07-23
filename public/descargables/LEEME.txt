@@ -1,0 +1,15 @@
+Aquí van los archivos descargables del sitio (LUTs, presets, tipografías, overlays).
+
+Pon los .zip con EXACTAMENTE estos nombres para que las tarjetas de /descargables
+los entreguen:
+
+  - luts-bushido.zip
+  - presets-bushido.zip
+  - tipografias-bushido.zip
+  - overlays-bushido.zip
+
+Si un archivo no existe todavía, la tarjeta igual capta el correo del visitante
+(queda como lead 'descarga' en el panel) y muestra "te lo enviamos pronto".
+
+Para cambiar nombres o agregar más packs: edita src/app/descargables/page.tsx
+(el arreglo GIFTS, campo `file`).
