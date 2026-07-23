@@ -49,8 +49,11 @@ const KIND_LABEL: Record<LeadKind, string> = {
   rental: "Alquiler de equipos",
 };
 
-/** Store the lead. Uses Supabase when configured, otherwise a local JSON file (dev). */
-export async function storeLead(lead: LeadInput): Promise<void> {
+/**
+ * Store the lead. Uses Supabase when configured, otherwise a local JSON file (dev).
+ * Devuelve el id del lead (para enlazarlo con su análisis) o null si no hay BD.
+ */
+export async function storeLead(lead: LeadInput): Promise<string | null> {
   // reenvío a tu servidor de monitoreo (best-effort, no bloquea)
   forwardToServer("lead", { ...lead }).catch(() => {});
   if (hasDb()) {
@@ -59,26 +62,30 @@ export async function storeLead(lead: LeadInput): Promise<void> {
       SUPABASE_SERVICE_ROLE_KEY as string,
       { auth: { persistSession: false } }
     );
-    const { error } = await supabase.from("leads").insert({
-      kind: lead.kind,
-      name: lead.name ?? null,
-      company: lead.company ?? null,
-      email: lead.email ?? null,
-      phone: lead.phone ?? null,
-      social: lead.social ?? null,
-      web: lead.web ?? null,
-      role: lead.role ?? null,
-      portfolio: lead.portfolio ?? null,
-      behance: lead.behance ?? null,
-      reel: lead.reel ?? null,
-      links: lead.links ?? null,
-      project: lead.project ?? null,
-      message: lead.message ?? null,
-      pack: lead.pack ?? null,
-      meta: lead.meta ?? null,
-    });
+    const { data, error } = await supabase
+      .from("leads")
+      .insert({
+        kind: lead.kind,
+        name: lead.name ?? null,
+        company: lead.company ?? null,
+        email: lead.email ?? null,
+        phone: lead.phone ?? null,
+        social: lead.social ?? null,
+        web: lead.web ?? null,
+        role: lead.role ?? null,
+        portfolio: lead.portfolio ?? null,
+        behance: lead.behance ?? null,
+        reel: lead.reel ?? null,
+        links: lead.links ?? null,
+        project: lead.project ?? null,
+        message: lead.message ?? null,
+        pack: lead.pack ?? null,
+        meta: lead.meta ?? null,
+      })
+      .select("id")
+      .single();
     if (error) throw new Error(`Supabase insert failed: ${error.message}`);
-    return;
+    return (data?.id as string) ?? null;
   }
 
   // Sin Supabase configurado: guarda en disco si se puede (dev), sin romper en
@@ -87,7 +94,8 @@ export async function storeLead(lead: LeadInput): Promise<void> {
   console.warn(
     `[lead:${lead.kind}] SIN SUPABASE — configura SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY en Vercel para persistir.`
   );
-  const record = { ...lead, created_at: new Date().toISOString() };
+  const id = globalThis.crypto?.randomUUID?.() ?? `local-${Date.now()}`;
+  const record = { id, ...lead, created_at: new Date().toISOString() };
   const dirs = [path.join(process.cwd(), ".data"), path.join(os.tmpdir(), "bushido")];
   for (const dir of dirs) {
     try {
@@ -101,11 +109,12 @@ export async function storeLead(lead: LeadInput): Promise<void> {
       }
       existing.push(record);
       await fs.writeFile(file, JSON.stringify(existing, null, 2), "utf8");
-      return;
+      return id;
     } catch {
       // intenta el siguiente directorio
     }
   }
+  return null;
 }
 
 // ── Cotización interna: clasificación automática por tipo de proyecto ──

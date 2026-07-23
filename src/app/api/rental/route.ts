@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { z } from "zod";
 import { storeLead, notifyLead, type LeadInput } from "@/lib/leads";
 
@@ -56,7 +56,8 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-  notifyLead(lead).catch((err) => console.error("notifyLead error:", err));
+  // after(): en Vercel el aviso sí se envía (el fire-and-forget se moría al responder)
+  after(() => notifyLead(lead).catch((err) => console.error("notifyLead error:", err)));
 
   return NextResponse.json({ ok: true });
 }

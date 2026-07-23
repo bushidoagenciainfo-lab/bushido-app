@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { z } from "zod";
 import {
   storeLead,
@@ -7,8 +7,12 @@ import {
   classifyProject,
   type LeadInput,
 } from "@/lib/leads";
+import { generarAnalisis, hasIA } from "@/lib/analizar";
+import { storeAnalisis, informeUrl, emailInformeListo } from "@/lib/analisis-store";
 
 export const runtime = "nodejs";
+// El informe automático (Claude) corre en 2º plano con after(); dale aire.
+export const maxDuration = 60;
 
 const schema = z.object({
   kind: z.enum(["analisis", "contacto", "talento", "descarga"]),
@@ -77,8 +81,9 @@ export async function POST(request: Request) {
     lead.meta = { ...(lead.meta ?? {}), categoria: clasif.cat, rango: clasif.rango };
   }
 
+  let leadId: string | null = null;
   try {
-    await storeLead(lead);
+    leadId = await storeLead(lead);
   } catch (err) {
     console.error("storeLead error:", err);
     return NextResponse.json(
@@ -87,13 +92,47 @@ export async function POST(request: Request) {
     );
   }
 
-  // fire-and-forget: aviso a Bushido + auto-respuesta al cliente con su estimado
-  notifyLead(lead).catch((err) => console.error("notifyLead error:", err));
-  if (lead.kind === "contacto" || lead.kind === "analisis") {
-    sendClientAutoReply(lead).catch((err) =>
-      console.error("autoReply error:", err)
-    );
-  }
+  // El trabajo pesado corre DESPUÉS de responder (after()): en Vercel esto sí se
+  // ejecuta, a diferencia del "dispara y olvida" que se moría al responder.
+  // Así la persona ve "recibido" al instante y el correo + informe salen solos.
+  after(async () => {
+    // 1) aviso a Bushido
+    await notifyLead(lead).catch((err) => console.error("notifyLead error:", err));
+
+    // 2) análisis: generar el informe con Claude y enviárselo al cliente
+    if (lead.kind === "analisis" && hasIA()) {
+      try {
+        const analisis = await generarAnalisis({
+          marca: lead.company || lead.name || "Marca",
+          redes: lead.social,
+          web: lead.web,
+          contexto: lead.project,
+        });
+        if (analisis) {
+          const id = await storeAnalisis(analisis, leadId ?? undefined);
+          if (lead.email) {
+            await emailInformeListo({
+              email: lead.email,
+              nombre: lead.name,
+              marca: analisis.marca,
+              url: informeUrl(id),
+            }).catch((e) => console.error("emailInforme error:", e));
+          }
+          return; // el informe reemplaza al auto-reply genérico
+        }
+      } catch (e) {
+        console.error("auto-informe error:", e);
+        // si falla, cae al auto-reply de abajo como acuse
+      }
+    }
+
+    // 3) acuse al cliente (contacto, o análisis sin IA / si el informe falló)
+    if (lead.kind === "contacto" || lead.kind === "analisis") {
+      await sendClientAutoReply(lead).catch((err) =>
+        console.error("autoReply error:", err)
+      );
+    }
+  });
 
   return NextResponse.json({ ok: true });
 }
