@@ -27,7 +27,9 @@ function db() {
   });
 }
 
-// mapea el `Analisis` (camelCase, del front) a las columnas de la tabla (snake_case)
+// mapea el `Analisis` (camelCase, del front) a las columnas de la tabla (snake_case).
+// La columna de la tabla sigue llamándose `maletas` (no migramos datos); en el
+// código el campo es `gatillos`.
 function toRow(a: Analisis, leadId?: string) {
   return {
     lead_id: leadId ?? null,
@@ -40,8 +42,11 @@ function toRow(a: Analisis, leadId?: string) {
     carencias: a.carencias ?? null,
     oportunidades: a.oportunidades ?? null,
     buyer_persona: a.buyerPersona ?? null,
-    maletas: a.maletas ?? null,
+    maletas: a.gatillos ?? null,
     emociones: a.emociones ?? null,
+    emociones_detalle: a.emocionesDetalle ?? null,
+    canales: a.canales ?? null,
+    metricas: a.metricas ?? null,
     propuesta: a.propuesta ?? null,
     paquete: a.paquete ?? null,
     estado: a.estado ?? "analizado",
@@ -65,8 +70,11 @@ function fromRow(r: Record<string, unknown>): Analisis {
       descripcion: "",
       jtbd: [],
     },
-    maletas: (r.maletas as Analisis["maletas"]) ?? [],
+    gatillos: (r.maletas as Analisis["gatillos"]) ?? [],
     emociones: (r.emociones as Analisis["emociones"]) ?? [],
+    emocionesDetalle: (r.emociones_detalle as Analisis["emocionesDetalle"]) ?? [],
+    canales: (r.canales as Analisis["canales"]) ?? [],
+    metricas: (r.metricas as Analisis["metricas"]) ?? [],
     propuesta: (r.propuesta as string) ?? "",
     paquete: (r.paquete as Analisis["paquete"]) ?? { nombre: "", precio: "", porque: "" },
     estado: (r.estado as Analisis["estado"]) ?? "analizado",

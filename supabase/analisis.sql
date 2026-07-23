@@ -30,6 +30,12 @@ create table if not exists public.analisis (
   report_url    text
 );
 
+-- Columnas nuevas (análisis profundo v2). Idempotentes: puedes correr este
+-- bloque aunque la tabla ya exista, no borra nada.
+alter table public.analisis add column if not exists emociones_detalle jsonb; -- { emocion, porque }[]
+alter table public.analisis add column if not exists canales           jsonb; -- { canal, estado, nota, recomendacion }[]
+alter table public.analisis add column if not exists metricas          jsonb; -- { nombre, queMirar, porQue }[]
+
 create index if not exists analisis_created_idx on public.analisis (created_at desc);
 create index if not exists analisis_nicho_idx   on public.analisis (nicho);
 create index if not exists analisis_estado_idx  on public.analisis (estado);

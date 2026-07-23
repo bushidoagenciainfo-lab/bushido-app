@@ -1,7 +1,20 @@
 import { WHATSAPP } from "@/lib/site";
-import type { Analisis } from "@/lib/analisis";
+import type { Analisis, EstadoCanal } from "@/lib/analisis";
+import Emociones from "./Emociones";
+
+// clase css sin acentos para el badge de estado del canal
+const estadoKey: Record<EstadoCanal, string> = {
+  fuerte: "fuerte",
+  irregular: "irregular",
+  "débil": "debil",
+  ausente: "ausente",
+};
 
 export default function ReportView({ a }: { a: Analisis }) {
+  const canales = a.canales ?? [];
+  const metricas = a.metricas ?? [];
+  const detalle = a.emocionesDetalle ?? [];
+
   return (
     <article className="report">
       <div className="rep-header">
@@ -23,92 +36,131 @@ export default function ReportView({ a }: { a: Analisis }) {
         <p className="rc-resumen">{a.resumen}</p>
       </header>
 
-      {/* Diagnóstico */}
-      <section className="rep-section">
-        <div className="rs-num">01 · Diagnóstico</div>
-        <div className="rep-cols">
-          <div className="rep-col forta">
-            <h4>Fortalezas</h4>
-            <ul>
-              {a.fortalezas.map((f) => (
-                <li key={f}>{f}</li>
-              ))}
-            </ul>
+      <div className="rep-body">
+        {/* Diagnóstico */}
+        <section className="rep-section">
+          <div className="rs-num">01 · La radiografía</div>
+          <div className="rep-cols">
+            <div className="rep-col forta">
+              <h4>Fortalezas</h4>
+              <ul>
+                {a.fortalezas.map((f) => (
+                  <li key={f}>{f}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="rep-col caren">
+              <h4>Carencias</h4>
+              <ul>
+                {a.carencias.map((c) => (
+                  <li key={c}>{c}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="rep-col oport">
+              <h4>Oportunidades</h4>
+              <ul>
+                {a.oportunidades.map((o) => (
+                  <li key={o}>{o}</li>
+                ))}
+              </ul>
+            </div>
           </div>
-          <div className="rep-col caren">
-            <h4>Carencias</h4>
-            <ul>
-              {a.carencias.map((c) => (
-                <li key={c}>{c}</li>
-              ))}
-            </ul>
-          </div>
-          <div className="rep-col oport">
-            <h4>Oportunidades</h4>
-            <ul>
-              {a.oportunidades.map((o) => (
-                <li key={o}>{o}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Buyer persona */}
-      <section className="rep-section">
-        <div className="rs-num">02 · Quién compra</div>
-        <div className="rep-persona">
-          <div className="rp-name">
-            <em>{a.buyerPersona.nombre}</em>
+        {/* Buyer persona */}
+        <section className="rep-section">
+          <div className="rs-num">02 · A quién le hablas</div>
+          <div className="rep-persona">
+            <div className="rp-name">
+              <em>{a.buyerPersona.nombre}</em>
+            </div>
+            <p className="rp-desc">{a.buyerPersona.descripcion}</p>
+            <div className="rp-jtbd">
+              {a.buyerPersona.jtbd.map((j) => (
+                <span key={j}>{j}</span>
+              ))}
+            </div>
           </div>
-          <p className="rp-desc">{a.buyerPersona.descripcion}</p>
-          <div className="rp-jtbd">
-            {a.buyerPersona.jtbd.map((j) => (
-              <span key={j}>{j}</span>
+        </section>
+
+        {/* Gatillos de compra */}
+        <section className="rep-section">
+          <div className="rs-num">03 · Los gatillos · por qué te compran</div>
+          <div className="rep-maletas">
+            {a.gatillos.map((m, i) => (
+              <div className="rep-maleta" key={m.nombre}>
+                <span className="rm-i">{String(i + 1).padStart(2, "0")}</span>
+                <h5>{m.nombre}</h5>
+                <p>{m.insight}</p>
+              </div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* 7 maletas */}
-      <section className="rep-section">
-        <div className="rs-num">03 · Por qué te compran · las maletas</div>
-        <div className="rep-maletas">
-          {a.maletas.map((m, i) => (
-            <div className="rep-maleta" key={m.nombre}>
-              <span className="rm-i">{String(i + 1).padStart(2, "0")}</span>
-              <h5>{m.nombre}</h5>
-              <p>{m.insight}</p>
+        {/* Emociones (interactivas) */}
+        {detalle.length > 0 && (
+          <section className="rep-section">
+            <div className="rs-num">04 · Las emociones que disparan la compra</div>
+            <Emociones detalle={detalle} />
+          </section>
+        )}
+
+        {/* Presencia digital */}
+        {canales.length > 0 && (
+          <section className="rep-section">
+            <div className="rs-num">05 · Tu presencia hoy</div>
+            <div className="rep-canales">
+              {canales.map((c) => (
+                <div className="canal-row" key={c.canal}>
+                  <div className="canal-head">
+                    <span className="canal-name">{c.canal}</span>
+                    <span className={"canal-badge est-" + estadoKey[c.estado]}>{c.estado}</span>
+                  </div>
+                  <p className="canal-nota">{c.nota}</p>
+                  <p className="canal-rec">
+                    <span>Recomendación</span> {c.recomendacion}
+                  </p>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </section>
+          </section>
+        )}
 
-      {/* Emociones */}
-      <section className="rep-section">
-        <div className="rs-num">04 · Emociones que mueven la compra</div>
-        <div className="rep-emos">
-          {a.emociones.map((e) => (
-            <span className="emo" key={e}>
-              {e}
-            </span>
-          ))}
-        </div>
-      </section>
+        {/* Qué medir */}
+        {metricas.length > 0 && (
+          <section className="rep-section">
+            <div className="rs-num">06 · Qué medir en tus redes</div>
+            <div className="rep-metricas">
+              {metricas.map((m) => (
+                <div className="metrica" key={m.nombre}>
+                  <h5>{m.nombre}</h5>
+                  <p className="met-line">
+                    <span>Qué mirar</span> {m.queMirar}
+                  </p>
+                  <p className="met-line">
+                    <span>Por qué</span> {m.porQue}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
-      {/* Propuesta */}
-      <section className="rep-section">
-        <div className="rs-num">05 · La propuesta</div>
-        <div className="rep-propuesta">
-          <p className="rp-text">{a.propuesta}</p>
-          <div className="rep-paquete">
-            <div className="pk-label">Paquete recomendado</div>
-            <div className="pk-name">{a.paquete.nombre}</div>
-            <div className="pk-price">{a.paquete.precio}</div>
-            <p className="pk-why">{a.paquete.porque}</p>
+        {/* Propuesta */}
+        <section className="rep-section">
+          <div className="rs-num">07 · El plan de Bushido</div>
+          <div className="rep-propuesta">
+            <p className="rp-text">{a.propuesta}</p>
+            <div className="rep-paquete">
+              <div className="pk-label">Paquete recomendado</div>
+              <div className="pk-name">{a.paquete.nombre}</div>
+              <div className="pk-price">{a.paquete.precio}</div>
+              <p className="pk-why">{a.paquete.porque}</p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
       <div className="rep-cta">
         <div className="rc-t">
