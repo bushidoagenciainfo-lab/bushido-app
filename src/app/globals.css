@@ -2384,9 +2384,16 @@ body.has-cursor .cursor-dot, body.has-cursor .cursor-ring, body.has-cursor .curs
 .rep-propuesta .rp-text em { font-style: italic; color: var(--sepp); }
 .rep-paquete { background: linear-gradient(180deg, var(--ink-2), var(--ink)); border: 1px solid var(--sepp); border-radius: 10px; padding: 30px 28px; display: flex; flex-direction: column; }
 .rep-paquete .pk-label { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--sepp); margin-bottom: 12px; }
-.rep-paquete .pk-name { font-family: var(--serif); font-size: 27px; color: var(--bone); line-height: 1.05; margin-bottom: 6px; }
-.rep-paquete .pk-price { font-family: var(--mono); font-size: 15px; color: var(--gold); margin-bottom: 16px; }
+.rep-paquete .pk-name { font-family: var(--serif); font-size: 27px; color: var(--bone); line-height: 1.05; margin-bottom: 10px; }
+.rep-paquete .pk-price { font-family: var(--mono); font-size: 17px; color: var(--gold); margin-bottom: 16px; display: flex; flex-direction: column; gap: 3px; }
+.rep-paquete .pk-price .pk-desde { font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--bone-ghost); }
 .rep-paquete .pk-why { color: var(--bone-dim); font-size: 13px; line-height: 1.55; }
+/* incentivo (bono por arrancar ya) — agrega valor, no descuenta */
+.rep-paquete .pk-incentivo { display: flex; gap: 12px; margin-top: 18px; padding: 16px 16px; border: 1px solid var(--gold); border-radius: 8px; background: rgba(201,162,74,0.07); }
+.rep-paquete .pk-bolt { font-size: 16px; line-height: 1.3; flex-shrink: 0; }
+.rep-paquete .pk-incentivo p { color: var(--bone); font-size: 13px; line-height: 1.5; }
+.rep-paquete .pk-incentivo .pk-cupos { display: block; margin-top: 8px; font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
+.rep-paquete .pk-cta { margin-top: 20px; width: 100%; justify-content: center; }
 
 .rep-cta { margin-top: 8px; padding-top: 44px; border-top: 1px solid var(--hairline); display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
 .rep-cta .rc-t { font-family: var(--serif); font-size: clamp(24px,3vw,32px); color: var(--bone); }

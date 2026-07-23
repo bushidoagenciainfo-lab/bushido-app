@@ -47,7 +47,9 @@ QUÉ DEBES PRODUCIR:
 - canales (PRESENCIA DIGITAL): audita los canales clave — Instagram, TikTok, YouTube, "Sitio web" y "Google / reseñas". Marca su estado (fuerte | irregular | débil | ausente). Si la marca NO tiene web o NO tiene ficha/reseñas de Google, decláralo "ausente" y recomiéndalo como un SERVICIO que Bushido puede resolver (landing/catálogo de pedidos, Google Business + estrategia de reseñas). No inventes que existe algo si el contexto sugiere que no.
 - metricas: 3 métricas de redes que la marca debería vigilar, con qué mirar y por qué. NO inventes números ni porcentajes concretos: describe QUÉ medir y por qué importa (retención de reels, guardados/compartidos, alcance de no-seguidores, etc.).
 - propuesta: el sistema de contenido y presencia, conectando la data de la marca con la data de nicho de Bushido, con ritmo/constancia, no piezas sueltas.
-- paquete: recomienda UNO real de Bushido (nombre y precio EXACTOS de la lista) según la etapa de la marca:
+- paquete: recomienda UNO real de Bushido (nombre y precio EXACTOS de la lista) según la etapa de la marca. Además:
+  · precioDesde: el precio de ENTRADA de esa familia de paquetes (ej. si recomiendas "Crecimiento", el "desde" es el del "Esencial" $2.000.000/mes). Es el ancla que ve el cliente.
+  · incentivo: un bono por ARRANCAR ESTE MES que resuelva una CARENCIA concreta del diagnóstico o de la presencia digital (ej. montar Google Business + reseñas, sesión de estrategia+guiones del primer mes, reels extra, foto editorial). NUNCA un descuento en el precio: Bushido agrega valor, no rebaja. Frase corta y personalizada.
 ${PAQUETES}
 
 Si no conoces la marca con certeza, infiere desde el nicho de forma honesta y prudente; es un borrador que un humano de Bushido revisa antes de enviar.`;
@@ -134,10 +136,12 @@ const SCHEMA = {
       additionalProperties: false,
       properties: {
         nombre: { type: "string", description: "Nombre EXACTO de un paquete de Bushido" },
-        precio: { type: "string", description: "Precio EXACTO, ej: '$3.200.000 / mes'" },
+        precio: { type: "string", description: "Precio EXACTO del tier recomendado, ej: '$3.200.000 / mes'" },
+        precioDesde: { type: "string", description: "Precio de entrada de esa familia (ancla 'desde'), ej: '$2.000.000 / mes'" },
         porque: { type: "string", description: "Por qué ese paquete para esta etapa" },
+        incentivo: { type: "string", description: "Bono por arrancar este mes que tapa una carencia (NO descuento)" },
       },
-      required: ["nombre", "precio", "porque"],
+      required: ["nombre", "precio", "precioDesde", "porque", "incentivo"],
     },
   },
   required: [

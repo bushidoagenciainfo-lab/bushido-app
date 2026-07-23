@@ -155,8 +155,32 @@ export default function ReportView({ a }: { a: Analisis }) {
             <div className="rep-paquete">
               <div className="pk-label">Paquete recomendado</div>
               <div className="pk-name">{a.paquete.nombre}</div>
-              <div className="pk-price">{a.paquete.precio}</div>
+              <div className="pk-price">
+                <span className="pk-desde">Inversión desde</span>
+                {a.paquete.precioDesde ?? a.paquete.precio}
+              </div>
               <p className="pk-why">{a.paquete.porque}</p>
+              {a.paquete.incentivo && (
+                <div className="pk-incentivo">
+                  <span className="pk-bolt" aria-hidden="true">⚡</span>
+                  <div>
+                    <p>{a.paquete.incentivo}</p>
+                    <span className="pk-cupos">
+                      Tomamos pocas marcas nuevas al mes · cupos limitados.
+                    </span>
+                  </div>
+                </div>
+              )}
+              <a
+                className="btn btn-primary pk-cta"
+                href={`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
+                  `Hola Bushido, vi el análisis de ${a.marca} y quiero reservar mi arranque del ${a.paquete.nombre}.`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Reservar mi arranque <span className="arrow">→</span>
+              </a>
             </div>
           </div>
         </section>

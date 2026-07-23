@@ -56,8 +56,10 @@ export interface Metrica {
 
 export interface PaqueteRecomendado {
   nombre: string;
-  precio: string;
+  precio: string; // precio real del tier (referencia)
+  precioDesde?: string; // ancla que se muestra: precio de entrada de la familia, ej "$2.000.000 / mes"
   porque: string;
+  incentivo?: string; // bono por arrancar ya, personalizado a una carencia (NO descuento)
 }
 
 export interface Analisis {
@@ -152,8 +154,11 @@ export const DEMO_ANALISIS: Analisis = {
   paquete: {
     nombre: "Paquete de redes · Crecimiento",
     precio: "$3.200.000 / mes",
+    precioDesde: "$2.000.000 / mes",
     porque:
       "Necesitas volumen y constancia (10 reels + fotos + gestión + campañas), no piezas sueltas. Es el que mueve la aguja en tu etapa.",
+    incentivo:
+      "Si arrancas este mes, te montamos tu Google Business + primeras reseñas sin costo — justo la carencia que hoy te deja invisible en búsquedas.",
   },
   estado: "analizado",
 };
