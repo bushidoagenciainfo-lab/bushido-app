@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 
 const INTERACTIVE =
   "a,button,input,select,textarea,[role=button],[data-open-modal],.card,.ficha,.eq-card,.arc-card,.svc-tile,.cat-card,.filter-btn,.dl-card,label";
@@ -8,8 +9,11 @@ const INTERACTIVE =
 export default function Cursor() {
   const dotRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+  const isAdmin = pathname?.startsWith("/admin");
 
   useEffect(() => {
+    if (isAdmin) return; // en el panel usamos el cursor normal del sistema
     const fine = window.matchMedia("(pointer: fine)").matches;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (!fine || reduce) return; // sin cursor custom en táctil / reduced-motion
@@ -40,7 +44,9 @@ export default function Cursor() {
       document.removeEventListener("mouseout", out);
       document.body.classList.remove("has-cursor", "cursor-hover");
     };
-  }, []);
+  }, [isAdmin]);
+
+  if (isAdmin) return null; // sin cursor custom en el panel
 
   return (
     <>

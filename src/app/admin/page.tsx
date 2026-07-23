@@ -46,7 +46,7 @@ export default async function AdminPage() {
     <main className="admin">
       <header className="admin-head">
         <span className="admin-brand">
-          BUSH<em>I</em>DO · <span>Panel</span>
+          BUSH<em>I</em>DO <span>· Panel</span>
         </span>
         <AdminLogout />
       </header>
@@ -54,8 +54,9 @@ export default async function AdminPage() {
       {error && <p className="admin-error">No se pudieron cargar los datos: {error}</p>}
 
       {stats && (
-        <>
-          <section className="admin-kpis">
+        <section className="admin-overview">
+          {/* KPIs */}
+          <div className="admin-kpis">
             <div className="kpi">
               <span className="kpi-n">{stats.leadsTotal}</span>
               <span className="kpi-l">Leads</span>
@@ -69,18 +70,19 @@ export default async function AdminPage() {
               <span className="kpi-l">Eventos</span>
             </div>
             <div className="kpi kpi-wide">
-              <span className="kpi-l">Por estado</span>
+              <span className="kpi-l">Leads por estado</span>
               <div className="kpi-tags">
                 {Object.entries(stats.porEstado).map(([k, v]) => (
                   <span key={k} className={"kpi-tag s-" + k}>
-                    {k} {v}
+                    {k} <b>{v}</b>
                   </span>
                 ))}
               </div>
             </div>
-          </section>
+          </div>
 
-          <section className="admin-analytics">
+          {/* Analítica de interés */}
+          <div className="admin-analytics">
             <div className="admin-panel">
               <h3>Servicios más mirados</h3>
               <Bars items={stats.topServicios} />
@@ -93,19 +95,25 @@ export default async function AdminPage() {
               <h3>Páginas más vistas</h3>
               <Bars items={stats.topPaginas} />
             </div>
-          </section>
-        </>
+          </div>
+        </section>
       )}
 
       <section className="admin-section">
-        <h2>Leads</h2>
+        <div className="admin-sec-head">
+          <h2>Leads</h2>
+          <span className="admin-sec-count">{leads.length}</span>
+        </div>
         <AdminLeads leads={leads} />
       </section>
 
       <section className="admin-section">
-        <h2>Análisis generados</h2>
+        <div className="admin-sec-head">
+          <h2>Análisis generados</h2>
+          <span className="admin-sec-count">{analisis.length}</span>
+        </div>
         {analisis.length === 0 ? (
-          <p className="admin-empty">Aún no hay análisis.</p>
+          <p className="admin-empty">Aún no hay análisis. Genera uno desde un lead ↑</p>
         ) : (
           <div className="admin-analisis">
             {analisis.map((a) => (
@@ -118,7 +126,7 @@ export default async function AdminPage() {
               >
                 <strong>{(a.marca as string) || "—"}</strong>
                 <span>{(a.nicho as string) || ""}</span>
-                <span className="ana-arrow">→</span>
+                <span className="ana-arrow">Ver informe →</span>
               </a>
             ))}
           </div>
