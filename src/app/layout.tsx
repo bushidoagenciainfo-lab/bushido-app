@@ -3,6 +3,7 @@ import "./globals.css";
 import Nav from "@/components/Nav";
 import Cursor from "@/components/Cursor";
 import AnalisisModal from "@/components/AnalisisModal";
+import TrackPageviews from "@/components/TrackPageviews";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://bushidoav.com"),
@@ -38,6 +39,7 @@ export default function RootLayout({
         <Nav />
         {children}
         <AnalisisModal />
+        <TrackPageviews />
       </body>
     </html>
   );

@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import os from "node:os";
+import { forwardToServer } from "./forward";
 
 export type LeadKind = "analisis" | "contacto" | "talento" | "descarga" | "rental";
 
@@ -50,6 +51,8 @@ const KIND_LABEL: Record<LeadKind, string> = {
 
 /** Store the lead. Uses Supabase when configured, otherwise a local JSON file (dev). */
 export async function storeLead(lead: LeadInput): Promise<void> {
+  // reenvío a tu servidor de monitoreo (best-effort, no bloquea)
+  forwardToServer("lead", { ...lead }).catch(() => {});
   if (hasDb()) {
     const supabase = createClient(
       SUPABASE_URL as string,
