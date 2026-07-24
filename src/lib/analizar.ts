@@ -6,7 +6,7 @@
 // pipeline sigue funcionando, solo no se genera el informe automático).
 
 import Anthropic from "@anthropic-ai/sdk";
-import { EMOCIONES, type Analisis, type EmocionDetalle, type Emocion } from "./analisis";
+import { EMOCIONES, NICHOS, type Analisis, type EmocionDetalle, type Emocion, type Nicho } from "./analisis";
 
 export interface AnalizarInput {
   marca: string; // nombre de la empresa/marca (del lead: company)
@@ -66,7 +66,8 @@ const SCHEMA = {
   type: "object",
   additionalProperties: false,
   properties: {
-    nicho: { type: "string", description: "Nicho + sector, ej: 'Repostería artesanal · gastronomía'" },
+    nicho: { type: "string", description: "Nicho + sector en texto libre, ej: 'Repostería artesanal · gastronomía'" },
+    categoria: { type: "string", enum: [...NICHOS], description: "La categoría de la lista que MEJOR agrupa esta marca (para la data). Si ninguna encaja, 'Otro'." },
     resumen: { type: "string", description: "2-3 frases: el diagnóstico central, sin rodeos" },
     fortalezas: { type: "array", items: { type: "string" }, description: "3 a 4 fortalezas reales" },
     carencias: { type: "array", items: { type: "string" }, description: "3 a 4 carencias accionables" },
@@ -151,7 +152,7 @@ const SCHEMA = {
     },
   },
   required: [
-    "nicho", "resumen", "fortalezas", "carencias", "oportunidades",
+    "nicho", "categoria", "resumen", "fortalezas", "carencias", "oportunidades",
     "buyerPersona", "gatillos", "emociones", "canales", "metricas",
     "propuesta", "paquete",
   ],
@@ -159,6 +160,7 @@ const SCHEMA = {
 
 interface ModelOut {
   nicho: string;
+  categoria: Nicho;
   resumen: string;
   fortalezas: string[];
   carencias: string[];
@@ -172,7 +174,36 @@ interface ModelOut {
   paquete: Analisis["paquete"];
 }
 
-/** Genera el análisis con Claude. Devuelve null si no hay ANTHROPIC_API_KEY. */
+/** PASO 1 — investiga la marca en la web para basar el análisis en HECHOS reales. */
+async function investigar(client: Anthropic, input: AnalizarInput): Promise<string> {
+  try {
+    const q = [
+      `Investiga en internet esta marca para un análisis de marketing. Marca: "${input.marca}".`,
+      input.redes ? `Instagram: ${input.redes}.` : "",
+      input.tiktok ? `TikTok: ${input.tiktok}.` : "",
+      input.web ? `Sitio web: ${input.web}.` : "",
+      `Busca su presencia REAL: sus perfiles de redes y qué tipo de contenido publican, si tienen sitio web, ficha/reseñas en Google, ciudad, y a qué se dedican exactamente. Devuelve un BRIEF de hechos verificados en viñetas cortas. Si algo no lo encuentras, dilo explícitamente ("no encontré..."). NO inventes datos.`,
+    ]
+      .filter(Boolean)
+      .join(" ");
+    const res = await client.messages.create({
+      model: "claude-opus-4-8",
+      max_tokens: 3000,
+      tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 4 }],
+      messages: [{ role: "user", content: q }],
+    });
+    return res.content
+      .filter((b): b is Extract<typeof b, { type: "text" }> => b.type === "text")
+      .map((b) => b.text)
+      .join("\n")
+      .trim();
+  } catch (e) {
+    console.error("[investigar] web_search falló (sigo sin investigación):", e);
+    return "";
+  }
+}
+
+/** Genera el análisis con Claude: investiga la web y luego estructura. null si no hay API key. */
 export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | null> {
   if (!KEY) {
     console.warn("[analizar] SIN ANTHROPIC_API_KEY — configúrala en Vercel para el análisis automático.");
@@ -180,12 +211,20 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
   }
   const client = new Anthropic({ apiKey: KEY });
 
+  // PASO 1: investigación web (hechos reales). Best-effort: si falla, sigue sin ella.
+  const brief = await investigar(client, input);
+
+  // PASO 2: estructurar el análisis usando esos hechos
   const userMsg = [
     `Marca: ${input.marca}`,
     `Instagram / redes: ${input.redes || "(no lo compartió)"}`,
     `TikTok: ${input.tiktok || "(no lo compartió — NO asumas que no tiene, márcalo 'por confirmar')"}`,
     `Sitio web: ${input.web || "(no reporta sitio web)"}`,
     `Qué busca el cliente: ${input.contexto || "(no especificó)"}`,
+    "",
+    brief
+      ? `INVESTIGACIÓN WEB (hechos reales — BÁSATE en esto, no inventes más allá de lo aquí verificado):\n${brief}`
+      : "(sin investigación web disponible — infiere del nicho con prudencia)",
     "",
     "Analiza esta marca y devuelve el informe estructurado. Recuerda la regla de honestidad de canales y recomienda el servicio que resuelve lo que el cliente busca.",
   ].join("\n");
@@ -214,6 +253,7 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
     web: input.web,
     fecha: String(new Date().getFullYear()),
     nicho: data.nicho,
+    categoria: data.categoria,
     resumen: data.resumen,
     fortalezas: data.fortalezas,
     carencias: data.carencias,

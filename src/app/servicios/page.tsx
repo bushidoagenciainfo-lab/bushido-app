@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ServiceList from "@/components/ServiceList";
 import Footer from "@/components/Footer";
 
-export const metadata: Metadata = { title: "Servicios y precios · Bushido" };
+export const metadata: Metadata = { title: "Servicios y precios · Bushido", description: "Paquetes de redes, videoclips, comerciales, cobertura de eventos y fotografía. Precios claros y propuesta a la medida en 24 horas." };
 
 export default function ServiciosPage() {
   return (

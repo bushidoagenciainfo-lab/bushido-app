@@ -2648,4 +2648,5 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 .admin-ana-row:hover { border-color: var(--bone-ghost); }
 .admin-ana-row strong { color: var(--bone); font-size: 14px; }
 .admin-ana-row span { color: var(--bone-dim); font-family: var(--mono); font-size: 11px; }
+.admin-ana-row .ana-cat { font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); border: 1px solid rgba(201,162,74,.4); border-radius: 999px; padding: 3px 9px; }
 .admin-ana-row .ana-arrow { margin-left: auto; color: var(--sepp); }

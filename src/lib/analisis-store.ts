@@ -35,6 +35,7 @@ function toRow(a: Analisis, leadId?: string) {
     lead_id: leadId ?? null,
     marca: a.marca,
     nicho: a.nicho ?? null,
+    categoria: a.categoria ?? null,
     redes: a.redes ?? null,
     web: a.web ?? null,
     resumen: a.resumen ?? null,
@@ -58,6 +59,7 @@ function fromRow(r: Record<string, unknown>): Analisis {
   return {
     marca: (r.marca as string) ?? "",
     nicho: (r.nicho as string) ?? "",
+    categoria: (r.categoria as Analisis["categoria"]) ?? undefined,
     redes: (r.redes as string) ?? undefined,
     web: (r.web as string) ?? undefined,
     fecha: r.created_at ? new Date(r.created_at as string).getFullYear().toString() : "",

@@ -125,6 +125,7 @@ export default async function AdminPage() {
                 className="admin-ana-row"
               >
                 <strong>{(a.marca as string) || "—"}</strong>
+                {a.categoria ? <span className="ana-cat">{a.categoria as string}</span> : null}
                 <span>{(a.nicho as string) || ""}</span>
                 <span className="ana-arrow">Ver informe →</span>
               </a>

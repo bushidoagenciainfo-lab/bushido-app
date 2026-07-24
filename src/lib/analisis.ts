@@ -19,6 +19,28 @@ export const EMOCIONES = [
 ] as const;
 export type Emocion = (typeof EMOCIONES)[number];
 
+// Categoría de nicho CONTROLADA (para agrupar la data: "los 10 fotógrafos").
+// El `nicho` sigue siendo texto libre y descriptivo; esta es la etiqueta para agrupar.
+export const NICHOS = [
+  "Música / artista",
+  "Moda / ropa",
+  "Gastronomía / restaurante",
+  "Repostería",
+  "Fotografía",
+  "Belleza / estética",
+  "Fitness / salud",
+  "Inmobiliaria",
+  "Automotriz",
+  "Educación / cursos",
+  "Tecnología / software",
+  "Retail / producto",
+  "Servicios profesionales",
+  "Eventos",
+  "Hotelería / turismo",
+  "Otro",
+] as const;
+export type Nicho = (typeof NICHOS)[number];
+
 // Cada emoción con el ARGUMENTO de por qué mueve la compra en esta marca
 export interface EmocionDetalle {
   emocion: Emocion;
@@ -65,7 +87,8 @@ export interface PaqueteRecomendado {
 export interface Analisis {
   // — cliente —
   marca: string;
-  nicho: string;
+  nicho: string; // texto libre descriptivo, ej "Repostería artesanal · gastronomía"
+  categoria?: Nicho; // etiqueta controlada para agrupar la data
   redes?: string;
   web?: string;
   fecha: string;
@@ -94,6 +117,7 @@ export interface Analisis {
 export const DEMO_ANALISIS: Analisis = {
   marca: "Bianco Bake Lab",
   nicho: "Repostería artesanal · gastronomía",
+  categoria: "Repostería",
   redes: "@biancobakelab",
   web: "—",
   fecha: "2026",

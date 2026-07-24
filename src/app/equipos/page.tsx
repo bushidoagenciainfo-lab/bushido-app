@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import EquiposCatalog from "@/components/EquiposCatalog";
 import Footer from "@/components/Footer";
 
-export const metadata: Metadata = { title: "Alquiler de equipos · Bushido" };
+export const metadata: Metadata = { title: "Alquiler de equipos · Bushido", description: "Renta de cámaras, lentes, luces, audio y grip en Bogotá. Catálogo de equipos audiovisuales profesionales con solicitud directa." };
 
 export default function EquiposPage() {
   return (

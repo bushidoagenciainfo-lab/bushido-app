@@ -4,7 +4,7 @@ import TalentForm from "@/components/TalentForm";
 import AnalisisButton from "@/components/AnalisisButton";
 import Footer from "@/components/Footer";
 
-export const metadata: Metadata = { title: "Gremio · Bushido" };
+export const metadata: Metadata = { title: "Gremio · Bushido", description: "Únete al gremio Bushido: banco de talentos audiovisuales, alquiler de equipos y recursos para creadores en Colombia." };
 
 export default function GremioPage() {
   return (

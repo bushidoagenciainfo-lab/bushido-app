@@ -4,7 +4,7 @@ import PortfolioGrid from "@/components/PortfolioGrid";
 import AnalisisButton from "@/components/AnalisisButton";
 import Footer from "@/components/Footer";
 
-export const metadata: Metadata = { title: "Portafolio · Bushido" };
+export const metadata: Metadata = { title: "Portafolio · Bushido", description: "Trabajos de Bushido con artistas y marcas: música, moda y contenido. Producción audiovisual con criterio cinematográfico." };
 
 export default function PortafolioPage() {
   return (

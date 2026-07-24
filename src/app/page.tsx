@@ -1,10 +1,30 @@
 import Hero from "@/components/Hero";
 import LeadForm from "@/components/LeadForm";
 import Footer from "@/components/Footer";
+import { SOCIAL, EMAIL, WHATSAPP } from "@/lib/site";
+
+const JSONLD = {
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  name: "Bushido — Agencia Audiovisual",
+  description:
+    "Agencia audiovisual en Bogotá: producción de video, fotografía de artistas, contenido para marcas y comerciales. Análisis gratis en 24 horas.",
+  url: "https://bushidoav.com",
+  email: EMAIL,
+  telephone: `+${WHATSAPP}`,
+  priceRange: "$$",
+  areaServed: "CO",
+  address: { "@type": "PostalAddress", addressLocality: "Bogotá", addressCountry: "CO" },
+  sameAs: [SOCIAL.instagram, SOCIAL.tiktok, SOCIAL.youtube],
+};
 
 export default function Home() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(JSONLD) }}
+      />
       <main>
         <Hero />
 

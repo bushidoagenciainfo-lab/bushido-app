@@ -3,7 +3,7 @@ import LeadForm from "@/components/LeadForm";
 import Footer from "@/components/Footer";
 import { WHATSAPP, EMAIL } from "@/lib/site";
 
-export const metadata: Metadata = { title: "Contacto · Bushido" };
+export const metadata: Metadata = { title: "Contacto · Bushido", description: "Hablemos de tu proyecto audiovisual. Escríbenos por WhatsApp o correo y recibe una propuesta a la medida en menos de 24 horas." };
 
 export default function ContactoPage() {
   return (

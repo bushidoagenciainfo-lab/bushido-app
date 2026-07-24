@@ -58,7 +58,7 @@ export async function listAnalisis(limit = 100): Promise<Array<Record<string, un
   if (hasDb()) {
     const { data, error } = await db()
       .from("analisis")
-      .select("id, created_at, marca, nicho, estado, lead_id")
+      .select("id, created_at, marca, nicho, categoria, estado, lead_id")
       .order("created_at", { ascending: false })
       .limit(limit);
     if (error) throw new Error(error.message);
