@@ -163,7 +163,7 @@ export async function emailInformeListo(opts: {
         <div style="padding:28px 24px">
           <p style="margin:0 0 16px;color:#0A0A0B;font:400 26px Georgia,serif">Hola ${nombre}, tu análisis de <b>${opts.marca}</b> está listo.</p>
           <p style="margin:0 0 22px;color:#514E4A;font:14px/1.6 Helvetica,Arial">
-            Analizamos tu marca con nuestro método de las 7 maletas: qué te compran, qué emociones lo mueven y qué contenido lo capitaliza.
+            Lo leímos con <b>Kansei</b>, el método de Bushido para decodificar qué te compran, qué emociones lo mueven y qué contenido lo capitaliza.
           </p>
           <a href="${opts.url}" style="display:inline-block;background:#0A0A0B;color:#EDE7DA;text-decoration:none;padding:14px 26px;border-radius:999px;font:600 13px Helvetica;letter-spacing:1px">Ver mi análisis →</a>
           <p style="margin:22px 0 0;color:#8A8784;font:11px monospace;letter-spacing:1px">Criterio antes que equipo · bushidoav.com</p>

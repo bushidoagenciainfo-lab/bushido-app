@@ -14,6 +14,7 @@ export interface LeadInput {
   email?: string;
   phone?: string;
   social?: string;
+  tiktok?: string;
   web?: string;
   role?: string;
   portfolio?: string;

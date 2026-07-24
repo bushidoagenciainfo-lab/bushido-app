@@ -39,7 +39,7 @@ export interface BuyerPersona {
 
 // Auditoría de presencia digital: cada canal con su estado y qué hacer.
 // Aquí afloran las carencias-servicio: "no tiene web", "no tiene reseñas", etc.
-export type EstadoCanal = "fuerte" | "irregular" | "débil" | "ausente";
+export type EstadoCanal = "fuerte" | "irregular" | "débil" | "ausente" | "por confirmar";
 export interface Canal {
   canal: string; // "Instagram", "Sitio web", "Google / reseñas", "TikTok", "YouTube"...
   estado: EstadoCanal;
@@ -142,7 +142,7 @@ export const DEMO_ANALISIS: Analisis = {
     { canal: "Instagram", estado: "irregular", nota: "Es el canal principal pero publica en ráfagas y los reels no retienen.", recomendacion: "Sistema de contenido con ritmo fijo: reels de antojo + BTS + campañas por ocasión." },
     { canal: "Sitio web", estado: "ausente", nota: "No hay web: toda la conversión depende del DM, que se pierde y no escala.", recomendacion: "Landing de pedidos + catálogo (menú, ocasiones, cómo encargar). Servicio Bushido." },
     { canal: "Google / reseñas", estado: "ausente", nota: "Sin ficha de Google Business ni reseñas: invisible para quien busca 'postres artesanales Bogotá'.", recomendacion: "Abrir Google Business + estrategia de reseñas. Prueba social que convierte." },
-    { canal: "TikTok", estado: "débil", nota: "Presencia mínima; el nicho gastronómico rinde fuerte en formato corto y crudo.", recomendacion: "Reutilizar reels de proceso adaptados al tono más crudo de TikTok." },
+    { canal: "TikTok", estado: "por confirmar", nota: "No nos compartiste tu TikTok — cuéntanos si lo tienes. El nicho gastronómico rinde fuerte en formato corto y crudo.", recomendacion: "Si aún no estás, abrir cuenta y reutilizar reels de proceso adaptados al tono más crudo de TikTok." },
   ],
   metricas: [
     { nombre: "Retención de reels (primeros 3s)", queMirar: "% que no hace scroll en los primeros segundos.", porQue: "Mide si el hook funciona — el mayor problema hoy es que se ve rico pero no detiene." },

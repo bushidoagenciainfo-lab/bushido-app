@@ -10,9 +10,10 @@ import { EMOCIONES, type Analisis, type EmocionDetalle, type Emocion } from "./a
 
 export interface AnalizarInput {
   marca: string; // nombre de la empresa/marca (del lead: company)
-  redes?: string; // @handles o links (del lead: social)
+  redes?: string; // Instagram / @handles (del lead: social)
+  tiktok?: string; // TikTok (opcional; puede tener otro @ que Instagram)
   web?: string;
-  contexto?: string; // notas extra: mensaje del formulario, tipo de proyecto, etc.
+  contexto?: string; // qué busca el cliente + notas extra
 }
 
 const KEY = process.env.ANTHROPIC_API_KEY;
@@ -37,6 +38,7 @@ Analizas una marca aplicando el framework de las "7 maletas de cualquier compra"
 
 REGLAS DE VOZ:
 - Español COLOMBIANO (tú/usted; NUNCA argentino: nada de "vos/pedí/contame").
+- NUNCA menciones "7 maletas", "las maletas" ni "Felipe Vergara" en tu respuesta: ese framework lo usas internamente, pero de cara al cliente el método de Bushido se llama **Kansei**. Si necesitas nombrar el método, di "Kansei" o "el método de Bushido".
 - Concreto y comercial, sin relleno. Cada carencia es accionable, cada gatillo un insight real de compra, cada recomendación algo que Bushido pueda ejecutar.
 
 QUÉ DEBES PRODUCIR:
@@ -44,10 +46,14 @@ QUÉ DEBES PRODUCIR:
 - buyerPersona con 3 jobs-to-be-done (qué "trabajo" contrata el cliente al comprar).
 - gatillos: 3 a 5 drivers de compra con su insight (por qué realmente compra la gente en este nicho, no lo que dicen).
 - emociones: 3 a 5 de la taxonomía fija, y por CADA una un argumento corto de por qué mueve la compra en ESTA marca. Taxonomía: ${EMOCIONES.join(", ")}. Usa solo esos valores.
-- canales (PRESENCIA DIGITAL): audita los canales clave — Instagram, TikTok, YouTube, "Sitio web" y "Google / reseñas". Marca su estado (fuerte | irregular | débil | ausente). Si la marca NO tiene web o NO tiene ficha/reseñas de Google, decláralo "ausente" y recomiéndalo como un SERVICIO que Bushido puede resolver (landing/catálogo de pedidos, Google Business + estrategia de reseñas). No inventes que existe algo si el contexto sugiere que no.
+- canales (PRESENCIA DIGITAL): audita Instagram, TikTok, YouTube, "Sitio web" y "Google / reseñas". Estado: fuerte | irregular | débil | ausente | "por confirmar".
+  ⚠️ REGLA DE HONESTIDAD (crítica para la credibilidad — si te equivocas, el cliente desconfía de todo el análisis): el estado de cada RED SOCIAL debe basarse SOLO en lo que el cliente te compartió.
+  · Si te dio el perfil de esa red → NO la marques "ausente"; márcala "por confirmar" y enfoca la nota/recomendación en potenciarla. No inventes un diagnóstico que no puedes ver.
+  · Si NO te compartió esa red → márcala "por confirmar" y en la nota PÍDELE el perfil ("cuéntanos tu TikTok si lo tienes"). NUNCA afirmes que una red social no existe.
+  · "ausente" ÚNICAMENTE para "Sitio web" o "Google / reseñas", y solo si el cliente no los reporta (esos sí suelen faltar en marcas pequeñas) → recomiéndalos como SERVICIO de Bushido (landing/catálogo de pedidos, Google Business + estrategia de reseñas).
 - metricas: 3 métricas de redes que la marca debería vigilar, con qué mirar y por qué. NO inventes números ni porcentajes concretos: describe QUÉ medir y por qué importa (retención de reels, guardados/compartidos, alcance de no-seguidores, etc.).
-- propuesta: el sistema de contenido y presencia, conectando la data de la marca con la data de nicho de Bushido, con ritmo/constancia, no piezas sueltas.
-- paquete: recomienda UNO real de Bushido (nombre y precio EXACTOS de la lista) según la etapa de la marca. Además:
+- propuesta: el sistema/servicio propuesto, conectando la data de la marca con la data de nicho de Bushido.
+- paquete: recomienda el servicio de Bushido que MEJOR resuelve LO QUE EL CLIENTE BUSCA (mira el campo "Qué busca / contexto"). NO recomiendes el paquete de redes por defecto: si pidió un comercial → "Empresarial" o "Mini comercial / campaña"; si un videoclip → el de Videoclip; si cobertura de evento → cotización de evento; si manejo de redes o no especifica → paquete de redes. Nombre y precio EXACTOS de la lista. Además:
   · precioDesde: el precio de ENTRADA de esa familia de paquetes (ej. si recomiendas "Crecimiento", el "desde" es el del "Esencial" $2.000.000/mes). Es el ancla que ve el cliente.
   · incentivo: un bono por ARRANCAR ESTE MES que resuelva una CARENCIA concreta del diagnóstico o de la presencia digital (ej. montar Google Business + reseñas, sesión de estrategia+guiones del primer mes, reels extra, foto editorial). NUNCA un descuento en el precio: Bushido agrega valor, no rebaja. Frase corta y personalizada.
 ${PAQUETES}
@@ -109,7 +115,7 @@ const SCHEMA = {
         additionalProperties: false,
         properties: {
           canal: { type: "string" },
-          estado: { type: "string", enum: ["fuerte", "irregular", "débil", "ausente"] },
+          estado: { type: "string", enum: ["fuerte", "irregular", "débil", "ausente", "por confirmar"] },
           nota: { type: "string", description: "Diagnóstico corto del canal" },
           recomendacion: { type: "string", description: "Qué hacer (servicio Bushido cuando aplica)" },
         },
@@ -176,11 +182,12 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
 
   const userMsg = [
     `Marca: ${input.marca}`,
-    `Redes: ${input.redes || "—"}`,
+    `Instagram / redes: ${input.redes || "(no lo compartió)"}`,
+    `TikTok: ${input.tiktok || "(no lo compartió — NO asumas que no tiene, márcalo 'por confirmar')"}`,
     `Sitio web: ${input.web || "(no reporta sitio web)"}`,
-    `Contexto del cliente: ${input.contexto || "—"}`,
+    `Qué busca el cliente: ${input.contexto || "(no especificó)"}`,
     "",
-    "Analiza esta marca con las 7 maletas y devuelve el informe estructurado.",
+    "Analiza esta marca y devuelve el informe estructurado. Recuerda la regla de honestidad de canales y recomienda el servicio que resuelve lo que el cliente busca.",
   ].join("\n");
 
   const res = await client.messages.create({

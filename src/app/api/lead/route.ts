@@ -24,6 +24,7 @@ const schema = z.object({
   email: z.string().trim().email().max(160).optional().or(z.literal("")),
   phone: z.string().trim().max(40).optional(),
   social: z.string().trim().max(300).optional(),
+  tiktok: z.string().trim().max(300).optional(),
   web: z.string().trim().max(300).optional(),
   role: z.string().trim().max(120).optional(),
   portfolio: z.string().trim().max(300).optional(),
@@ -77,12 +78,14 @@ export async function POST(request: Request) {
     );
   }
 
-  // Cotización interna: clasifica y guarda el estimado en el registro
+  // Cotización interna: clasifica y guarda el estimado; guarda tiktok en meta
   const lead = data as LeadInput;
   const clasif = classifyProject(lead.project);
-  if (clasif) {
-    lead.meta = { ...(lead.meta ?? {}), categoria: clasif.cat, rango: clasif.rango };
-  }
+  lead.meta = {
+    ...(lead.meta ?? {}),
+    ...(clasif ? { categoria: clasif.cat, rango: clasif.rango } : {}),
+    ...(lead.tiktok ? { tiktok: lead.tiktok } : {}),
+  };
 
   let leadId: string | null = null;
   try {
@@ -115,8 +118,9 @@ export async function POST(request: Request) {
         const analisis = await generarAnalisis({
           marca: lead.company || lead.name || "Marca",
           redes: lead.social,
+          tiktok: lead.tiktok,
           web: lead.web,
-          contexto: lead.project,
+          contexto: lead.project, // "¿Qué busca?" el cliente
         });
         if (analisis) {
           const id = await storeAnalisis(analisis, leadId ?? undefined);

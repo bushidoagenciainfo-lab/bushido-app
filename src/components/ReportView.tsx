@@ -8,6 +8,7 @@ const estadoKey: Record<EstadoCanal, string> = {
   irregular: "irregular",
   "débil": "debil",
   ausente: "ausente",
+  "por confirmar": "confirmar",
 };
 
 export default function ReportView({ a }: { a: Analisis }) {
@@ -25,7 +26,7 @@ export default function ReportView({ a }: { a: Analisis }) {
       </div>
 
       <header className="rep-cover">
-        <div className="rc-label">Análisis de marca · Gratis</div>
+        <div className="rc-label">Análisis de marca · Método Kansei</div>
         <h1>
           {a.marca} <em>bajo la lupa</em>.
         </h1>
