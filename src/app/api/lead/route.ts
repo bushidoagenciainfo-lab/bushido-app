@@ -10,6 +10,7 @@ import {
 import { generarAnalisis, hasIA } from "@/lib/analizar";
 import { storeAnalisis, informeUrl, emailInformeListo } from "@/lib/analisis-store";
 import { alertaBushidoWhatsApp, sendClientWhatsApp } from "@/lib/whatsapp";
+import { alertaTelegram } from "@/lib/telegram";
 import { forwardToServer } from "@/lib/forward";
 
 export const runtime = "nodejs";
@@ -98,14 +99,15 @@ export async function POST(request: Request) {
   // ejecuta, a diferencia del "dispara y olvida" que se moría al responder.
   // Así la persona ve "recibido" al instante y el correo + informe salen solos.
   after(async () => {
-    // 1) avisos a Bushido: correo + WhatsApp (a tu número, para estar pendiente)
+    // 1) avisos a Bushido: correo + WhatsApp + Telegram (a ti, para estar pendiente)
     await notifyLead(lead).catch((err) => console.error("notifyLead error:", err));
-    await alertaBushidoWhatsApp(
+    const resumen =
       `🔔 Nuevo lead · ${lead.kind}\n` +
-        `${lead.name || "—"}${lead.company ? " · " + lead.company : ""}\n` +
-        `${lead.email || ""}${lead.phone ? " · +57 " + lead.phone : ""}\n` +
-        `${lead.social || ""}`
-    );
+      `${lead.name || "—"}${lead.company ? " · " + lead.company : ""}\n` +
+      `${lead.email || ""}${lead.phone ? " · +57 " + lead.phone : ""}\n` +
+      `${lead.social || ""}`;
+    await alertaBushidoWhatsApp(resumen);
+    await alertaTelegram(resumen);
 
     // 2) análisis: generar el informe con Claude y enviárselo al cliente (correo + WhatsApp)
     if (lead.kind === "analisis" && hasIA()) {
