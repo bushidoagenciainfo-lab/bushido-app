@@ -55,13 +55,47 @@ export function toWhatsAppNumber(phone?: string): string | null {
 }
 
 /**
- * Envía al cliente un mensaje de plantilla. `params` rellena {{1}}, {{2}}, {{3}}…
- * en el orden de la plantilla (ej: nombre, marca, link del informe).
+ * Idiomas a intentar, en orden. Meta registra la plantilla bajo UN código exacto
+ * ("es", "es_CO", "es_ES"…) y rechaza con 132001 si no coincide. En vez de
+ * adivinar, probamos los candidatos: el configurado primero, luego los comunes.
+ */
+function langCandidates(): string[] {
+  const set = [WA_LANG, "es", "es_CO", "es_ES", "es_MX"];
+  return [...new Set(set.filter(Boolean))] as string[];
+}
+
+async function postTemplate(to: string, lang: string, params: string[]) {
+  const res = await fetch(`https://graph.facebook.com/v21.0/${WA_PHONE_ID}/messages`, {
+    method: "POST",
+    headers: { authorization: `Bearer ${WA_TOKEN}`, "content-type": "application/json" },
+    body: JSON.stringify({
+      messaging_product: "whatsapp",
+      to,
+      type: "template",
+      template: {
+        name: WA_TEMPLATE,
+        language: { code: lang },
+        components: [
+          { type: "body", parameters: params.map((t) => ({ type: "text", text: t })) },
+        ],
+      },
+    }),
+    signal: AbortSignal.timeout(8000),
+  });
+  const data = await res.json().catch(() => ({}));
+  return { ok: res.ok, data };
+}
+
+/**
+ * Envía al cliente el mensaje de plantilla. `params` rellena {{1}}, {{2}}, {{3}}…
+ * en el orden de la plantilla (nombre, marca, link del informe).
+ * Si el idioma configurado no coincide con el que Meta registró, reintenta con
+ * los otros candidatos y avisa en el log cuál sí funcionó.
  */
 export async function sendClientWhatsApp(opts: {
   phone?: string;
   params: string[];
-}): Promise<{ ok: boolean; to?: string; error?: unknown }> {
+}): Promise<{ ok: boolean; to?: string; lang?: string; error?: unknown }> {
   if (!hasClientWhatsApp()) {
     console.warn("[wa:cliente] sin configurar (falta WHATSAPP_TOKEN/PHONE_ID/TEMPLATE)");
     return { ok: false, error: "sin configurar" };
@@ -72,30 +106,25 @@ export async function sendClientWhatsApp(opts: {
     return { ok: false, error: "teléfono inválido" };
   }
   try {
-    const res = await fetch(`https://graph.facebook.com/v21.0/${WA_PHONE_ID}/messages`, {
-      method: "POST",
-      headers: { authorization: `Bearer ${WA_TOKEN}`, "content-type": "application/json" },
-      body: JSON.stringify({
-        messaging_product: "whatsapp",
-        to,
-        type: "template",
-        template: {
-          name: WA_TEMPLATE,
-          language: { code: WA_LANG },
-          components: [
-            { type: "body", parameters: opts.params.map((t) => ({ type: "text", text: t })) },
-          ],
-        },
-      }),
-      signal: AbortSignal.timeout(8000),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      console.error(`[wa:cliente] Meta rechazó (to=${to}, template=${WA_TEMPLATE}, lang=${WA_LANG}):`, JSON.stringify(data));
-      return { ok: false, to, error: data };
+    let last: unknown = null;
+    for (const lang of langCandidates()) {
+      const { ok, data } = await postTemplate(to, lang, opts.params);
+      if (ok) {
+        console.log(
+          `[wa:cliente] enviado a ${to} · lang=${lang} · id=${data?.messages?.[0]?.id ?? "?"}` +
+            (lang !== WA_LANG ? ` ← ponle WHATSAPP_TEMPLATE_LANG=${lang} en Vercel` : "")
+        );
+        return { ok: true, to, lang };
+      }
+      last = data;
+      // 132001 = la plantilla no existe en ESE idioma → probar el siguiente.
+      // Cualquier otro error (token, número, plantilla pausada) no se arregla
+      // cambiando de idioma: cortamos aquí.
+      if (data?.error?.code !== 132001) break;
+      console.warn(`[wa:cliente] plantilla no existe en ${lang}, probando siguiente…`);
     }
-    console.log(`[wa:cliente] enviado a ${to} · id=${data?.messages?.[0]?.id ?? "?"}`);
-    return { ok: true, to };
+    console.error(`[wa:cliente] Meta rechazó (to=${to}, template=${WA_TEMPLATE}):`, JSON.stringify(last));
+    return { ok: false, to, error: last };
   } catch (e) {
     console.error("[wa:cliente] error:", e);
     return { ok: false, to, error: String(e) };
