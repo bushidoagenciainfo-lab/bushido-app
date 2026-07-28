@@ -36,12 +36,21 @@ export function hasClientWhatsApp(): boolean {
   return Boolean(WA_TOKEN && WA_PHONE_ID && WA_TEMPLATE);
 }
 
-/** Normaliza a dígitos con código país (Colombia 57 por defecto). */
+/**
+ * Normaliza a dígitos con código país (Colombia 57 por defecto).
+ * Tolera lo que la gente escribe de verdad: "+57 300...", "300 892 3390",
+ * y el caso del formulario donde el prefijo +57 queda duplicado ("5757300...").
+ */
 export function toWhatsAppNumber(phone?: string): string | null {
   if (!phone) return null;
   let d = phone.replace(/\D/g, "");
   if (!d) return null;
-  if (!d.startsWith("57") && d.length <= 10) d = "57" + d; // asume Colombia
+  // quita códigos de país repetidos: 57 57 300... → 57 300...
+  while (d.startsWith("5757")) d = d.slice(2);
+  // celular colombiano sin código: 10 dígitos empezando por 3
+  if (d.length === 10 && d.startsWith("3")) d = "57" + d;
+  // 57 + 10 dígitos = 12. Si quedó más largo y empieza por 57, recorta el sobrante
+  if (d.startsWith("57") && d.length > 12) d = "57" + d.slice(-10);
   return d;
 }
 
@@ -52,10 +61,16 @@ export function toWhatsAppNumber(phone?: string): string | null {
 export async function sendClientWhatsApp(opts: {
   phone?: string;
   params: string[];
-}): Promise<void> {
-  if (!hasClientWhatsApp()) return;
+}): Promise<{ ok: boolean; to?: string; error?: unknown }> {
+  if (!hasClientWhatsApp()) {
+    console.warn("[wa:cliente] sin configurar (falta WHATSAPP_TOKEN/PHONE_ID/TEMPLATE)");
+    return { ok: false, error: "sin configurar" };
+  }
   const to = toWhatsAppNumber(opts.phone);
-  if (!to) return;
+  if (!to) {
+    console.warn(`[wa:cliente] teléfono inválido: "${opts.phone}"`);
+    return { ok: false, error: "teléfono inválido" };
+  }
   try {
     const res = await fetch(`https://graph.facebook.com/v21.0/${WA_PHONE_ID}/messages`, {
       method: "POST",
@@ -75,9 +90,14 @@ export async function sendClientWhatsApp(opts: {
       signal: AbortSignal.timeout(8000),
     });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) console.error("[wa:cliente] Meta rechazó:", JSON.stringify(data));
-    else console.log("[wa:cliente] enviado a", to);
+    if (!res.ok) {
+      console.error(`[wa:cliente] Meta rechazó (to=${to}, template=${WA_TEMPLATE}, lang=${WA_LANG}):`, JSON.stringify(data));
+      return { ok: false, to, error: data };
+    }
+    console.log(`[wa:cliente] enviado a ${to} · id=${data?.messages?.[0]?.id ?? "?"}`);
+    return { ok: true, to };
   } catch (e) {
     console.error("[wa:cliente] error:", e);
+    return { ok: false, to, error: String(e) };
   }
 }

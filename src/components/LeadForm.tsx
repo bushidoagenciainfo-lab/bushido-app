@@ -52,7 +52,16 @@ export default function LeadForm({
     const fd = new FormData(form);
     const payload: Record<string, string> = { kind };
     fields.forEach((f) => {
-      payload[f.name] = (fd.get(f.name) as string) || "";
+      let v = (fd.get(f.name) as string) || "";
+      // el campo ya muestra el prefijo (+57): si la persona lo escribe otra vez,
+      // lo quitamos aquí para no guardar "+57 +57300..."
+      if (f.prefix && v) {
+        const pfx = f.prefix.replace(/\D/g, "");
+        v = v.replace(/[^\d]/g, "");
+        while (pfx && v.startsWith(pfx + pfx)) v = v.slice(pfx.length);
+        if (pfx && v.startsWith(pfx) && v.length > 10) v = v.slice(pfx.length);
+      }
+      payload[f.name] = v;
     });
     payload.website_hp = (fd.get("website_hp") as string) || "";
 

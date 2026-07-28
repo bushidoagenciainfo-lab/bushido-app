@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
+import { sendClientWhatsApp, toWhatsAppNumber } from "@/lib/whatsapp";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -10,8 +11,10 @@ export const maxDuration = 60;
  * Diagnóstico del panel: prueba CADA pieza por separado y dice cuál falla.
  * Protegido por la cookie de admin (ver proxy.ts). Abrir: /api/admin/diag
  */
-export async function GET() {
+export async function GET(request: Request) {
   const out: Record<string, unknown> = {};
+  // ?wa=573008923390 → envía la plantilla REAL a ese número y muestra el error de Meta
+  const waTest = new URL(request.url).searchParams.get("wa");
 
   // ── 1. Variables de entorno presentes ──
   const env = {
@@ -107,6 +110,20 @@ export async function GET() {
     } catch (e) {
       out.whatsapp = { ok: false, error: String(e) };
     }
+  }
+
+  // ── 7. Envío REAL de la plantilla de WhatsApp (solo si pasas ?wa=numero) ──
+  if (waTest) {
+    out.whatsapp_envio = {
+      numero_recibido: waTest,
+      numero_normalizado: toWhatsAppNumber(waTest),
+      resultado: await sendClientWhatsApp({
+        phone: waTest,
+        params: ["Maick", "Bushido", "https://bushidoav.com/informe/demo"],
+      }),
+    };
+  } else {
+    out.whatsapp_envio = "Para probar el envío: /api/admin/diag?wa=573008923390";
   }
 
   return NextResponse.json(out, { status: 200 });

@@ -4,11 +4,12 @@ import Emociones from "./Emociones";
 
 // clase css sin acentos para el badge de estado del canal
 const estadoKey: Record<EstadoCanal, string> = {
+  activo: "activo",
   fuerte: "fuerte",
   irregular: "irregular",
   "débil": "debil",
   ausente: "ausente",
-  "por confirmar": "confirmar",
+  "por confirmar": "confirmar", // legado (informes viejos)
 };
 
 export default function ReportView({ a }: { a: Analisis }) {

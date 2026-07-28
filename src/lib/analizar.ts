@@ -52,11 +52,12 @@ QUÉ DEBES PRODUCIR:
 - buyerPersona con 3 jobs-to-be-done (qué "trabajo" contrata el cliente al comprar).
 - gatillos: 3 a 5 drivers de compra con su insight (por qué realmente compra la gente en este nicho, no lo que dicen).
 - emociones: 3 a 5 de la taxonomía fija, y por CADA una un argumento corto de por qué mueve la compra en ESTA marca. Taxonomía: ${EMOCIONES.join(", ")}. Usa solo esos valores.
-- canales (PRESENCIA DIGITAL): audita Instagram, TikTok, YouTube, "Sitio web" y "Google / reseñas". Estado: fuerte | irregular | débil | ausente | "por confirmar".
-  ⚠️ REGLA DE HONESTIDAD (crítica para la credibilidad — si te equivocas, el cliente desconfía de todo el análisis): el estado de cada RED SOCIAL debe basarse SOLO en lo que el cliente te compartió.
-  · Si te dio el perfil de esa red → NO la marques "ausente"; márcala "por confirmar" y enfoca la nota/recomendación en potenciarla. No inventes un diagnóstico que no puedes ver.
-  · Si NO te compartió esa red → márcala "por confirmar" y en la nota PÍDELE el perfil ("cuéntanos tu TikTok si lo tienes"). NUNCA afirmes que una red social no existe.
-  · "ausente" ÚNICAMENTE para "Sitio web" o "Google / reseñas", y solo si el cliente no los reporta (esos sí suelen faltar en marcas pequeñas) → recomiéndalos como SERVICIO de Bushido (landing/catálogo de pedidos, Google Business + estrategia de reseñas).
+- canales (PRESENCIA DIGITAL): audita SOLO los canales relevantes. Estado: activo | fuerte | irregular | débil | ausente.
+  ⚠️ REGLA CRÍTICA DE CREDIBILIDAD — el cliente desconfía si le dices algo que él sabe que es falso, o si le respondes "no sé":
+  · Si el cliente TE COMPARTIÓ el perfil de una red (Instagram, TikTok…) → esa red está **"activo"**. NUNCA la marques "ausente", "débil" ni digas que no sabes si existe: él sabe que la tiene. La nota debe reconocer que el canal está en marcha y nombrar el potencial del nicho; la recomendación debe ser el siguiente paso concreto para potenciarlo. Habla de OPORTUNIDAD, no de diagnóstico que no puedes ver.
+  · Si el cliente NO te compartió esa red social → simplemente **NO la incluyas** en la lista de canales. No inventes ni preguntes: mejor un informe corto y certero que uno que adivina.
+  · "ausente" ÚNICAMENTE para "Sitio web" o "Google / reseñas" cuando el cliente no los reporta (esos sí suelen faltar en marcas pequeñas y son venta directa) → recomiéndalos como SERVICIO de Bushido (landing/catálogo de pedidos, Google Business + estrategia de reseñas).
+  · Si el cliente reporta sitio web → márcalo "activo" y recomienda cómo aprovecharlo mejor.
 - metricas: 3 métricas de redes que la marca debería vigilar, con qué mirar y por qué. NO inventes números ni porcentajes concretos: describe QUÉ medir y por qué importa (retención de reels, guardados/compartidos, alcance de no-seguidores, etc.).
 - propuesta: el sistema/servicio propuesto, conectando la data de la marca con la data de nicho de Bushido.
 - paquete: recomienda el servicio de Bushido que MEJOR resuelve LO QUE EL CLIENTE BUSCA (mira el campo "Qué busca / contexto"). NO recomiendes el paquete de redes por defecto: si pidió un comercial → "Empresarial" o "Mini comercial / campaña"; si un videoclip → el de Videoclip; si cobertura de evento → cotización de evento; si manejo de redes o no especifica → paquete de redes. Nombre y precio EXACTOS de la lista. Además:
@@ -122,7 +123,7 @@ const SCHEMA = {
         additionalProperties: false,
         properties: {
           canal: { type: "string" },
-          estado: { type: "string", enum: ["fuerte", "irregular", "débil", "ausente", "por confirmar"] },
+          estado: { type: "string", enum: ["activo", "fuerte", "irregular", "débil", "ausente"] },
           nota: { type: "string", description: "Diagnóstico corto del canal" },
           recomendacion: { type: "string", description: "Qué hacer (servicio Bushido cuando aplica)" },
         },
