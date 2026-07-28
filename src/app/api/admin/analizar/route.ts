@@ -19,6 +19,7 @@ const schema = z.object({
   nombre: z.string().trim().max(120).nullish(),
   phone: z.string().trim().max(40).nullish(),
   enviarCliente: z.boolean().nullish(), // si true y hay email, le manda el informe
+  profundo: z.boolean().nullish(), // busca la marca en la web antes de analizar (+35s)
 });
 
 /**
@@ -42,7 +43,8 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ ok: false, error: "Datos inválidos.", issues: parsed.error.issues }, { status: 422 });
   }
-  const { marca, redes, tiktok, web, contexto, leadId, email, nombre, enviarCliente } = parsed.data;
+  const { marca, redes, tiktok, web, contexto, leadId, email, nombre, enviarCliente, profundo } =
+    parsed.data;
 
   let analisis;
   try {
@@ -52,10 +54,12 @@ export async function POST(request: Request) {
       tiktok: tiktok ?? undefined,
       web: web ?? undefined,
       contexto: contexto ?? undefined,
+      profundo: profundo ?? false,
     });
   } catch (err) {
     console.error("generarAnalisis:", err);
-    return NextResponse.json({ ok: false, error: "El análisis falló." }, { status: 502 });
+    const msg = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ ok: false, error: `El análisis falló: ${msg}` }, { status: 502 });
   }
   if (!analisis) {
     return NextResponse.json({ ok: false, error: "No se pudo generar el análisis." }, { status: 502 });

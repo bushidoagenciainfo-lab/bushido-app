@@ -24,7 +24,7 @@ export default function AdminLeads({ leads }: { leads: LeadRow[] }) {
     }).catch(() => {});
   }
 
-  async function generar(lead: LeadRow) {
+  async function generar(lead: LeadRow, profundo = false) {
     setBusy(lead.id);
     setResult((r) => ({ ...r, [lead.id]: {} }));
     try {
@@ -41,6 +41,7 @@ export default function AdminLeads({ leads }: { leads: LeadRow[] }) {
           email: lead.email,
           nombre: lead.name,
           phone: lead.phone,
+          profundo,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -95,6 +96,15 @@ export default function AdminLeads({ leads }: { leads: LeadRow[] }) {
                 disabled={busy === l.id}
               >
                 {busy === l.id ? "Analizando…" : "Generar análisis"}
+              </button>
+              <button
+                type="button"
+                className="al-gen al-gen-deep"
+                onClick={() => generar(l, true)}
+                disabled={busy === l.id}
+                title="Busca la marca en la web antes de analizar. Tarda ~1 min más — para clientes que ya contrataron."
+              >
+                {busy === l.id ? "…" : "＋ Profundo (con web)"}
               </button>
               {res?.url && (
                 <a href={res.url} target="_blank" rel="noopener noreferrer" className="al-link">

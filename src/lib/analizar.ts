@@ -14,6 +14,12 @@ export interface AnalizarInput {
   tiktok?: string; // TikTok (opcional; puede tener otro @ que Instagram)
   web?: string;
   contexto?: string; // qué busca el cliente + notas extra
+  /**
+   * MODO PROFUNDO: busca la marca en la web antes de analizar (+35s).
+   * OFF por defecto: el análisis gratis debe llegar RÁPIDO (es el gancho).
+   * Úsalo desde el panel para clientes que ya contrataron.
+   */
+  profundo?: boolean;
 }
 
 const KEY = process.env.ANTHROPIC_API_KEY;
@@ -177,17 +183,11 @@ interface ModelOut {
 // Tope de tiempo para la investigación web. Vercel corta la función (60s en
 // Hobby) y el análisis corre dentro de ese presupuesto: si la búsqueda se
 // demora, la abandonamos y seguimos — mejor un informe sin research que ninguno.
-// Medido en producción: la búsqueda web tarda ~35s. Ahora el análisis corre en
-// su propia ruta (/api/generar-informe) con 60s completos, así que le damos 25s
-// y dejamos ~30s para redactar el informe.
+// Medido en producción: la búsqueda web tarda ~35s. Solo se usa en modo profundo.
 const RESEARCH_TIMEOUT_MS = Number(process.env.RESEARCH_TIMEOUT_MS || 25000);
-// Poner INVESTIGAR_WEB=0 en Vercel desactiva la búsqueda web (informes más
-// rápidos y baratos, pero basados solo en inferencia del nicho).
-const RESEARCH_ON = process.env.INVESTIGAR_WEB !== "0";
 
-/** PASO 1 — investiga la marca en la web para basar el análisis en HECHOS reales. */
+/** PASO 1 (solo modo profundo) — investiga la marca en la web para basarse en HECHOS. */
 async function investigar(client: Anthropic, input: AnalizarInput): Promise<string> {
-  if (!RESEARCH_ON) return "";
   try {
     const q = [
       `Investiga en internet esta marca para un análisis de marketing. Marca: "${input.marca}".`,
@@ -229,8 +229,9 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
   }
   const client = new Anthropic({ apiKey: KEY });
 
-  // PASO 1: investigación web (hechos reales). Best-effort: si falla, sigue sin ella.
-  const brief = await investigar(client, input);
+  // PASO 1: investigación web — SOLO en modo profundo (tarda ~35s). El análisis
+  // gratis va sin ella para que llegue rápido y sin riesgo de timeout.
+  const brief = input.profundo ? await investigar(client, input) : "";
 
   // PASO 2: estructurar el análisis usando esos hechos
   const userMsg = [
@@ -247,19 +248,21 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
     "Analiza esta marca y devuelve el informe estructurado. Recuerda la regla de honestidad de canales y recomienda el servicio que resuelve lo que el cliente busca.",
   ].join("\n");
 
+  // Config que YA funcionaba en producción (no la aprietes: si el modelo se corta,
+  // el informe nunca llega). El timeout va holgado dentro de los 60s de la ruta.
   const t1 = Date.now();
   const res = await client.messages.create(
     {
       model: "claude-opus-4-8",
-      max_tokens: 12000,
+      max_tokens: 16000,
       thinking: { type: "adaptive" },
-      output_config: { format: { type: "json_schema", schema: SCHEMA }, effort: "low" },
+      output_config: { format: { type: "json_schema", schema: SCHEMA }, effort: "medium" },
       system: SYSTEM,
       messages: [{ role: "user", content: userMsg }],
     },
-    { timeout: 30000, maxRetries: 0 }
+    { timeout: 50000, maxRetries: 1 }
   );
-  console.log(`[analizar] informe estructurado en ${Date.now() - t1}ms`);
+  console.log(`[analizar] informe estructurado en ${Date.now() - t1}ms (profundo=${!!input.profundo})`);
 
   const textBlock = res.content.find((b) => b.type === "text");
   if (!textBlock || textBlock.type !== "text") {
