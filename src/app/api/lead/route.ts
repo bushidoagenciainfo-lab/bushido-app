@@ -102,8 +102,11 @@ export async function POST(request: Request) {
   // ejecuta, a diferencia del "dispara y olvida" que se moría al responder.
   // Así la persona ve "recibido" al instante y el correo + informe salen solos.
   after(async () => {
+    const tStart = Date.now();
+    console.log(`[after] arrancó · kind=${lead.kind} · leadId=${leadId ?? "sin-db"}`);
     // 1) avisos a Bushido: correo + WhatsApp + Telegram (a ti, para estar pendiente)
     await notifyLead(lead).catch((err) => console.error("notifyLead error:", err));
+    console.log(`[after] avisos enviados (${Date.now() - tStart}ms)`);
     const resumen =
       `🔔 Nuevo lead · ${lead.kind}\n` +
       `${lead.name || "—"}${lead.company ? " · " + lead.company : ""}\n` +
@@ -140,6 +143,7 @@ export async function POST(request: Request) {
             phone: lead.phone,
             params: [(lead.name || "").split(" ")[0] || "hola", analisis.marca, url],
           });
+          console.log(`[after] informe LISTO y enviado (${Date.now() - tStart}ms) · ${url}`);
           return; // el informe reemplaza al auto-reply genérico
         }
       } catch (e) {

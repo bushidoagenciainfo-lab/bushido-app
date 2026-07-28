@@ -1,0 +1,113 @@
+import { NextResponse } from "next/server";
+import Anthropic from "@anthropic-ai/sdk";
+import { Resend } from "resend";
+import { createClient } from "@supabase/supabase-js";
+
+export const runtime = "nodejs";
+export const maxDuration = 60;
+
+/**
+ * Diagnóstico del panel: prueba CADA pieza por separado y dice cuál falla.
+ * Protegido por la cookie de admin (ver proxy.ts). Abrir: /api/admin/diag
+ */
+export async function GET() {
+  const out: Record<string, unknown> = {};
+
+  // ── 1. Variables de entorno presentes ──
+  const env = {
+    ANTHROPIC_API_KEY: !!process.env.ANTHROPIC_API_KEY,
+    RESEND_API_KEY: !!process.env.RESEND_API_KEY,
+    LEAD_FROM_EMAIL: process.env.LEAD_FROM_EMAIL || "(sin definir)",
+    LEAD_NOTIFY_EMAIL: process.env.LEAD_NOTIFY_EMAIL || "(sin definir)",
+    SUPABASE_URL: !!process.env.SUPABASE_URL,
+    SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    WHATSAPP_TOKEN: !!process.env.WHATSAPP_TOKEN,
+    WHATSAPP_PHONE_ID: process.env.WHATSAPP_PHONE_ID || "(sin definir)",
+    WHATSAPP_TEMPLATE: process.env.WHATSAPP_TEMPLATE || "(sin definir)",
+    WHATSAPP_TEMPLATE_LANG: process.env.WHATSAPP_TEMPLATE_LANG || "(sin definir)",
+    TELEGRAM_BOT_TOKEN: !!process.env.TELEGRAM_BOT_TOKEN,
+  };
+  out.env = env;
+
+  // ── 2. Resend: ¿la key sirve y puede enviar? ──
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      const { data, error } = await resend.emails.send({
+        from: process.env.LEAD_FROM_EMAIL || "Bushido <onboarding@resend.dev>",
+        to: process.env.LEAD_NOTIFY_EMAIL || "servicios@bushidoav.com",
+        subject: "Diagnóstico Bushido · prueba de correo",
+        html: "<p>Si recibes esto, Resend funciona correctamente.</p>",
+      });
+      out.resend = error ? { ok: false, error } : { ok: true, id: data?.id };
+    } catch (e) {
+      out.resend = { ok: false, error: String(e) };
+    }
+  } else {
+    out.resend = { ok: false, error: "sin RESEND_API_KEY" };
+  }
+
+  // ── 3. Supabase: ¿existe la columna `categoria` en analisis? ──
+  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    try {
+      const db = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, {
+        auth: { persistSession: false },
+      });
+      const { error } = await db.from("analisis").select("id, categoria").limit(1);
+      out.supabase_categoria = error ? { ok: false, error: error.message } : { ok: true };
+      const ev = await db.from("events").select("id").limit(1);
+      out.supabase_events = ev.error ? { ok: false, error: ev.error.message } : { ok: true };
+    } catch (e) {
+      out.supabase_categoria = { ok: false, error: String(e) };
+    }
+  }
+
+  // ── 4. Claude: ¿la key sirve? (llamada mínima) ──
+  if (process.env.ANTHROPIC_API_KEY) {
+    try {
+      const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+      const t0 = Date.now();
+      const r = await client.messages.create({
+        model: "claude-opus-4-8",
+        max_tokens: 32,
+        messages: [{ role: "user", content: "Responde solo: ok" }],
+      });
+      out.claude = { ok: true, ms: Date.now() - t0, stop: r.stop_reason };
+    } catch (e) {
+      out.claude = { ok: false, error: e instanceof Error ? e.message : String(e) };
+    }
+  }
+
+  // ── 5. Claude + búsqueda web: ¿funciona y cuánto tarda? (el sospechoso de timeouts) ──
+  if (process.env.ANTHROPIC_API_KEY) {
+    try {
+      const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+      const t0 = Date.now();
+      await client.messages.create({
+        model: "claude-opus-4-8",
+        max_tokens: 500,
+        tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 1 }],
+        messages: [{ role: "user", content: "Busca brevemente qué es bushidoav.com" }],
+      });
+      out.web_search = { ok: true, ms: Date.now() - t0 };
+    } catch (e) {
+      out.web_search = { ok: false, error: e instanceof Error ? e.message : String(e) };
+    }
+  }
+
+  // ── 6. WhatsApp: ¿el token y el número sirven? ──
+  if (process.env.WHATSAPP_TOKEN && process.env.WHATSAPP_PHONE_ID) {
+    try {
+      const r = await fetch(
+        `https://graph.facebook.com/v21.0/${process.env.WHATSAPP_PHONE_ID}?fields=display_phone_number,verified_name,quality_rating`,
+        { headers: { authorization: `Bearer ${process.env.WHATSAPP_TOKEN}` } }
+      );
+      const data = await r.json().catch(() => ({}));
+      out.whatsapp = r.ok ? { ok: true, ...data } : { ok: false, error: data };
+    } catch (e) {
+      out.whatsapp = { ok: false, error: String(e) };
+    }
+  }
+
+  return NextResponse.json(out, { status: 200 });
+}

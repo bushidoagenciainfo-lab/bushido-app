@@ -174,8 +174,17 @@ interface ModelOut {
   paquete: Analisis["paquete"];
 }
 
+// Tope de tiempo para la investigación web. Vercel corta la función (60s en
+// Hobby) y el análisis corre dentro de ese presupuesto: si la búsqueda se
+// demora, la abandonamos y seguimos — mejor un informe sin research que ninguno.
+const RESEARCH_TIMEOUT_MS = Number(process.env.RESEARCH_TIMEOUT_MS || 18000);
+// Poner INVESTIGAR_WEB=0 en Vercel desactiva la búsqueda web (informes más
+// rápidos y baratos, pero basados solo en inferencia del nicho).
+const RESEARCH_ON = process.env.INVESTIGAR_WEB !== "0";
+
 /** PASO 1 — investiga la marca en la web para basar el análisis en HECHOS reales. */
 async function investigar(client: Anthropic, input: AnalizarInput): Promise<string> {
+  if (!RESEARCH_ON) return "";
   try {
     const q = [
       `Investiga en internet esta marca para un análisis de marketing. Marca: "${input.marca}".`,
@@ -186,19 +195,25 @@ async function investigar(client: Anthropic, input: AnalizarInput): Promise<stri
     ]
       .filter(Boolean)
       .join(" ");
-    const res = await client.messages.create({
-      model: "claude-opus-4-8",
-      max_tokens: 3000,
-      tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 4 }],
-      messages: [{ role: "user", content: q }],
-    });
-    return res.content
+    const t0 = Date.now();
+    const res = await client.messages.create(
+      {
+        model: "claude-opus-4-8",
+        max_tokens: 2000,
+        tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 3 }],
+        messages: [{ role: "user", content: q }],
+      },
+      { timeout: RESEARCH_TIMEOUT_MS, maxRetries: 0 } // no reintentar: gastaría el presupuesto
+    );
+    const brief = res.content
       .filter((b): b is Extract<typeof b, { type: "text" }> => b.type === "text")
       .map((b) => b.text)
       .join("\n")
       .trim();
+    console.log(`[investigar] ok en ${Date.now() - t0}ms (${brief.length} chars)`);
+    return brief;
   } catch (e) {
-    console.error("[investigar] web_search falló (sigo sin investigación):", e);
+    console.error("[investigar] sin research (timeout o error), sigo igual:", e instanceof Error ? e.message : e);
     return "";
   }
 }
@@ -229,14 +244,19 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
     "Analiza esta marca y devuelve el informe estructurado. Recuerda la regla de honestidad de canales y recomienda el servicio que resuelve lo que el cliente busca.",
   ].join("\n");
 
-  const res = await client.messages.create({
-    model: "claude-opus-4-8",
-    max_tokens: 16000,
-    thinking: { type: "adaptive" },
-    output_config: { format: { type: "json_schema", schema: SCHEMA }, effort: "medium" },
-    system: SYSTEM,
-    messages: [{ role: "user", content: userMsg }],
-  });
+  const t1 = Date.now();
+  const res = await client.messages.create(
+    {
+      model: "claude-opus-4-8",
+      max_tokens: 12000,
+      thinking: { type: "adaptive" },
+      output_config: { format: { type: "json_schema", schema: SCHEMA }, effort: "low" },
+      system: SYSTEM,
+      messages: [{ role: "user", content: userMsg }],
+    },
+    { timeout: 35000, maxRetries: 0 }
+  );
+  console.log(`[analizar] informe estructurado en ${Date.now() - t1}ms`);
 
   const textBlock = res.content.find((b) => b.type === "text");
   if (!textBlock || textBlock.type !== "text") {
