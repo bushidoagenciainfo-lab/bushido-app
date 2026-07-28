@@ -15,6 +15,8 @@ export async function GET(request: Request) {
   const out: Record<string, unknown> = {};
   // ?wa=573008923390 → envía la plantilla REAL a ese número y muestra el error de Meta
   const waTest = new URL(request.url).searchParams.get("wa");
+  // ?waba=899817986501868 → lista las plantillas REALES de esa cuenta (nombre + idioma exactos)
+  const wabaId = new URL(request.url).searchParams.get("waba") || process.env.WHATSAPP_WABA_ID;
 
   // ── 1. Variables de entorno presentes ──
   const env = {
@@ -110,6 +112,35 @@ export async function GET(request: Request) {
     } catch (e) {
       out.whatsapp = { ok: false, error: String(e) };
     }
+  }
+
+  // ── 6-bis. Plantillas REALES de la cuenta (nombre + idioma exactos) ──
+  // El error 132001 en todos los idiomas suele significar que la plantilla vive
+  // en OTRA cuenta de WhatsApp (WABA) distinta a la del número emisor.
+  if (process.env.WHATSAPP_TOKEN && wabaId) {
+    try {
+      const r = await fetch(
+        `https://graph.facebook.com/v21.0/${wabaId}/message_templates?fields=name,language,status,category&limit=50`,
+        { headers: { authorization: `Bearer ${process.env.WHATSAPP_TOKEN}` } }
+      );
+      const data = await r.json().catch(() => ({}));
+      out.plantillas = r.ok
+        ? {
+            ok: true,
+            waba: wabaId,
+            total: data?.data?.length ?? 0,
+            lista: (data?.data ?? []).map(
+              (t: { name: string; language: string; status: string; category: string }) =>
+                `${t.name} · ${t.language} · ${t.status} · ${t.category}`
+            ),
+          }
+        : { ok: false, waba: wabaId, error: data };
+    } catch (e) {
+      out.plantillas = { ok: false, error: String(e) };
+    }
+  } else {
+    out.plantillas =
+      "Para ver las plantillas reales: /api/admin/diag?waba=TU_ID_DE_CUENTA_WHATSAPP_BUSINESS";
   }
 
   // ── 7. Envío REAL de la plantilla de WhatsApp (solo si pasas ?wa=numero) ──
