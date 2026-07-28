@@ -6,15 +6,19 @@ import { storeAnalisis, informeUrl, emailInformeListo } from "@/lib/analisis-sto
 export const runtime = "nodejs";
 export const maxDuration = 120;
 
+// `nullish()` porque Supabase devuelve null (no undefined) en los campos vacíos:
+// con .optional() el panel fallaba con "Datos inválidos".
 const schema = z.object({
   marca: z.string().trim().min(1).max(160),
-  redes: z.string().trim().max(300).optional(),
-  web: z.string().trim().max(300).optional(),
-  contexto: z.string().trim().max(2000).optional(),
-  leadId: z.string().trim().max(80).optional(),
-  email: z.string().trim().email().max(160).optional().or(z.literal("")),
-  nombre: z.string().trim().max(120).optional(),
-  enviarCliente: z.boolean().optional(), // si true y hay email, le manda el informe
+  redes: z.string().trim().max(300).nullish(),
+  tiktok: z.string().trim().max(300).nullish(),
+  web: z.string().trim().max(300).nullish(),
+  contexto: z.string().trim().max(2000).nullish(),
+  leadId: z.string().trim().max(80).nullish(),
+  email: z.string().trim().max(160).nullish(),
+  nombre: z.string().trim().max(120).nullish(),
+  phone: z.string().trim().max(40).nullish(),
+  enviarCliente: z.boolean().nullish(), // si true y hay email, le manda el informe
 });
 
 /**
@@ -38,11 +42,17 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ ok: false, error: "Datos inválidos.", issues: parsed.error.issues }, { status: 422 });
   }
-  const { marca, redes, web, contexto, leadId, email, nombre, enviarCliente } = parsed.data;
+  const { marca, redes, tiktok, web, contexto, leadId, email, nombre, enviarCliente } = parsed.data;
 
   let analisis;
   try {
-    analisis = await generarAnalisis({ marca, redes, web, contexto });
+    analisis = await generarAnalisis({
+      marca,
+      redes: redes ?? undefined,
+      tiktok: tiktok ?? undefined,
+      web: web ?? undefined,
+      contexto: contexto ?? undefined,
+    });
   } catch (err) {
     console.error("generarAnalisis:", err);
     return NextResponse.json({ ok: false, error: "El análisis falló." }, { status: 502 });
@@ -53,7 +63,7 @@ export async function POST(request: Request) {
 
   let id: string;
   try {
-    id = await storeAnalisis(analisis, leadId);
+    id = await storeAnalisis(analisis, leadId ?? undefined);
   } catch (err) {
     console.error("storeAnalisis:", err);
     return NextResponse.json({ ok: false, error: "No pudimos guardar el análisis." }, { status: 500 });
@@ -61,7 +71,9 @@ export async function POST(request: Request) {
 
   const url = informeUrl(id);
   if (enviarCliente && email) {
-    emailInformeListo({ email, nombre, marca, url }).catch((e) => console.error("emailInformeListo:", e));
+    emailInformeListo({ email, nombre: nombre ?? undefined, marca, url }).catch((e) =>
+      console.error("emailInformeListo:", e)
+    );
   }
   return NextResponse.json({ ok: true, id, url });
 }

@@ -177,7 +177,10 @@ interface ModelOut {
 // Tope de tiempo para la investigación web. Vercel corta la función (60s en
 // Hobby) y el análisis corre dentro de ese presupuesto: si la búsqueda se
 // demora, la abandonamos y seguimos — mejor un informe sin research que ninguno.
-const RESEARCH_TIMEOUT_MS = Number(process.env.RESEARCH_TIMEOUT_MS || 18000);
+// Medido en producción: la búsqueda web tarda ~35s. Ahora el análisis corre en
+// su propia ruta (/api/generar-informe) con 60s completos, así que le damos 25s
+// y dejamos ~30s para redactar el informe.
+const RESEARCH_TIMEOUT_MS = Number(process.env.RESEARCH_TIMEOUT_MS || 25000);
 // Poner INVESTIGAR_WEB=0 en Vercel desactiva la búsqueda web (informes más
 // rápidos y baratos, pero basados solo en inferencia del nicho).
 const RESEARCH_ON = process.env.INVESTIGAR_WEB !== "0";
@@ -254,7 +257,7 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
       system: SYSTEM,
       messages: [{ role: "user", content: userMsg }],
     },
-    { timeout: 35000, maxRetries: 0 }
+    { timeout: 30000, maxRetries: 0 }
   );
   console.log(`[analizar] informe estructurado en ${Date.now() - t1}ms`);
 

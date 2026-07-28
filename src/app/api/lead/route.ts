@@ -7,15 +7,23 @@ import {
   classifyProject,
   type LeadInput,
 } from "@/lib/leads";
-import { generarAnalisis, hasIA } from "@/lib/analizar";
-import { storeAnalisis, informeUrl, emailInformeListo } from "@/lib/analisis-store";
-import { alertaBushidoWhatsApp, sendClientWhatsApp } from "@/lib/whatsapp";
+import { hasIA } from "@/lib/analizar";
+import { alertaBushidoWhatsApp } from "@/lib/whatsapp";
 import { alertaTelegram } from "@/lib/telegram";
-import { forwardToServer } from "@/lib/forward";
 
 export const runtime = "nodejs";
-// El informe automático (Claude) corre en 2º plano con after(); dale aire.
+// Esta ruta solo guarda + avisa (rápido). El análisis pesado se delega a
+// /api/generar-informe para que tenga su propio presupuesto de tiempo.
 export const maxDuration = 60;
+
+/** URL base del sitio, para llamar a nuestras propias rutas desde el servidor. */
+function baseUrl(req: Request): string {
+  const env = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL;
+  if (env) return env.replace(/\/$/, "");
+  const vercel = process.env.VERCEL_URL;
+  if (vercel) return `https://${vercel}`;
+  return new URL(req.url).origin;
+}
 
 const schema = z.object({
   kind: z.enum(["analisis", "contacto", "talento", "descarga"]),
@@ -115,39 +123,32 @@ export async function POST(request: Request) {
     await alertaBushidoWhatsApp(resumen);
     await alertaTelegram(resumen);
 
-    // 2) análisis: generar el informe con Claude y enviárselo al cliente (correo + WhatsApp)
-    if (lead.kind === "analisis" && hasIA()) {
+    // 2) análisis: se delega a /api/generar-informe (su propio presupuesto de
+    //    tiempo: la búsqueda web sola tarda ~35s y aquí no cabía).
+    const secret = process.env.INTERNAL_SECRET || process.env.ANALIZAR_SECRET;
+    if (lead.kind === "analisis" && hasIA() && secret) {
       try {
-        const analisis = await generarAnalisis({
-          marca: lead.company || lead.name || "Marca",
-          redes: lead.social,
-          tiktok: lead.tiktok,
-          web: lead.web,
-          contexto: lead.project, // "¿Qué busca?" el cliente
-        });
-        if (analisis) {
-          const id = await storeAnalisis(analisis, leadId ?? undefined);
-          const url = informeUrl(id);
-          // reenvía el análisis estructurado a tu servidor de data
-          forwardToServer("analisis", { leadId, ...analisis }).catch(() => {});
-          if (lead.email) {
-            await emailInformeListo({
-              email: lead.email,
-              nombre: lead.name,
-              marca: analisis.marca,
-              url,
-            }).catch((e) => console.error("emailInforme error:", e));
-          }
-          // WhatsApp al cliente con el link (canal directo). params: nombre, marca, link
-          await sendClientWhatsApp({
+        const res = await fetch(`${baseUrl(request)}/api/generar-informe`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            secret,
+            marca: lead.company || lead.name || "Marca",
+            redes: lead.social,
+            tiktok: lead.tiktok,
+            web: lead.web,
+            contexto: lead.project, // "¿Qué busca?" el cliente
+            leadId,
+            email: lead.email,
+            nombre: lead.name,
             phone: lead.phone,
-            params: [(lead.name || "").split(" ")[0] || "hola", analisis.marca, url],
-          });
-          console.log(`[after] informe LISTO y enviado (${Date.now() - tStart}ms) · ${url}`);
-          return; // el informe reemplaza al auto-reply genérico
-        }
+          }),
+          signal: AbortSignal.timeout(10000),
+        });
+        console.log(`[after] informe encolado (${res.status}) en ${Date.now() - tStart}ms`);
+        if (res.ok) return; // el informe reemplaza al auto-reply genérico
       } catch (e) {
-        console.error("auto-informe error:", e);
+        console.error("[after] no se pudo encolar el informe:", e);
         // si falla, cae al auto-reply de abajo como acuse
       }
     }

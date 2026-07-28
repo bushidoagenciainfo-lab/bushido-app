@@ -35,10 +35,12 @@ export default function AdminLeads({ leads }: { leads: LeadRow[] }) {
           leadId: lead.id,
           marca: lead.company || lead.name || "Marca",
           redes: lead.social,
+          tiktok: lead.tiktok,
           web: lead.web,
           contexto: [lead.project, lead.message].filter(Boolean).join(" · "),
           email: lead.email,
           nombre: lead.name,
+          phone: lead.phone,
         }),
       });
       const data = await res.json().catch(() => ({}));
