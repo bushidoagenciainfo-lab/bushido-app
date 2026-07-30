@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SERVICES, type Service } from "@/lib/site";
+import { SERVICES, SERVICE_GROUPS, type Service } from "@/lib/site";
 import { openAnalisis } from "@/lib/ui";
 
 export default function ServiceList() {
@@ -19,24 +19,38 @@ export default function ServiceList() {
 
   return (
     <>
-      <div className="services-tiles">
-        {SERVICES.map((s) => (
-          <button key={s.slug} type="button" className="svc-tile" onClick={() => setActive(s)}>
-            <div className="num">
-              {s.num} / {s.cat}
+      {SERVICE_GROUPS.map((g) => {
+        const items = SERVICES.filter((s) => s.grupo === g.key).sort((a, b) =>
+          a.num.localeCompare(b.num)
+        );
+        if (!items.length) return null;
+        return (
+          <div className="svc-group" key={g.key}>
+            <div className="svc-group-head">
+              <h2>{g.label}</h2>
+              <span>{g.hint}</span>
             </div>
-            <h3>
-              {s.title} <em>{s.titleEm}</em>
-            </h3>
-            <div className="from">
-              Desde <b>{s.packages[0].price}</b>
+            <div className="services-tiles">
+              {items.map((s) => (
+                <button key={s.slug} type="button" className="svc-tile" onClick={() => setActive(s)}>
+                  <div className="num">
+                    {s.num} / {s.cat}
+                  </div>
+                  <h3>
+                    {s.title} <em>{s.titleEm}</em>
+                  </h3>
+                  <div className="from">
+                    Desde <b>{s.packages[0].price}</b>
+                  </div>
+                  <span className="go">
+                    Ver paquetes <span aria-hidden="true">→</span>
+                  </span>
+                </button>
+              ))}
             </div>
-            <span className="go">
-              Ver paquetes <span aria-hidden="true">→</span>
-            </span>
-          </button>
-        ))}
-      </div>
+          </div>
+        );
+      })}
 
       <div
         className={"drawer-backdrop" + (open ? " open" : "")}

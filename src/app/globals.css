@@ -2395,6 +2395,15 @@ body.has-cursor .cursor-dot, body.has-cursor .cursor-ring, body.has-cursor .curs
 }
 .chip:hover { color: var(--bone); border-color: var(--bone-ghost); }
 .chip.on { color: var(--bone); background: var(--sepp); border-color: var(--sepp); }
+
+/* ── familias de servicio ── */
+.svc-group + .svc-group { margin-top: 54px; }
+.svc-group-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--hairline); }
+.svc-group-head h2 {
+  font-family: var(--serif); font-weight: 400; font-size: clamp(24px, 3vw, 34px);
+  color: var(--bone); letter-spacing: -.01em;
+}
+.svc-group-head span { font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--bone-ghost); }
 .canal-nota { font-size: 13.5px; line-height: 1.55; color: var(--bone-dim); }
 .canal-rec { font-size: 13.5px; line-height: 1.55; color: var(--bone); padding-top: 10px; border-top: 1px dashed var(--hairline); }
 .canal-rec span { display: inline-block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--sepp); margin-right: 6px; }

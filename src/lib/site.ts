@@ -14,7 +14,15 @@ export interface PortfolioItem {
 
 export const PORTFOLIO: PortfolioItem[] = [
   { file: "ferxxo", cat: "eventos", label: "En vivo", title: "Ferxxo", client: "Feid · gira", badge: "Concierto", featured: true },
+  { file: "jbalvin", cat: "eventos", label: "En vivo", title: "J Balvin", client: "Bogotá", badge: "Concierto", featured: true },
   { file: "blessd", cat: "eventos", label: "En vivo", title: "Blessd", client: "Si Supieras Tour", badge: "Concierto", featured: true },
+  { file: "arcangel", cat: "eventos", label: "En vivo", title: "Arcángel", client: "Show en vivo", badge: "Concierto", featured: true },
+  { file: "sam-smith", cat: "eventos", label: "En vivo", title: "Sam Smith", client: "Tour internacional", badge: "Concierto" },
+  { file: "juniorh", cat: "eventos", label: "En vivo", title: "Junior H", client: "Show en vivo", badge: "Concierto" },
+  { file: "black-coffee", cat: "eventos", label: "En vivo", title: "Black Coffee", client: "Set en vivo", badge: "Concierto" },
+  { file: "ken-y", cat: "eventos", label: "En vivo", title: "Ken-Y", client: "Show en vivo", badge: "Concierto" },
+  { file: "lenny-jquiles", cat: "eventos", label: "En vivo", title: "Lenny Tavárez & J Quiles", client: "Show en vivo", badge: "Concierto" },
+  { file: "luis-alfonso", cat: "eventos", label: "En vivo", title: "Luis Alfonso", client: "Show en vivo", badge: "Concierto" },
   { file: "kaalvo", cat: "eventos", label: "En vivo", title: "Kaalvo", client: "Show en vivo", badge: "Concierto" },
   { file: "limp", cat: "eventos", label: "En vivo", title: "LIMP", client: "Festival", badge: "Concierto" },
   { file: "black", cat: "eventos", label: "Cobertura", title: "Black", client: "Evento", badge: "Evento" },
@@ -32,6 +40,7 @@ export const PORTFOLIO: PortfolioItem[] = [
   { file: "mindo", cat: "contenido", label: "Creadores", title: "Mindo & SoulBurge", client: "Creadores", badge: "Contenido", featured: true },
   { file: "bianco", cat: "contenido", label: "Gastronomía", title: "Bianco Bake Lab", client: "Reels de marca", badge: "Reels" },
   { file: "kosher", cat: "contenido", label: "Gastronomía", title: "Esquina Kosher", client: "Reels de marca", badge: "Reels" },
+  { file: "bears-bake", cat: "contenido", label: "Gastronomía", title: "Bears Bakery", client: "Contenido de marca", badge: "Reels" },
 ];
 
 export const PORTFOLIO_FILTERS: { key: "todos" | PortfolioCat; label: string }[] = [
@@ -46,9 +55,18 @@ export interface ServicePackage {
   price: string;
   featured?: boolean;
 }
+// Familias de servicio: agrupan la oferta para que se lea ordenada.
+export const SERVICE_GROUPS = [
+  { key: "growth", label: "Marca y crecimiento", hint: "Estrategia, redes, pauta y branding" },
+  { key: "creators", label: "Creators y UGC", hint: "Contenido de creador con data" },
+  { key: "produccion", label: "Producción audiovisual", hint: "Video, foto y cobertura" },
+] as const;
+export type ServiceGroup = (typeof SERVICE_GROUPS)[number]["key"];
+
 export interface Service {
   slug: string;
   num: string;
+  grupo: ServiceGroup;
   cat: string;
   title: string;
   titleEm: string; // parte en itálica/rojo
@@ -60,7 +78,7 @@ export interface Service {
 
 export const SERVICES: Service[] = [
   {
-    slug: "ugc", num: "01", cat: "Creators · Data-driven", title: "UGC con", titleEm: "data",
+    slug: "ugc", num: "01", grupo: "creators", cat: "Creators · Data-driven", title: "UGC con", titleEm: "data",
     description:
       "Contenido de creador que no se elige por tendencia: elegimos al creator y el ángulo con data de tu nicho, y medimos el resultado. Casting curado de nuestro book, producción con dirección de arte y reporte de performance.",
     packages: [
@@ -77,7 +95,7 @@ export const SERVICES: Service[] = [
     note: "Ideal para testear mensajes antes de invertir fuerte en pauta.",
   },
   {
-    slug: "pauta", num: "02", cat: "Performance", title: "Pauta y", titleEm: "amplificación",
+    slug: "pauta", num: "03", grupo: "growth", cat: "Performance", title: "Pauta y", titleEm: "amplificación",
     description:
       "Tu mejor contenido no sirve si nadie lo ve. Gestionamos Meta, TikTok y Google Ads con la data que ya construimos de tu marca y tu nicho: segmentación, testeo de creativos y optimización semanal.",
     packages: [
@@ -94,7 +112,7 @@ export const SERVICES: Service[] = [
     note: "El fee es la gestión; la inversión publicitaria va aparte y es tuya.",
   },
   {
-    slug: "estrategia", num: "03", cat: "Strategy · Kansei", title: "Estrategia", titleEm: "Kansei",
+    slug: "estrategia", num: "01", grupo: "growth", cat: "Strategy · Kansei", title: "Estrategia", titleEm: "Kansei",
     description:
       "Nuestro método propio para decodificar qué te compran y qué emociones lo mueven. Auditoría profunda de tu marca y tu competencia, buyer personas, pilares de contenido y un roadmap de 90 días listo para ejecutar.",
     packages: [
@@ -111,7 +129,7 @@ export const SERVICES: Service[] = [
     note: "El análisis gratis del sitio es la versión corta de este método.",
   },
   {
-    slug: "branding", num: "04", cat: "Brand", title: "Branding e", titleEm: "identidad",
+    slug: "branding", num: "04", grupo: "growth", cat: "Brand", title: "Branding e", titleEm: "identidad",
     description:
       "El universo visual de tu marca: cómo se ve, cómo suena y cómo se siente. Construimos el sistema para que todo tu contenido se vea de la misma familia, no como piezas sueltas.",
     packages: [
@@ -128,7 +146,7 @@ export const SERVICES: Service[] = [
     note: "Se puede abonar al primer mes si contratas un paquete de redes.",
   },
   {
-    slug: "redes", num: "05", cat: "Mensual · Insignia", title: "Paquetes de", titleEm: "redes",
+    slug: "redes", num: "02", grupo: "growth", cat: "Mensual · Insignia", title: "Paquetes de", titleEm: "redes",
     description:
       "Manejo integral de tus redes: estrategia, producción y campañas. Lo construimos con la data de tu marca y la data que ya hemos creado en tu nicho — no publicamos por publicar.",
     packages: [
@@ -145,7 +163,7 @@ export const SERVICES: Service[] = [
     note: "Mínimo 3 meses · pauta publicitaria aparte (desde $800.000/mes recomendado).",
   },
   {
-    slug: "reels", num: "06", cat: "À la carte", title: "Reels", titleEm: "sueltos",
+    slug: "reels", num: "06", grupo: "produccion", cat: "À la carte", title: "Reels", titleEm: "sueltos",
     description:
       "Piezas puntuales para una necesidad específica. Si publicas constante, el paquete mensual de redes te rinde mucho más por lo que incluye.",
     packages: [
@@ -158,7 +176,7 @@ export const SERVICES: Service[] = [
     note: "À la carte · para el flujo mensual, mira Paquetes de redes.",
   },
   {
-    slug: "eventos", num: "07", cat: "Eventos", title: "Cobertura de", titleEm: "eventos",
+    slug: "eventos", num: "04", grupo: "produccion", cat: "Eventos", title: "Cobertura de", titleEm: "eventos",
     description: "Fotografía + Reel highlight con entrega el mismo día. Conciertos, lanzamientos y corporativos.",
     packages: [
       { name: "Hasta 3 horas", price: "$1.000.000" },
@@ -170,7 +188,7 @@ export const SERVICES: Service[] = [
     note: "Ideal para prensa, giras y activaciones de marca.",
   },
   {
-    slug: "comercial", num: "08", cat: "Campaña", title: "Mini", titleEm: "comercial",
+    slug: "comercial", num: "02", grupo: "produccion", cat: "Campaña", title: "Mini", titleEm: "comercial",
     description: "Para lanzamientos de producto, marca y campañas digitales. Narrativa completa, hasta 90 segundos.",
     packages: [
       { name: "Básico", price: "$1.700.000" },
@@ -181,7 +199,7 @@ export const SERVICES: Service[] = [
     note: "Cuando el lanzamiento merece una pieza con historia.",
   },
   {
-    slug: "corporativo", num: "09", cat: "Empresa", title: "Video", titleEm: "corporativo",
+    slug: "corporativo", num: "03", grupo: "produccion", cat: "Empresa", title: "Video", titleEm: "corporativo",
     description: "Institucional, testimoniales, capacitación y presentación de marca. Producción completa para empresas.",
     packages: [
       { name: "Corto (2–3 min)", price: "$2.800.000" },
@@ -192,7 +210,7 @@ export const SERVICES: Service[] = [
     note: "Para empresas que quieren verse a la altura de lo que hacen.",
   },
   {
-    slug: "producto", num: "10", cat: "Producto", title: "Video de", titleEm: "producto",
+    slug: "producto", num: "05", grupo: "produccion", cat: "Producto", title: "Video de", titleEm: "producto",
     description: "Para e-commerce, redes y publicidad. Muestra el producto de forma que vende.",
     packages: [
       { name: "1 producto", price: "$550.000" },
@@ -203,7 +221,7 @@ export const SERVICES: Service[] = [
     note: "El detalle que hace que un producto se vea deseable.",
   },
   {
-    slug: "videoclip", num: "11", cat: "Música", title: "Video", titleEm: "clip",
+    slug: "videoclip", num: "01", grupo: "produccion", cat: "Música", title: "Video", titleEm: "clip",
     description: "Concepto, locación, dirección y colorización. Para artistas que van al siguiente nivel.",
     packages: [
       { name: "Básico (1 locación)", price: "$3.000.000" },

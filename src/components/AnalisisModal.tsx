@@ -4,10 +4,13 @@ import { useEffect, useState } from "react";
 import LeadForm from "./LeadForm";
 import { ANALISIS_EVENT } from "@/lib/ui";
 
-const SHOWN_KEY = "bushido_modal_shown_v2";
+// v3: guarda la FECHA en que se mostró (antes guardaba "1" y no volvía a salir nunca).
+const SHOWN_KEY = "bushido_modal_shown_v3";
+// Si el visitante ya lo vio, vuelve a aparecer pasados estos días.
+const REAPARECE_DIAS = 3;
 // Segundos antes de que el pop-up aparezca solo (una vez por visitante).
 // Súbelo/bájalo aquí a gusto.
-const AUTO_OPEN_MS = 2500;
+const AUTO_OPEN_MS = 900;
 
 export default function AnalisisModal() {
   const [open, setOpen] = useState(false);
@@ -23,7 +26,11 @@ export default function AnalisisModal() {
     // auto-abre una sola vez, a los 14s
     let auto = true;
     try {
-      auto = !localStorage.getItem(SHOWN_KEY);
+      const visto = localStorage.getItem(SHOWN_KEY);
+      if (visto) {
+        const dias = (Date.now() - Number(visto)) / 86_400_000;
+        auto = !Number.isFinite(dias) || dias >= REAPARECE_DIAS;
+      }
     } catch {}
     const t = auto
       ? window.setTimeout(() => {
@@ -42,7 +49,7 @@ export default function AnalisisModal() {
     document.body.classList.toggle("modal-open", open);
     if (open) {
       try {
-        localStorage.setItem(SHOWN_KEY, "1");
+        localStorage.setItem(SHOWN_KEY, String(Date.now()));
       } catch {}
     }
   }, [open]);
