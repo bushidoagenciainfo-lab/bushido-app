@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { listLeads, listAnalisis, dashboardStats } from "@/lib/admin";
+import { listCreadores } from "@/lib/creadores";
 import AdminLeads from "@/components/admin/AdminLeads";
+import AdminCreadores, { type CreadorLite } from "@/components/admin/AdminCreadores";
 import AdminLogout from "@/components/admin/AdminLogout";
 
 export const metadata: Metadata = {
@@ -32,11 +34,13 @@ export default async function AdminPage() {
   let stats = null;
   let leads: Awaited<ReturnType<typeof listLeads>> = [];
   let analisis: Array<Record<string, unknown>> = [];
+  let creadores: CreadorLite[] = [];
   try {
-    [stats, leads, analisis] = await Promise.all([
+    [stats, leads, analisis, creadores] = await Promise.all([
       dashboardStats(),
       listLeads(100),
       listAnalisis(50),
+      listCreadores({ limit: 300 }) as Promise<CreadorLite[]>,
     ]);
   } catch (e) {
     error = e instanceof Error ? e.message : "Error cargando datos.";
@@ -98,6 +102,15 @@ export default async function AdminPage() {
           </div>
         </section>
       )}
+
+      <section className="admin-section">
+        <div className="admin-sec-head">
+          <h2>Book de creadores</h2>
+          <span className="admin-sec-count">{creadores.length}</span>
+          <span className="admin-sec-hint">Privado · para armar castings por nicho</span>
+        </div>
+        <AdminCreadores creadores={creadores} />
+      </section>
 
       <section className="admin-section">
         <div className="admin-sec-head">

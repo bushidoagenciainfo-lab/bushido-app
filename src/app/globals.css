@@ -2383,6 +2383,18 @@ body.has-cursor .cursor-dot, body.has-cursor .cursor-ring, body.has-cursor .curs
 .canal-badge.est-ausente   { color: var(--sepp); background: rgba(213,50,46,.1); }
 .canal-badge.est-confirmar { color: var(--bone-dim); border-style: dashed; }
 .canal-badge.est-activo    { color: #6FBF8E; }
+
+/* ── chips seleccionables (book de creadores) ── */
+.chip-group { display: flex; flex-wrap: wrap; gap: 7px; }
+.chip {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .04em;
+  color: var(--bone-dim); background: transparent;
+  border: 1px solid var(--hairline); border-radius: 999px;
+  padding: 8px 13px; cursor: pointer;
+  transition: color .2s var(--e-out), border-color .2s var(--e-out), background .2s var(--e-out);
+}
+.chip:hover { color: var(--bone); border-color: var(--bone-ghost); }
+.chip.on { color: var(--bone); background: var(--sepp); border-color: var(--sepp); }
 .canal-nota { font-size: 13.5px; line-height: 1.55; color: var(--bone-dim); }
 .canal-rec { font-size: 13.5px; line-height: 1.55; color: var(--bone); padding-top: 10px; border-top: 1px dashed var(--hairline); }
 .canal-rec span { display: inline-block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--sepp); margin-right: 6px; }
@@ -2616,6 +2628,39 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 .admin-sec-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
 .admin-sec-head h2 { font-family: var(--serif); font-size: clamp(22px,2.6vw,28px); color: var(--bone); font-weight: 400; }
 .admin-sec-count { font-family: var(--mono); font-size: 11px; color: var(--sepp); border: 1px solid var(--hairline); border-radius: 999px; padding: 3px 10px; }
+.admin-sec-hint { font-family: var(--mono); font-size: 10px; color: var(--bone-ghost); letter-spacing: .06em; }
+
+/* ── Book de creadores (admin) ── */
+.book-filtros { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
+.book-filtros input, .book-filtros select {
+  font-family: var(--mono); font-size: 11.5px; color: var(--bone);
+  background: var(--ink-2); border: 1px solid var(--hairline); border-radius: 8px; padding: 9px 12px;
+}
+.book-filtros input:focus, .book-filtros select:focus { outline: none; border-color: var(--sepp); }
+.book-search { min-width: 220px; flex: 1; }
+.book-count { font-family: var(--mono); font-size: 11px; color: var(--sepp); border: 1px solid var(--hairline); border-radius: 999px; padding: 5px 11px; margin-left: auto; }
+.book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.book-card { border: 1px solid var(--hairline); border-radius: 10px; background: var(--ink-2); padding: 16px 18px; display: flex; flex-direction: column; gap: 9px; }
+.book-card.e-destacado { border-color: rgba(201,162,74,.5); }
+.book-card.e-aprobado  { border-color: rgba(111,191,142,.4); }
+.book-card.e-pausado   { opacity: .55; }
+.bc-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.bc-top strong { color: var(--bone); font-size: 14.5px; }
+.bc-city { font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--bone-ghost); }
+.bc-social { display: flex; flex-wrap: wrap; gap: 8px; }
+.bc-social a { font-family: var(--mono); font-size: 10.5px; color: var(--bone-dim); border-bottom: 1px solid var(--hairline); }
+.bc-social a:hover { color: var(--sepp); border-color: var(--sepp); }
+.bc-wa { font-family: var(--mono); font-size: 10.5px; color: #6FBF8E; }
+.bc-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.bc-tag { font-family: var(--mono); font-size: 9px; letter-spacing: .06em; border-radius: 999px; padding: 3px 8px; border: 1px solid currentColor; }
+.bc-tag.n { color: var(--gold); }
+.bc-tag.f { color: var(--bone-dim); }
+.bc-notas { font-size: 11.5px; line-height: 1.45; color: var(--bone-dim); }
+.bc-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: auto; padding-top: 6px; }
+.bc-seg { font-family: var(--mono); font-size: 10px; color: var(--bone-ghost); }
+.bc-estado { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--bone); background: var(--ink); border: 1px solid var(--hairline); border-radius: 7px; padding: 5px 8px; margin-left: auto; cursor: pointer; }
+.bc-estado.s-destacado { color: var(--gold); border-color: var(--gold); }
+.bc-estado.s-aprobado  { color: #6FBF8E; border-color: #6FBF8E; }
 
 /* leads */
 .admin-leads { display: flex; flex-direction: column; gap: 10px; }

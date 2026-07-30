@@ -20,6 +20,10 @@ export const PORTFOLIO: PortfolioItem[] = [
   { file: "black", cat: "eventos", label: "Cobertura", title: "Black", client: "Evento", badge: "Evento" },
   { file: "blink", cat: "eventos", label: "Cobertura", title: "Blink", client: "Evento", badge: "Evento" },
   { file: "adidas-samba", cat: "moda", label: "Campaña", title: "Adidas Samba", client: "Día de Muertos", badge: "Moda", featured: true },
+  { file: "adidas-neighborhood", cat: "moda", label: "Campaña", title: "Adidas Neighborhood", client: "Adidas Originals", badge: "Moda" },
+  { file: "adidas-outfit", cat: "moda", label: "Editorial", title: "Adidas Outfit", client: "Adidas", badge: "Moda" },
+  { file: "adidas-sl-bob", cat: "moda", label: "Campaña", title: "Adidas SL", client: "Adidas Running", badge: "Moda" },
+  { file: "nike-dn", cat: "moda", label: "Sneaker", title: "Nike DN", client: "Nike Sportswear", badge: "Producto" },
   { file: "nike-procity", cat: "moda", label: "Sneaker", title: "Nike Dunk ProCity", client: "Nike SB", badge: "Producto", featured: true },
   { file: "new-era", cat: "moda", label: "Editorial", title: "New Era", client: "Lookbook", badge: "Moda" },
   { file: "airforce", cat: "moda", label: "Sneaker", title: "Nike Air Force 1", client: "Producto", badge: "Producto" },
@@ -56,7 +60,75 @@ export interface Service {
 
 export const SERVICES: Service[] = [
   {
-    slug: "redes", num: "01", cat: "Mensual · Insignia", title: "Paquetes de", titleEm: "redes",
+    slug: "ugc", num: "01", cat: "Creators · Data-driven", title: "UGC con", titleEm: "data",
+    description:
+      "Contenido de creador que no se elige por tendencia: elegimos al creator y el ángulo con data de tu nicho, y medimos el resultado. Casting curado de nuestro book, producción con dirección de arte y reporte de performance.",
+    packages: [
+      { name: "Starter · 4 piezas", price: "$1.600.000" },
+      { name: "Growth · 8 piezas", price: "$2.900.000", featured: true },
+      { name: "Always-on · 12+ /mes", price: "Desde $4.200.000" },
+    ],
+    benefits: [
+      "Casting por nicho y buyer persona, no por seguidores",
+      "Briefing y ángulos definidos con data (método Kansei)",
+      "Derechos de uso para pauta (whitelisting) incluidos",
+      "Reporte de performance por pieza: qué ángulo ganó y por qué",
+    ],
+    note: "Ideal para testear mensajes antes de invertir fuerte en pauta.",
+  },
+  {
+    slug: "pauta", num: "02", cat: "Performance", title: "Pauta y", titleEm: "amplificación",
+    description:
+      "Tu mejor contenido no sirve si nadie lo ve. Gestionamos Meta, TikTok y Google Ads con la data que ya construimos de tu marca y tu nicho: segmentación, testeo de creativos y optimización semanal.",
+    packages: [
+      { name: "Fee gestión · /mes", price: "$1.200.000" },
+      { name: "Performance · /mes", price: "$1.900.000", featured: true },
+      { name: "Full-funnel · /mes", price: "Desde $2.800.000" },
+    ],
+    benefits: [
+      "Setup de campañas, públicos y píxel/eventos",
+      "Testeo A/B de creativos (qué hook y qué emoción convierte)",
+      "Optimización semanal + reporte con CPA, ROAS y aprendizajes",
+      "Remarketing y embudo completo en planes superiores",
+    ],
+    note: "El fee es la gestión; la inversión publicitaria va aparte y es tuya.",
+  },
+  {
+    slug: "estrategia", num: "03", cat: "Strategy · Kansei", title: "Estrategia", titleEm: "Kansei",
+    description:
+      "Nuestro método propio para decodificar qué te compran y qué emociones lo mueven. Auditoría profunda de tu marca y tu competencia, buyer personas, pilares de contenido y un roadmap de 90 días listo para ejecutar.",
+    packages: [
+      { name: "Auditoría express", price: "$900.000" },
+      { name: "Estrategia 90 días", price: "$2.400.000", featured: true },
+      { name: "Estrategia + acompañamiento", price: "Desde $3.500.000" },
+    ],
+    benefits: [
+      "Investigación real de marca, nicho y competencia",
+      "Buyer personas con jobs-to-be-done y drivers de compra",
+      "Pilares de contenido y calendario editorial por funnel",
+      "KPIs y tablero de medición para saber si funciona",
+    ],
+    note: "El análisis gratis del sitio es la versión corta de este método.",
+  },
+  {
+    slug: "branding", num: "04", cat: "Brand", title: "Branding e", titleEm: "identidad",
+    description:
+      "El universo visual de tu marca: cómo se ve, cómo suena y cómo se siente. Construimos el sistema para que todo tu contenido se vea de la misma familia, no como piezas sueltas.",
+    packages: [
+      { name: "Identidad esencial", price: "$1.800.000" },
+      { name: "Sistema de marca", price: "$3.400.000", featured: true },
+      { name: "Rebrand completo", price: "Desde $5.500.000" },
+    ],
+    benefits: [
+      "Logo, paleta, tipografías y usos correctos",
+      "Dirección de arte y guía de estilo para redes",
+      "Tono de voz y mensajes clave de la marca",
+      "Plantillas editables para tu equipo",
+    ],
+    note: "Se puede abonar al primer mes si contratas un paquete de redes.",
+  },
+  {
+    slug: "redes", num: "05", cat: "Mensual · Insignia", title: "Paquetes de", titleEm: "redes",
     description:
       "Manejo integral de tus redes: estrategia, producción y campañas. Lo construimos con la data de tu marca y la data que ya hemos creado en tu nicho — no publicamos por publicar.",
     packages: [
@@ -73,7 +145,7 @@ export const SERVICES: Service[] = [
     note: "Mínimo 3 meses · pauta publicitaria aparte (desde $800.000/mes recomendado).",
   },
   {
-    slug: "reels", num: "02", cat: "À la carte", title: "Reels", titleEm: "sueltos",
+    slug: "reels", num: "06", cat: "À la carte", title: "Reels", titleEm: "sueltos",
     description:
       "Piezas puntuales para una necesidad específica. Si publicas constante, el paquete mensual de redes te rinde mucho más por lo que incluye.",
     packages: [
@@ -86,7 +158,7 @@ export const SERVICES: Service[] = [
     note: "À la carte · para el flujo mensual, mira Paquetes de redes.",
   },
   {
-    slug: "eventos", num: "03", cat: "Eventos", title: "Cobertura de", titleEm: "eventos",
+    slug: "eventos", num: "07", cat: "Eventos", title: "Cobertura de", titleEm: "eventos",
     description: "Fotografía + Reel highlight con entrega el mismo día. Conciertos, lanzamientos y corporativos.",
     packages: [
       { name: "Hasta 3 horas", price: "$1.000.000" },
@@ -98,7 +170,7 @@ export const SERVICES: Service[] = [
     note: "Ideal para prensa, giras y activaciones de marca.",
   },
   {
-    slug: "comercial", num: "04", cat: "Campaña", title: "Mini", titleEm: "comercial",
+    slug: "comercial", num: "08", cat: "Campaña", title: "Mini", titleEm: "comercial",
     description: "Para lanzamientos de producto, marca y campañas digitales. Narrativa completa, hasta 90 segundos.",
     packages: [
       { name: "Básico", price: "$1.700.000" },
@@ -109,7 +181,7 @@ export const SERVICES: Service[] = [
     note: "Cuando el lanzamiento merece una pieza con historia.",
   },
   {
-    slug: "corporativo", num: "05", cat: "Empresa", title: "Video", titleEm: "corporativo",
+    slug: "corporativo", num: "09", cat: "Empresa", title: "Video", titleEm: "corporativo",
     description: "Institucional, testimoniales, capacitación y presentación de marca. Producción completa para empresas.",
     packages: [
       { name: "Corto (2–3 min)", price: "$2.800.000" },
@@ -120,7 +192,7 @@ export const SERVICES: Service[] = [
     note: "Para empresas que quieren verse a la altura de lo que hacen.",
   },
   {
-    slug: "producto", num: "06", cat: "Producto", title: "Video de", titleEm: "producto",
+    slug: "producto", num: "10", cat: "Producto", title: "Video de", titleEm: "producto",
     description: "Para e-commerce, redes y publicidad. Muestra el producto de forma que vende.",
     packages: [
       { name: "1 producto", price: "$550.000" },
@@ -131,7 +203,7 @@ export const SERVICES: Service[] = [
     note: "El detalle que hace que un producto se vea deseable.",
   },
   {
-    slug: "videoclip", num: "07", cat: "Música", title: "Video", titleEm: "clip",
+    slug: "videoclip", num: "11", cat: "Música", title: "Video", titleEm: "clip",
     description: "Concepto, locación, dirección y colorización. Para artistas que van al siguiente nivel.",
     packages: [
       { name: "Básico (1 locación)", price: "$3.000.000" },
