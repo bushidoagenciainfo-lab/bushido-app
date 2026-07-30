@@ -35,6 +35,25 @@ export default function Hero() {
             Ver el portafolio <span className="arrow">→</span>
           </Link>
         </div>
+
+        {/* Prueba social: números reales de una sola pieza orgánica */}
+        <div className="hero-proof liquid-glass">
+          <div className="proof-item">
+            <span className="proof-n">43,4M</span>
+            <span className="proof-l">vistas orgánicas</span>
+          </div>
+          <span className="proof-sep" aria-hidden="true" />
+          <div className="proof-item">
+            <span className="proof-n">2,7M</span>
+            <span className="proof-l">cuentas alcanzadas</span>
+          </div>
+          <span className="proof-sep" aria-hidden="true" />
+          <div className="proof-item">
+            <span className="proof-n">1,7M</span>
+            <span className="proof-l">me gusta</span>
+          </div>
+          <span className="proof-note">con una sola pieza · sin pauta</span>
+        </div>
       </div>
 
       <div className="scrollcue" aria-hidden="true">

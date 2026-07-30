@@ -20,6 +20,49 @@ export interface CreadorLite {
 
 const ESTADOS = ["nuevo", "aprobado", "destacado", "pausado"];
 
+/** Book vacío: botón para cargar la base inicial de creadores de un clic. */
+function ImportarBase() {
+  const [estado, setEstado] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [msg, setMsg] = useState("");
+
+  async function importar() {
+    setEstado("loading");
+    try {
+      const res = await fetch("/api/admin/importar-creadores", { method: "POST" });
+      const d = await res.json();
+      if (d.ok || d.importados) {
+        setMsg(`${d.importados} creadores importados${d.yaEstaban ? ` · ${d.yaEstaban} ya estaban` : ""}.`);
+        setEstado("done");
+        setTimeout(() => window.location.reload(), 900);
+      } else {
+        setMsg(d.error || "No se pudo importar.");
+        setEstado("error");
+      }
+    } catch {
+      setMsg("Error de red.");
+      setEstado("error");
+    }
+  }
+
+  return (
+    <div className="book-empty">
+      <p className="admin-empty">
+        El book está vacío. Puedes cargar la base inicial (Cúcuta) o compartir{" "}
+        <a href="/gremio#creadores" target="_blank" rel="noopener noreferrer">/gremio#creadores</a>{" "}
+        para que se registren solos.
+      </p>
+      <button type="button" className="al-gen" onClick={importar} disabled={estado === "loading"}>
+        {estado === "loading" ? "Importando…" : "Cargar base inicial"}
+      </button>
+      {msg && (
+        <p className={estado === "error" ? "al-err" : "admin-empty"} style={{ marginTop: 8 }}>
+          {msg}
+        </p>
+      )}
+    </div>
+  );
+}
+
 /** Book de creadores en el panel: filtra por ciudad, nicho y formato para armar castings. */
 export default function AdminCreadores({ creadores }: { creadores: CreadorLite[] }) {
   const [rows, setRows] = useState(creadores);
@@ -54,7 +97,7 @@ export default function AdminCreadores({ creadores }: { creadores: CreadorLite[]
   }
 
   if (!creadores.length) {
-    return <p className="admin-empty">El book está vacío. Importa creadores o comparte /gremio#creadores.</p>;
+    return <ImportarBase />;
   }
 
   return (

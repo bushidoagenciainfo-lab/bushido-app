@@ -6,6 +6,8 @@ import { openAnalisis } from "@/lib/ui";
 
 export default function ServiceList() {
   const [active, setActive] = useState<Service | null>(null);
+  // Categoría desplegada. Arranca abierta la primera para que no se vea vacío.
+  const [openCat, setOpenCat] = useState<string | null>(SERVICE_GROUPS[0].key);
   const open = active !== null;
 
   useEffect(() => {
@@ -19,38 +21,61 @@ export default function ServiceList() {
 
   return (
     <>
-      {SERVICE_GROUPS.map((g) => {
-        const items = SERVICES.filter((s) => s.grupo === g.key).sort((a, b) =>
-          a.num.localeCompare(b.num)
-        );
-        if (!items.length) return null;
-        return (
-          <div className="svc-group" key={g.key}>
-            <div className="svc-group-head">
-              <h2>{g.label}</h2>
-              <span>{g.hint}</span>
-            </div>
-            <div className="services-tiles">
-              {items.map((s) => (
-                <button key={s.slug} type="button" className="svc-tile" onClick={() => setActive(s)}>
-                  <div className="num">
-                    {s.num} / {s.cat}
-                  </div>
-                  <h3>
-                    {s.title} <em>{s.titleEm}</em>
-                  </h3>
-                  <div className="from">
-                    Desde <b>{s.packages[0].price}</b>
-                  </div>
-                  <span className="go">
-                    Ver paquetes <span aria-hidden="true">→</span>
+      <div className="svc-cats">
+        {SERVICE_GROUPS.map((g) => {
+          const items = SERVICES.filter((s) => s.grupo === g.key).sort((a, b) =>
+            a.num.localeCompare(b.num)
+          );
+          if (!items.length) return null;
+          const abierta = openCat === g.key;
+          const desde = items
+            .map((s) => s.packages[0].price)
+            .sort((a, b) => Number(a.replace(/\D/g, "")) - Number(b.replace(/\D/g, "")))[0];
+          return (
+            <div className={"svc-cat" + (abierta ? " open" : "")} key={g.key}>
+              <button
+                type="button"
+                className="svc-cat-head"
+                onClick={() => setOpenCat(abierta ? null : g.key)}
+                aria-expanded={abierta}
+              >
+                <div className="scc-text">
+                  <h2>{g.label}</h2>
+                  <span>{g.hint}</span>
+                </div>
+                <div className="scc-right">
+                  <span className="scc-count">{items.length} servicios</span>
+                  <span className="scc-from">desde {desde}</span>
+                  <span className="scc-toggle" aria-hidden="true">
+                    {abierta ? "−" : "+"}
                   </span>
-                </button>
-              ))}
+                </div>
+              </button>
+
+              {abierta && (
+                <div className="services-tiles">
+                  {items.map((s) => (
+                    <button key={s.slug} type="button" className="svc-tile" onClick={() => setActive(s)}>
+                      <div className="num">
+                        {s.num} / {s.cat}
+                      </div>
+                      <h3>
+                        {s.title} <em>{s.titleEm}</em>
+                      </h3>
+                      <div className="from">
+                        Desde <b>{s.packages[0].price}</b>
+                      </div>
+                      <span className="go">
+                        Ver paquetes <span aria-hidden="true">→</span>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
 
       <div
         className={"drawer-backdrop" + (open ? " open" : "")}

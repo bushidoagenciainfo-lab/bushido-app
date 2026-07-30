@@ -1,6 +1,12 @@
 // Datos del sitio Bushido (fuente única mientras montamos el CMS en Fase 3).
 
-export type PortfolioCat = "eventos" | "moda" | "contenido";
+export type PortfolioCat =
+  | "conciertos"
+  | "eventos"
+  | "moda"
+  | "contenido"
+  | "podcast"
+  | "videoclip";
 
 export interface PortfolioItem {
   file: string; // en /public/portafolio
@@ -10,44 +16,60 @@ export interface PortfolioItem {
   client: string;
   badge: string;
   featured?: boolean;
+  link?: string; // reel real de la pieza (Instagram) — los links salen de contenido_aud/*.txt
 }
 
 export const PORTFOLIO: PortfolioItem[] = [
-  { file: "ferxxo", cat: "eventos", label: "En vivo", title: "Ferxxo", client: "Feid · gira", badge: "Concierto", featured: true },
-  { file: "jbalvin", cat: "eventos", label: "En vivo", title: "J Balvin", client: "Bogotá", badge: "Concierto", featured: true },
-  { file: "blessd", cat: "eventos", label: "En vivo", title: "Blessd", client: "Si Supieras Tour", badge: "Concierto", featured: true },
-  { file: "arcangel", cat: "eventos", label: "En vivo", title: "Arcángel", client: "Show en vivo", badge: "Concierto", featured: true },
-  { file: "sam-smith", cat: "eventos", label: "En vivo", title: "Sam Smith", client: "Tour internacional", badge: "Concierto" },
-  { file: "juniorh", cat: "eventos", label: "En vivo", title: "Junior H", client: "Show en vivo", badge: "Concierto" },
-  { file: "black-coffee", cat: "eventos", label: "En vivo", title: "Black Coffee", client: "Set en vivo", badge: "Concierto" },
-  { file: "ken-y", cat: "eventos", label: "En vivo", title: "Ken-Y", client: "Show en vivo", badge: "Concierto" },
-  { file: "lenny-jquiles", cat: "eventos", label: "En vivo", title: "Lenny Tavárez & J Quiles", client: "Show en vivo", badge: "Concierto" },
-  { file: "luis-alfonso", cat: "eventos", label: "En vivo", title: "Luis Alfonso", client: "Show en vivo", badge: "Concierto" },
-  { file: "kaalvo", cat: "eventos", label: "En vivo", title: "Kaalvo", client: "Show en vivo", badge: "Concierto" },
-  { file: "limp", cat: "eventos", label: "En vivo", title: "LIMP", client: "Festival", badge: "Concierto" },
-  { file: "black", cat: "eventos", label: "Cobertura", title: "Black", client: "Evento", badge: "Evento" },
-  { file: "blink", cat: "eventos", label: "Cobertura", title: "Blink", client: "Evento", badge: "Evento" },
-  { file: "adidas-samba", cat: "moda", label: "Campaña", title: "Adidas Samba", client: "Día de Muertos", badge: "Moda", featured: true },
+  { file: "ferxxo", cat: "conciertos", label: "En vivo", title: "Ferxxo", client: "Feid · gira", badge: "Concierto", featured: true },
+  { file: "jbalvin", cat: "conciertos", label: "En vivo", title: "J Balvin", client: "Bogotá", badge: "Concierto", featured: true },
+  { file: "blessd", cat: "conciertos", label: "En vivo", title: "Blessd", client: "Si Supieras Tour", badge: "Concierto", featured: true },
+  { file: "arcangel", cat: "conciertos", label: "En vivo", title: "Arcángel", client: "Show en vivo", badge: "Concierto", featured: true },
+  { file: "sam-smith", cat: "conciertos", label: "En vivo", title: "Sam Smith", client: "Tour internacional", badge: "Concierto" },
+  { file: "juniorh", cat: "conciertos", label: "En vivo", title: "Junior H", client: "Show en vivo", badge: "Concierto" },
+  { file: "black-coffee", cat: "conciertos", label: "En vivo", title: "Black Coffee", client: "Set en vivo", badge: "Concierto" },
+  { file: "ken-y", cat: "conciertos", label: "En vivo", title: "Ken-Y", client: "Show en vivo", badge: "Concierto" },
+  { file: "lenny-jquiles", cat: "conciertos", label: "En vivo", title: "Lenny Tavárez & J Quiles", client: "Show en vivo", badge: "Concierto" },
+  { file: "luis-alfonso", cat: "conciertos", label: "En vivo", title: "Luis Alfonso", client: "Show en vivo", badge: "Concierto" },
+  { file: "kaalvo", cat: "conciertos", label: "En vivo", title: "Kaalvo", client: "Show en vivo", badge: "Concierto" },
+  { file: "limp", cat: "conciertos", label: "En vivo", title: "LIMP", client: "Festival", badge: "Concierto" },
+  { file: "black", cat: "conciertos", label: "Cobertura", title: "Black", client: "Evento", badge: "Evento" },
+  { file: "blink", cat: "conciertos", label: "Cobertura", title: "Blink", client: "Evento", badge: "Evento" },
+  { file: "adidas-samba", cat: "moda", label: "Campaña", title: "Adidas Samba", client: "Día de Muertos", badge: "Moda", featured: true, link: "https://www.instagram.com/reel/DJ2sIgaMYUl/" },
   { file: "adidas-neighborhood", cat: "moda", label: "Campaña", title: "Adidas Neighborhood", client: "Adidas Originals", badge: "Moda" },
   { file: "adidas-outfit", cat: "moda", label: "Editorial", title: "Adidas Outfit", client: "Adidas", badge: "Moda" },
   { file: "adidas-sl-bob", cat: "moda", label: "Campaña", title: "Adidas SL", client: "Adidas Running", badge: "Moda" },
-  { file: "nike-dn", cat: "moda", label: "Sneaker", title: "Nike DN", client: "Nike Sportswear", badge: "Producto" },
-  { file: "nike-procity", cat: "moda", label: "Sneaker", title: "Nike Dunk ProCity", client: "Nike SB", badge: "Producto", featured: true },
-  { file: "new-era", cat: "moda", label: "Editorial", title: "New Era", client: "Lookbook", badge: "Moda" },
+  { file: "nike-dn", cat: "moda", label: "Sneaker", title: "Nike DN", client: "Nike Sportswear", badge: "Producto", link: "https://www.instagram.com/reel/DJF0vq3s2ke/" },
+  { file: "nike-procity", cat: "moda", label: "Sneaker", title: "Nike Dunk ProCity", client: "Nike SB", badge: "Producto", featured: true, link: "https://www.instagram.com/reel/DBuON3YvBwl/" },
+  { file: "new-era", cat: "moda", label: "Editorial", title: "New Era", client: "Lookbook", badge: "Moda", link: "https://www.instagram.com/reel/DJ7zwTbs6z6/" },
   { file: "airforce", cat: "moda", label: "Sneaker", title: "Nike Air Force 1", client: "Producto", badge: "Producto" },
   { file: "veneno", cat: "moda", label: "Editorial", title: "Veneno", client: "Red Bull", badge: "Moda" },
-  { file: "nike-pegasus", cat: "moda", label: "Sneaker", title: "Nike Pegasus", client: "Nike Running", badge: "Producto" },
+  { file: "nike-pegasus", cat: "moda", label: "Sneaker", title: "Nike Pegasus", client: "Nike Running", badge: "Producto", link: "https://www.instagram.com/reel/DCE4f_vvUx8/" },
   { file: "mindo", cat: "contenido", label: "Creadores", title: "Mindo & SoulBurge", client: "Creadores", badge: "Contenido", featured: true },
   { file: "bianco", cat: "contenido", label: "Gastronomía", title: "Bianco Bake Lab", client: "Reels de marca", badge: "Reels" },
-  { file: "kosher", cat: "contenido", label: "Gastronomía", title: "Esquina Kosher", client: "Reels de marca", badge: "Reels" },
-  { file: "bears-bake", cat: "contenido", label: "Gastronomía", title: "Bears Bakery", client: "Contenido de marca", badge: "Reels" },
+  { file: "kosher", cat: "contenido", label: "Gastronomía", title: "Esquina Kosher", client: "Reels de marca", badge: "Reels", link: "https://www.instagram.com/p/Da3C2IKJohQ/" },
+  { file: "bears-bake", cat: "contenido", label: "Gastronomía", title: "Bears Bakery", client: "Contenido de marca", badge: "Reels", link: "https://www.instagram.com/p/DOJcn1IjYYH/" },
+  // — Eventos y activaciones de marca —
+  { file: "forbes", cat: "eventos", label: "Corporativo", title: "Forbes Colombia", client: "Evento de marca", badge: "Evento", featured: true },
+  { file: "estrellas-aguila", cat: "eventos", label: "Activación", title: "Estrellas Águila", client: "Cerveza Águila", badge: "Evento" },
+  { file: "guacherna", cat: "eventos", label: "Cultural", title: "Guacherna", client: "Barranquilla 2026", badge: "Evento" },
+  { file: "ciudad-primavera", cat: "eventos", label: "Festival", title: "Ciudad Primavera", client: "J Balvin", badge: "Evento" },
+  { file: "fep-backstage", cat: "eventos", label: "Backstage", title: "FEP Backstage", client: "Festival Estéreo Picnic", badge: "Evento" },
+  { file: "melina-ronda", cat: "eventos", label: "Activación", title: "Melina Martínez", client: "Ronda", badge: "Evento" },
+  { file: "mindo-medios", cat: "eventos", label: "Prensa", title: "Mindo", client: "Rueda de medios", badge: "Evento" },
+  // — Podcast —
+  { file: "historias-carceles", cat: "podcast", label: "Podcast", title: "Historias de cárceles", client: "Producción de podcast", badge: "Podcast", featured: true },
+  // — Videoclips —
+  { file: "trucoperro", cat: "videoclip", label: "Videoclip", title: "Truco Perro", client: "Videoclip musical", badge: "Videoclip", featured: true },
 ];
 
 export const PORTFOLIO_FILTERS: { key: "todos" | PortfolioCat; label: string }[] = [
   { key: "todos", label: "Todos" },
+  { key: "conciertos", label: "Conciertos" },
   { key: "eventos", label: "Eventos" },
   { key: "moda", label: "Moda" },
   { key: "contenido", label: "Contenido" },
+  { key: "videoclip", label: "Videoclips" },
+  { key: "podcast", label: "Podcast" },
 ];
 
 export interface ServicePackage {
