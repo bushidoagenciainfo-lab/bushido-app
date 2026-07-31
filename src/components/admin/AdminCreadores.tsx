@@ -135,7 +135,20 @@ export default function AdminCreadores({ creadores }: { creadores: CreadorLite[]
           <div className={"book-card e-" + c.estado} key={c.id}>
             <div className="bc-top">
               <strong>{c.nombre}</strong>
-              {c.ciudad && <span className="bc-city">{c.ciudad}</span>}
+              <div className="bc-quick">
+                {c.seguidores ? (
+                  <span className="bc-seg-badge">
+                    {c.seguidores >= 1000
+                      ? `${(c.seguidores / 1000).toFixed(c.seguidores >= 10000 ? 0 : 1)}K`
+                      : c.seguidores}
+                  </span>
+                ) : null}
+                {c.ciudad && <span className="bc-city">{c.ciudad}</span>}
+              </div>
+            </div>
+            {/* nicho: lo más importante para identificarlo rápido */}
+            <div className="bc-nicho">
+              {c.nichos?.length ? c.nichos.join(" · ") : <em>sin clasificar</em>}
             </div>
             <div className="bc-social">
               {c.instagram && (
@@ -162,19 +175,15 @@ export default function AdminCreadores({ creadores }: { creadores: CreadorLite[]
                 WhatsApp {c.telefono}
               </a>
             )}
-            {(c.nichos?.length || c.formatos?.length) && (
+            {c.formatos?.length ? (
               <div className="bc-tags">
-                {(c.nichos ?? []).map((n) => (
-                  <span key={n} className="bc-tag n">{n}</span>
-                ))}
-                {(c.formatos ?? []).map((f) => (
+                {c.formatos.map((f) => (
                   <span key={f} className="bc-tag f">{f}</span>
                 ))}
               </div>
-            )}
+            ) : null}
             {c.notas && <p className="bc-notas">{c.notas}</p>}
             <div className="bc-foot">
-              {c.seguidores ? <span className="bc-seg">{c.seguidores.toLocaleString("es-CO")} seg.</span> : null}
               {c.tarifa ? <span className="bc-seg">{c.tarifa}</span> : null}
               <select
                 className={"bc-estado s-" + c.estado}

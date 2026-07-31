@@ -4,6 +4,7 @@ import { listCreadores } from "@/lib/creadores";
 import AdminLeads from "@/components/admin/AdminLeads";
 import AdminCreadores, { type CreadorLite } from "@/components/admin/AdminCreadores";
 import AdminLogout from "@/components/admin/AdminLogout";
+import AdminSection from "@/components/admin/AdminSection";
 
 export const metadata: Metadata = {
   title: "Panel · Bushido",
@@ -103,28 +104,15 @@ export default async function AdminPage() {
         </section>
       )}
 
-      <section className="admin-section">
-        <div className="admin-sec-head">
-          <h2>Book de creadores</h2>
-          <span className="admin-sec-count">{creadores.length}</span>
-          <span className="admin-sec-hint">Privado · para armar castings por nicho</span>
-        </div>
+      <AdminSection title="Book de creadores" count={creadores.length} hint="Privado · castings por nicho">
         <AdminCreadores creadores={creadores} />
-      </section>
+      </AdminSection>
 
-      <section className="admin-section">
-        <div className="admin-sec-head">
-          <h2>Leads</h2>
-          <span className="admin-sec-count">{leads.length}</span>
-        </div>
+      <AdminSection title="Leads" count={leads.length} defaultOpen hint="Solicitudes que entraron">
         <AdminLeads leads={leads} />
-      </section>
+      </AdminSection>
 
-      <section className="admin-section">
-        <div className="admin-sec-head">
-          <h2>Análisis generados</h2>
-          <span className="admin-sec-count">{analisis.length}</span>
-        </div>
+      <AdminSection title="Análisis generados" count={analisis.length} hint="Informes Kansei enviados">
         {analisis.length === 0 ? (
           <p className="admin-empty">Aún no hay análisis. Genera uno desde un lead ↑</p>
         ) : (
@@ -145,7 +133,7 @@ export default async function AdminPage() {
             ))}
           </div>
         )}
-      </section>
+      </AdminSection>
     </main>
   );
 }

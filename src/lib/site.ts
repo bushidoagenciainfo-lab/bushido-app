@@ -6,68 +6,86 @@ export type PortfolioCat =
   | "moda"
   | "contenido"
   | "podcast"
-  | "videoclip";
+  | "videoclip"
+  | "cinema";
 
 export interface PortfolioItem {
-  file: string; // en /public/portafolio
+  id: string;               // carpeta en /public/portafolio/g/<id>/
   cat: PortfolioCat;
   label: string;
   title: string;
   client: string;
-  badge: string;
+  fotos: number;            // cuántas fotos tiene la galería (01.jpg…)
   featured?: boolean;
-  link?: string; // reel real de la pieza (Instagram) — los links salen de contenido_aud/*.txt
+  link?: string;            // reel publicado (Instagram), si existe
 }
 
 export const PORTFOLIO: PortfolioItem[] = [
-  { file: "ferxxo", cat: "conciertos", label: "En vivo", title: "Ferxxo", client: "Feid · gira", badge: "Concierto", featured: true },
-  { file: "jbalvin", cat: "conciertos", label: "En vivo", title: "J Balvin", client: "Bogotá", badge: "Concierto", featured: true },
-  { file: "blessd", cat: "conciertos", label: "En vivo", title: "Blessd", client: "Si Supieras Tour", badge: "Concierto", featured: true },
-  { file: "arcangel", cat: "conciertos", label: "En vivo", title: "Arcángel", client: "Show en vivo", badge: "Concierto", featured: true },
-  { file: "sam-smith", cat: "conciertos", label: "En vivo", title: "Sam Smith", client: "Tour internacional", badge: "Concierto" },
-  { file: "juniorh", cat: "conciertos", label: "En vivo", title: "Junior H", client: "Show en vivo", badge: "Concierto" },
-  { file: "black-coffee", cat: "conciertos", label: "En vivo", title: "Black Coffee", client: "Set en vivo", badge: "Concierto" },
-  { file: "ken-y", cat: "conciertos", label: "En vivo", title: "Ken-Y", client: "Show en vivo", badge: "Concierto" },
-  { file: "lenny-jquiles", cat: "conciertos", label: "En vivo", title: "Lenny Tavárez & J Quiles", client: "Show en vivo", badge: "Concierto" },
-  { file: "luis-alfonso", cat: "conciertos", label: "En vivo", title: "Luis Alfonso", client: "Show en vivo", badge: "Concierto" },
-  { file: "kaalvo", cat: "conciertos", label: "En vivo", title: "Kaalvo", client: "Show en vivo", badge: "Concierto" },
-  { file: "limp", cat: "conciertos", label: "En vivo", title: "LIMP", client: "Festival", badge: "Concierto" },
-  { file: "black", cat: "conciertos", label: "Cobertura", title: "Black", client: "Evento", badge: "Evento" },
-  { file: "blink", cat: "conciertos", label: "Cobertura", title: "Blink", client: "Evento", badge: "Evento" },
-  { file: "adidas-samba", cat: "moda", label: "Campaña", title: "Adidas Samba", client: "Día de Muertos", badge: "Moda", featured: true, link: "https://www.instagram.com/reel/DJ2sIgaMYUl/" },
-  { file: "adidas-neighborhood", cat: "moda", label: "Campaña", title: "Adidas Neighborhood", client: "Adidas Originals", badge: "Moda" },
-  { file: "adidas-outfit", cat: "moda", label: "Editorial", title: "Adidas Outfit", client: "Adidas", badge: "Moda" },
-  { file: "adidas-sl-bob", cat: "moda", label: "Campaña", title: "Adidas SL", client: "Adidas Running", badge: "Moda" },
-  { file: "nike-dn", cat: "moda", label: "Sneaker", title: "Nike DN", client: "Nike Sportswear", badge: "Producto", link: "https://www.instagram.com/reel/DJF0vq3s2ke/" },
-  { file: "nike-procity", cat: "moda", label: "Sneaker", title: "Nike Dunk ProCity", client: "Nike SB", badge: "Producto", featured: true, link: "https://www.instagram.com/reel/DBuON3YvBwl/" },
-  { file: "new-era", cat: "moda", label: "Editorial", title: "New Era", client: "Lookbook", badge: "Moda", link: "https://www.instagram.com/reel/DJ7zwTbs6z6/" },
-  { file: "airforce", cat: "moda", label: "Sneaker", title: "Nike Air Force 1", client: "Producto", badge: "Producto" },
-  { file: "veneno", cat: "moda", label: "Editorial", title: "Veneno", client: "Red Bull", badge: "Moda" },
-  { file: "nike-pegasus", cat: "moda", label: "Sneaker", title: "Nike Pegasus", client: "Nike Running", badge: "Producto", link: "https://www.instagram.com/reel/DCE4f_vvUx8/" },
-  { file: "mindo", cat: "contenido", label: "Creadores", title: "Mindo & SoulBurge", client: "Creadores", badge: "Contenido", featured: true },
-  { file: "bianco", cat: "contenido", label: "Gastronomía", title: "Bianco Bake Lab", client: "Reels de marca", badge: "Reels" },
-  { file: "kosher", cat: "contenido", label: "Gastronomía", title: "Esquina Kosher", client: "Reels de marca", badge: "Reels", link: "https://www.instagram.com/p/Da3C2IKJohQ/" },
-  { file: "bears-bake", cat: "contenido", label: "Gastronomía", title: "Bears Bakery", client: "Contenido de marca", badge: "Reels", link: "https://www.instagram.com/p/DOJcn1IjYYH/" },
-  // — Eventos y activaciones de marca —
-  { file: "forbes", cat: "eventos", label: "Corporativo", title: "Forbes Colombia", client: "Evento de marca", badge: "Evento", featured: true },
-  { file: "estrellas-aguila", cat: "eventos", label: "Activación", title: "Estrellas Águila", client: "Cerveza Águila", badge: "Evento" },
-  { file: "guacherna", cat: "eventos", label: "Cultural", title: "Guacherna", client: "Barranquilla 2026", badge: "Evento" },
-  { file: "ciudad-primavera", cat: "eventos", label: "Festival", title: "Ciudad Primavera", client: "J Balvin", badge: "Evento" },
-  { file: "fep-backstage", cat: "eventos", label: "Backstage", title: "FEP Backstage", client: "Festival Estéreo Picnic", badge: "Evento" },
-  { file: "melina-ronda", cat: "eventos", label: "Activación", title: "Melina Martínez", client: "Ronda", badge: "Evento" },
-  { file: "mindo-medios", cat: "eventos", label: "Prensa", title: "Mindo", client: "Rueda de medios", badge: "Evento" },
-  // — Podcast —
-  { file: "historias-carceles", cat: "podcast", label: "Podcast", title: "Historias de cárceles", client: "Producción de podcast", badge: "Podcast", featured: true },
-  // — Videoclips —
-  { file: "trucoperro", cat: "videoclip", label: "Videoclip", title: "Truco Perro", client: "Videoclip musical", badge: "Videoclip", featured: true },
+  { id: "arcangel", cat: "conciertos", label: "En vivo", title: "Arcángel", client: "Show en vivo", fotos: 8, featured: true },
+  { id: "blessd", cat: "conciertos", label: "En vivo", title: "Blessd", client: "Si Supieras Tour", fotos: 8, featured: true },
+  { id: "blink-182", cat: "conciertos", label: "En vivo", title: "Blink-182", client: "Festival", fotos: 8, featured: true },
+  { id: "ferxxo", cat: "conciertos", label: "En vivo", title: "Ferxxo", client: "Feid · gira", fotos: 8, featured: true },
+  { id: "j-balvin-bogota", cat: "conciertos", label: "En vivo", title: "J Balvin", client: "Bogotá", fotos: 8, featured: true },
+  { id: "black-coffee", cat: "conciertos", label: "En vivo", title: "Black Coffee", client: "Set en vivo", fotos: 8 },
+  { id: "franco-el-gorilla", cat: "conciertos", label: "En vivo", title: "Franco El Gorila", client: "Show en vivo", fotos: 8 },
+  { id: "juniorh", cat: "conciertos", label: "En vivo", title: "Junior H", client: "Show en vivo", fotos: 8 },
+  { id: "kaalvo", cat: "conciertos", label: "En vivo", title: "Kaalvo", client: "Show en vivo", fotos: 8 },
+  { id: "keny-y", cat: "conciertos", label: "En vivo", title: "Ken-Y", client: "Show en vivo", fotos: 8 },
+  { id: "lenny-tavarez-j-quiles", cat: "conciertos", label: "En vivo", title: "Lenny Tavárez & J Quiles", client: "Show en vivo", fotos: 7 },
+  { id: "limp-bizkit", cat: "conciertos", label: "En vivo", title: "Limp Bizkit", client: "Festival", fotos: 8 },
+  { id: "luis-alfonso", cat: "conciertos", label: "En vivo", title: "Luis Alfonso", client: "Show en vivo", fotos: 8 },
+  { id: "sam-smith", cat: "conciertos", label: "En vivo", title: "Sam Smith", client: "Tour internacional", fotos: 8 },
+  { id: "yomo", cat: "conciertos", label: "En vivo", title: "Yomo", client: "Show en vivo", fotos: 8 },
+  { id: "adidas-samba-diadelosmuertos", cat: "moda", label: "Campaña", title: "Adidas Samba", client: "Día de Muertos", fotos: 8, featured: true, link: "https://www.instagram.com/reel/DJ2sIgaMYUl/" },
+  { id: "jordan-1-retro-high-og-unc-reimagined", cat: "moda", label: "Drop", title: "Air Jordan 1 UNC", client: "Reimagined", fotos: 8, featured: true, link: "https://www.instagram.com/reel/DJp_q5BMpRO/" },
+  { id: "nike-procity", cat: "moda", label: "Drop", title: "Nike Dunk ProCity", client: "Nike SB", fotos: 8, featured: true, link: "https://www.instagram.com/reel/DBuON3YvBwl/" },
+  { id: "real-madrid-adidas", cat: "moda", label: "Campaña", title: "Real Madrid × Adidas", client: "Adidas Football", fotos: 6, featured: true },
+  { id: "wales-bonner-x-adidas-ss25", cat: "moda", label: "Campaña", title: "Wales Bonner × Adidas", client: "SS25", fotos: 8, featured: true },
+  { id: "adidas-adizero-aruku", cat: "moda", label: "Drop", title: "Adidas Adizero Aruku", client: "Adidas", fotos: 8 },
+  { id: "adidas-megarider-01", cat: "moda", label: "Drop", title: "Adidas Megaride", client: "Adidas", fotos: 6 },
+  { id: "adidas-neighborhood", cat: "moda", label: "Campaña", title: "Adidas Neighborhood", client: "Adidas Originals", fotos: 8 },
+  { id: "adidas-outfit", cat: "moda", label: "Editorial", title: "Adidas Outfit", client: "Adidas", fotos: 8 },
+  { id: "adidas-sl-bob", cat: "moda", label: "Campaña", title: "Adidas SL", client: "Adidas Running", fotos: 8 },
+  { id: "air-jordan-1-retro-high-og-unc-reimagined", cat: "moda", label: "Drop", title: "Air Jordan 1 UNC", client: "Retro High OG", fotos: 5 },
+  { id: "airforce1", cat: "moda", label: "Drop", title: "Nike Air Force 1", client: "Nike", fotos: 8 },
+  { id: "new-balance-1000", cat: "moda", label: "Drop", title: "New Balance 1000", client: "New Balance", fotos: 8 },
+  { id: "new-balance-9060-great-plains", cat: "moda", label: "Drop", title: "New Balance 9060", client: "Great Plains", fotos: 6 },
+  { id: "new-balance-mt10o", cat: "moda", label: "Drop", title: "New Balance MT10", client: "New Balance", fotos: 8 },
+  { id: "new-era", cat: "moda", label: "Editorial", title: "New Era", client: "Lookbook", fotos: 8, link: "https://www.instagram.com/reel/DJ7zwTbs6z6/" },
+  { id: "new-era-9forty", cat: "moda", label: "Drop", title: "New Era 9FORTY", client: "New Era", fotos: 8 },
+  { id: "new-era-9forty-crinkled-pu", cat: "moda", label: "Drop", title: "New Era 9FORTY Crinkled", client: "New Era", fotos: 8 },
+  { id: "new-era-fire", cat: "moda", label: "Campaña", title: "New Era Fire", client: "New Era", fotos: 8 },
+  { id: "nike-air-force-1-fe-by-hype", cat: "moda", label: "Drop", title: "Nike Air Force 1 [FE]", client: "by HYPE", fotos: 5 },
+  { id: "nike-air-max-dn-heat-map", cat: "moda", label: "Drop", title: "Nike Air Max DN", client: "Heat Map", fotos: 6, link: "https://www.instagram.com/reel/DJF0vq3s2ke/" },
+  { id: "nike-dn", cat: "moda", label: "Drop", title: "Nike DN", client: "Nike Sportswear", fotos: 8, link: "https://www.instagram.com/reel/DJF0vq3s2ke/" },
+  { id: "veneno-fire", cat: "moda", label: "Editorial", title: "Veneno Fire", client: "Red Bull", fotos: 4 },
+  { id: "veneno-rider", cat: "moda", label: "Editorial", title: "Veneno Rider", client: "Red Bull", fotos: 6 },
+  { id: "forbes-colombia", cat: "eventos", label: "Corporate", title: "Forbes Colombia", client: "Evento corporativo", fotos: 8, featured: true },
+  { id: "veneno", cat: "moda", label: "Editorial", title: "Veneno", client: "Red Bull", fotos: 8, featured: true },
+  { id: "ciudad-primavera-j-balvin", cat: "eventos", label: "Festival", title: "Ciudad Primavera", client: "J Balvin", fotos: 8 },
+  { id: "estrellas-aguila", cat: "eventos", label: "Activación", title: "Estrellas Águila", client: "Cerveza Águila", fotos: 8 },
+  { id: "fep-backstage", cat: "eventos", label: "Backstage", title: "FEP Backstage", client: "Estéreo Picnic", fotos: 8 },
+  { id: "guacherna-barranquilla-2026", cat: "eventos", label: "Cultural", title: "Guacherna", client: "Barranquilla 2026", fotos: 8 },
+  { id: "j-balvin-cali-callao", cat: "eventos", label: "Festival", title: "J Balvin · Callao", client: "Cali", fotos: 8 },
+  { id: "melina-martinez-ronda", cat: "eventos", label: "Activación", title: "Melina Martínez", client: "Ronda", fotos: 8 },
+  { id: "mindo-soulburge", cat: "eventos", label: "Creators", title: "Mindo & SoulBurge", client: "Creadores", fotos: 8 },
+  { id: "mindo-rueda-de-medios", cat: "eventos", label: "Prensa", title: "Mindo", client: "Rueda de medios", fotos: 8 },
+  { id: "avela", cat: "contenido", label: "Social", title: "Avela", client: "Contenido de marca", fotos: 8 },
+  { id: "bearsbake", cat: "contenido", label: "Social", title: "Bears Bakery", client: "Contenido de marca", fotos: 7, link: "https://www.instagram.com/p/DOJcn1IjYYH/" },
+  { id: "bianco-bake-lab", cat: "contenido", label: "Social", title: "Bianco Bake Lab", client: "Contenido de marca", fotos: 8 },
+  { id: "esquina-kosher", cat: "contenido", label: "Social", title: "Esquina Kosher", client: "Contenido de marca", fotos: 7, link: "https://www.instagram.com/p/Da3C2IKJohQ/" },
+  { id: "trucoperro", cat: "videoclip", label: "Music video", title: "Truco Perro", client: "Videoclip musical", fotos: 8, featured: true },
+  { id: "cinema-bts", cat: "cinema", label: "Cinema", title: "Cine y series", client: "Behind the scenes", fotos: 8, featured: true },
+  { id: "historias-de-carceles", cat: "podcast", label: "Podcast", title: "Historias de cárceles", client: "Producción de podcast", fotos: 8, featured: true },
 ];
 
 export const PORTFOLIO_FILTERS: { key: "todos" | PortfolioCat; label: string }[] = [
   { key: "todos", label: "Todos" },
   { key: "conciertos", label: "Conciertos" },
-  { key: "eventos", label: "Eventos" },
   { key: "moda", label: "Moda" },
+  { key: "eventos", label: "Eventos" },
   { key: "contenido", label: "Contenido" },
+  { key: "cinema", label: "Cine y series" },
   { key: "videoclip", label: "Videoclips" },
   { key: "podcast", label: "Podcast" },
 ];

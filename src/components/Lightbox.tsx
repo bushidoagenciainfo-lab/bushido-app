@@ -1,0 +1,118 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import type { PortfolioItem } from "@/lib/site";
+import { openAnalisis } from "@/lib/ui";
+
+const foto = (id: string, n: number) =>
+  `/portafolio/g/${id}/${String(n).padStart(2, "0")}.jpg`;
+
+/** Álbum del trabajo: portada grande + miniaturas + CTA. */
+export default function Lightbox({
+  item,
+  onClose,
+}: {
+  item: PortfolioItem | null;
+  onClose: () => void;
+}) {
+  const [i, setI] = useState(1);
+
+  useEffect(() => setI(1), [item?.id]);
+
+  const next = useCallback(() => {
+    if (item) setI((v) => (v % item.fotos) + 1);
+  }, [item]);
+  const prev = useCallback(() => {
+    if (item) setI((v) => (v === 1 ? item.fotos : v - 1));
+  }, [item]);
+
+  useEffect(() => {
+    if (!item) return;
+    document.body.classList.add("lb-open");
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowRight") next();
+      if (e.key === "ArrowLeft") prev();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.classList.remove("lb-open");
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [item, onClose, next, prev]);
+
+  if (!item) return null;
+
+  return (
+    <div className="lb" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="lb-inner">
+        <header className="lb-head">
+          <div>
+            <div className="lb-cat">{item.label}</div>
+            <h3>
+              {item.title} <span>· {item.client}</span>
+            </h3>
+          </div>
+          <button type="button" className="lb-close" onClick={onClose} aria-label="Cerrar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+        </header>
+
+        <div className="lb-stage">
+          {item.fotos > 1 && (
+            <button type="button" className="lb-nav prev" onClick={prev} aria-label="Anterior">
+              ‹
+            </button>
+          )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={foto(item.id, i)} alt={`${item.title} — foto ${i}`} />
+          {item.fotos > 1 && (
+            <button type="button" className="lb-nav next" onClick={next} aria-label="Siguiente">
+              ›
+            </button>
+          )}
+          <span className="lb-count">
+            {i} / {item.fotos}
+          </span>
+        </div>
+
+        {item.fotos > 1 && (
+          <div className="lb-thumbs">
+            {Array.from({ length: item.fotos }, (_, k) => k + 1).map((n) => (
+              <button
+                key={n}
+                type="button"
+                className={"lb-thumb" + (n === i ? " on" : "")}
+                onClick={() => setI(n)}
+                style={{ backgroundImage: `url('${foto(item.id, n)}')` }}
+                aria-label={`Foto ${n}`}
+              />
+            ))}
+          </div>
+        )}
+
+        <footer className="lb-foot">
+          {item.link ? (
+            <a className="btn btn-ghost" href={item.link} target="_blank" rel="noopener noreferrer">
+              Ver el reel <span className="arrow">↗</span>
+            </a>
+          ) : (
+            <span className="lb-note">Fotografía y video · producción Bushido</span>
+          )}
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => {
+              onClose();
+              openAnalisis("portafolio");
+            }}
+          >
+            Quiero algo así <span className="arrow">→</span>
+          </button>
+        </footer>
+      </div>
+    </div>
+  );
+}

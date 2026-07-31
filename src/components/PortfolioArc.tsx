@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { PORTFOLIO } from "@/lib/site";
-import { openAnalisis } from "@/lib/ui";
+import { useEffect, useRef, useState } from "react";
+import { PORTFOLIO, type PortfolioItem } from "@/lib/site";
+import { track } from "@/lib/track";
+import Lightbox from "./Lightbox";
 
 const SPACING = 15; // grados entre piezas
 const RADIUS = 440;
@@ -25,6 +26,8 @@ function place(theta: number) {
 const baseTheta = (i: number) => (i - (N - 1) / 2) * SPACING;
 
 export default function PortfolioArc() {
+  // Abre el álbum del proyecto (antes mandaba al pop-up de análisis)
+  const [abierto, setAbierto] = useState<PortfolioItem | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const offset = useRef(0);
@@ -80,19 +83,19 @@ export default function PortfolioArc() {
             const s0 = place(baseTheta(i));
             return (
               <button
-                key={p.file}
+                key={p.id}
                 type="button"
                 className={"arc-card" + (s0.focus ? " focus" : "")}
                 ref={(el) => {
                   cardRefs.current[i] = el;
                 }}
                 style={{ transform: s0.transform, opacity: s0.opacity, zIndex: s0.zIndex }}
-                onClick={openAnalisis}
+                onClick={() => { track("portafolio", p.title); setAbierto(p); }}
                 aria-label={p.title}
               >
-                <div className="a-img" style={{ backgroundImage: `url('/portafolio/${p.file}.jpg')` }} />
+                <div className="a-img" style={{ backgroundImage: `url('/portafolio/g/${p.id}/01.jpg')` }} />
                 <div className="a-scrim" />
-                <div className="a-lock">Privado</div>
+                <div className="a-lock">{p.fotos} fotos</div>
                 <div className="a-body">
                   <div className="a-cat">{p.label}</div>
                   <div className="a-title">{p.title}</div>
@@ -110,8 +113,8 @@ export default function PortfolioArc() {
       {/* MÓVIL: fila con scroll */}
       <div className="arc-mobile">
         {PORTFOLIO.map((p) => (
-          <button key={p.file} type="button" className="am-card" onClick={openAnalisis} aria-label={p.title}>
-            <div className="a-img" style={{ backgroundImage: `url('/portafolio/${p.file}.jpg')` }} />
+          <button key={p.id} type="button" className="am-card" onClick={() => { track("portafolio", p.title); setAbierto(p); }} aria-label={p.title}>
+            <div className="a-img" style={{ backgroundImage: `url('/portafolio/g/${p.id}/01.jpg')` }} />
             <div className="a-scrim" />
             <div className="a-body">
               <div className="a-cat">{p.label}</div>
@@ -120,6 +123,8 @@ export default function PortfolioArc() {
           </button>
         ))}
       </div>
+
+      <Lightbox item={abierto} onClose={() => setAbierto(null)} />
     </>
   );
 }

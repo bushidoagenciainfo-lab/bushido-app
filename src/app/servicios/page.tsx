@@ -13,12 +13,13 @@ export default function ServiciosPage() {
             <div>
               <div className="view-header-eyebrow">02 · Servicios</div>
               <h1>
-                Servicios y <em>precios</em>.
+                Lo que <em>armamos</em> para ti.
               </h1>
             </div>
             <p>
-              Elige un servicio para ver sus paquetes, precios y lo que incluye.
-              Precios base en COP — cada proyecto se afina en una conversación.
+              Abre una categoría, elige el servicio y mira exactamente qué incluye y
+              cuánto cuesta. Sin cotizaciones misteriosas: precios base en COP y
+              todo se afina contigo.
             </p>
           </div>
         </div>

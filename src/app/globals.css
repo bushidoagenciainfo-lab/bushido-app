@@ -2162,8 +2162,8 @@ body.drawer-open { overflow: hidden; }
 
 /* ══════════════ Letterbox · parpadeo cinematográfico (carga y cambio de sección) ══════════════ */
 .lb { position: fixed; left: 0; right: 0; height: 52vh; background: #000; z-index: 400; pointer-events: none; }
-.lb-top { top: 0; animation: lbUp 0.8s cubic-bezier(0.65,0.05,0.35,1) forwards; }
-.lb-bot { bottom: 0; animation: lbDown 0.8s cubic-bezier(0.65,0.05,0.35,1) forwards; }
+.lb-top { top: 0; animation: lbUp 0.6s cubic-bezier(0.65,0.05,0.35,1) forwards; }
+.lb-bot { bottom: 0; animation: lbDown 0.6s cubic-bezier(0.65,0.05,0.35,1) forwards; }
 @keyframes lbUp { from { transform: translateY(0); } to { transform: translateY(-101%); } }
 @keyframes lbDown { from { transform: translateY(0); } to { transform: translateY(101%); } }
 @media (prefers-reduced-motion: reduce) { .lb { display: none; } }
@@ -2410,6 +2410,80 @@ body.has-cursor .cursor-dot, body.has-cursor .cursor-ring, body.has-cursor .curs
   .hero-proof { gap: 12px 16px; padding: 14px 18px; border-radius: 18px; }
   .proof-sep { display: none; }
   .proof-note { width: 100%; text-align: center; }
+}
+
+/* ── El hero debe CABER en pantalla: en monitores anchos pero bajos (laptops)
+   el título a 150px + el badge lo hacían desbordar y dejaban franja negra. ── */
+@media (max-height: 900px) {
+  .hero-vid { padding-top: 96px; padding-bottom: 60px; }
+  .hero-v2 h1 { font-size: clamp(40px, 6.5vw, 104px); }
+  .hero-v2 .sub { margin-top: 22px; font-size: clamp(15px, 1.3vw, 18px); }
+  .hero-v2 .actions { margin-top: 26px; }
+  .hero-proof { margin-top: 22px; padding: 12px 22px; gap: 12px 18px; }
+  .proof-n { font-size: clamp(19px, 2vw, 24px); }
+  .hero-v2 .eyebrow { margin-bottom: 18px; }
+  .hero-v2 .scrollcue { display: none; }
+}
+@media (max-height: 740px) {
+  .hero-vid { padding-top: 84px; padding-bottom: 46px; }
+  .hero-v2 h1 { font-size: clamp(34px, 5.4vw, 80px); }
+  .hero-v2 .sub { margin-top: 16px; max-width: 520px; }
+  .hero-v2 .actions { margin-top: 20px; }
+  .hero-proof { margin-top: 16px; padding: 10px 18px; }
+}
+
+/* ══════════ LIGHTBOX · álbum del proyecto ══════════ */
+body.lb-open { overflow: hidden; }
+.lb {
+  position: fixed; inset: 0; z-index: 600; padding: 20px;
+  background: rgba(5,5,6,.9); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  display: flex; align-items: center; justify-content: center;
+  animation: lbIn .25s var(--e-out);
+}
+@keyframes lbIn { from { opacity: 0 } to { opacity: 1 } }
+.lb-inner {
+  width: 100%; max-width: 1080px; max-height: 94svh;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.lb-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.lb-cat { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--sepp); margin-bottom: 6px; }
+.lb-head h3 { font-family: var(--serif); font-weight: 400; font-size: clamp(22px,3vw,32px); color: var(--bone); line-height: 1.1; }
+.lb-head h3 span { color: var(--bone-ghost); font-size: .55em; font-family: var(--mono); letter-spacing: .06em; }
+.lb-close {
+  width: 40px; height: 40px; flex-shrink: 0; display: grid; place-items: center;
+  border: 1px solid var(--hairline); border-radius: 50%; background: rgba(10,10,11,.6); color: var(--bone); cursor: pointer;
+}
+.lb-close:hover { border-color: var(--sepp); color: var(--sepp); }
+.lb-close svg { width: 18px; height: 18px; }
+.lb-stage { position: relative; flex: 1; min-height: 0; display: grid; place-items: center; }
+.lb-stage img {
+  max-width: 100%; max-height: 62svh; width: auto; height: auto;
+  border-radius: 10px; border: 1px solid var(--hairline); object-fit: contain;
+}
+.lb-nav {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+  width: 46px; height: 46px; display: grid; place-items: center;
+  font-size: 26px; line-height: 1; color: var(--bone);
+  background: rgba(10,10,11,.7); border: 1px solid var(--hairline); border-radius: 50%; cursor: pointer;
+}
+.lb-nav:hover { background: var(--sepp); border-color: var(--sepp); }
+.lb-nav.prev { left: 8px; } .lb-nav.next { right: 8px; }
+.lb-count { position: absolute; bottom: 10px; right: 12px; font-family: var(--mono); font-size: 10px; letter-spacing: .1em; color: var(--bone-dim); background: rgba(10,10,11,.7); padding: 5px 10px; border-radius: 999px; }
+.lb-thumbs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+.lb-thumb {
+  width: 62px; height: 62px; flex-shrink: 0; border-radius: 7px; cursor: pointer;
+  background-size: cover; background-position: center;
+  border: 1px solid var(--hairline); opacity: .5; transition: opacity .2s, border-color .2s;
+}
+.lb-thumb:hover { opacity: .85; }
+.lb-thumb.on { opacity: 1; border-color: var(--sepp); }
+.lb-foot { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding-top: 4px; border-top: 1px solid var(--hairline); }
+.lb-note { font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; color: var(--bone-ghost); }
+@media (max-width: 640px) {
+  .lb { padding: 12px; }
+  .lb-stage img { max-height: 48svh; }
+  .lb-thumb { width: 48px; height: 48px; }
+  .lb-foot .btn { flex: 1; justify-content: center; }
 }
 
 /* ── familias de servicio (acordeón: categoría → servicios → tarifas) ── */
@@ -2677,6 +2751,22 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 .admin-sec-count { font-family: var(--mono); font-size: 11px; color: var(--sepp); border: 1px solid var(--hairline); border-radius: 999px; padding: 3px 10px; }
 .admin-sec-hint { font-family: var(--mono); font-size: 10px; color: var(--bone-ghost); letter-spacing: .06em; }
 
+/* ── secciones plegables del panel ── */
+.admin-acc { border: 1px solid var(--hairline); border-radius: 12px; background: var(--ink-2); margin-top: 12px; overflow: hidden; }
+.admin-acc.open { border-color: rgba(213,50,46,.35); }
+.admin-acc-head {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 18px 22px; background: none; border: none; cursor: pointer; text-align: left;
+}
+.admin-acc-head:hover { background: rgba(237,231,218,.03); }
+.aah-left { display: flex; align-items: baseline; gap: 10px; }
+.aah-left h2 { font-family: var(--serif); font-weight: 400; font-size: clamp(19px,2.2vw,24px); color: var(--bone); }
+.aah-right { display: flex; align-items: center; gap: 12px; }
+.aah-toggle { width: 28px; height: 28px; display: grid; place-items: center; border: 1px solid var(--hairline); border-radius: 50%; font-size: 15px; color: var(--bone); }
+.admin-acc.open .aah-toggle { background: var(--sepp); border-color: var(--sepp); }
+.admin-acc-body { padding: 4px 22px 22px; }
+@media (max-width: 640px) { .admin-sec-hint { display: none; } .admin-acc-body { padding: 4px 14px 18px; } }
+
 /* ── Book de creadores (admin) ── */
 .book-filtros { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
 .book-filtros input, .book-filtros select {
@@ -2694,6 +2784,10 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 .bc-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 .bc-top strong { color: var(--bone); font-size: 14.5px; }
 .bc-city { font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--bone-ghost); }
+.bc-quick { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.bc-seg-badge { font-family: var(--mono); font-size: 10px; font-weight: 600; color: var(--gold); border: 1px solid rgba(201,162,74,.45); border-radius: 999px; padding: 2px 8px; }
+.bc-nicho { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--sepp); }
+.bc-nicho em { color: var(--bone-ghost); font-style: normal; opacity: .7; }
 .bc-social { display: flex; flex-wrap: wrap; gap: 8px; }
 .bc-social a { font-family: var(--mono); font-size: 10.5px; color: var(--bone-dim); border-bottom: 1px solid var(--hairline); }
 .bc-social a:hover { color: var(--sepp); border-color: var(--sepp); }

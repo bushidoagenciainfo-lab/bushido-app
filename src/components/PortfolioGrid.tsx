@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { PORTFOLIO, PORTFOLIO_FILTERS, type PortfolioCat } from "@/lib/site";
-import { openAnalisis } from "@/lib/ui";
+import { PORTFOLIO, PORTFOLIO_FILTERS, type PortfolioCat, type PortfolioItem } from "@/lib/site";
 import { track } from "@/lib/track";
+import Lightbox from "./Lightbox";
 
 export default function PortfolioGrid() {
   const [filter, setFilter] = useState<"todos" | PortfolioCat>("todos");
+  const [abierto, setAbierto] = useState<PortfolioItem | null>(null);
   const visible = PORTFOLIO.filter((p) => filter === "todos" || p.cat === filter);
 
   return (
@@ -23,48 +24,41 @@ export default function PortfolioGrid() {
           </button>
         ))}
         <div className="filter-count">
-          {visible.length} {visible.length === 1 ? "pieza" : "piezas"}
+          {visible.length} {visible.length === 1 ? "proyecto" : "proyectos"}
         </div>
       </div>
 
       <div className="fichas-grid">
-        {visible.map((p) => {
-          // Contenido de la ficha (igual con o sin reel publicado)
-          const inner = (
-            <>
-              <div className="art" style={{ backgroundImage: `url('/portafolio/${p.file}.jpg')` }} />
-              <div className="scrim" />
-              <div className="badge">{p.badge}</div>
-              <div className="lock">{p.link ? "Ver reel ↗" : "Privado"}</div>
-              <div className="frame-outline" />
-              <div className="meta">
-                <div className="meta-left">
-                  <div className="cat">{p.label}</div>
-                  <div className="title">{p.title}</div>
-                </div>
-                <div className="client">{p.client}</div>
+        {visible.map((p) => (
+          <button
+            key={p.id}
+            type="button"
+            className="card"
+            onClick={() => {
+              track("portafolio", p.title);
+              setAbierto(p);
+            }}
+          >
+            <div
+              className="art"
+              style={{ backgroundImage: `url('/portafolio/g/${p.id}/01.jpg')` }}
+            />
+            <div className="scrim" />
+            <div className="badge">{p.label}</div>
+            <div className="lock">{p.fotos} fotos</div>
+            <div className="frame-outline" />
+            <div className="meta">
+              <div className="meta-left">
+                <div className="cat">{p.label}</div>
+                <div className="title">{p.title}</div>
               </div>
-            </>
-          );
-          // Si la pieza tiene reel publicado, la ficha lleva a verlo.
-          return p.link ? (
-            <a
-              key={p.file}
-              className="card"
-              href={p.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => track("portafolio", p.title)}
-            >
-              {inner}
-            </a>
-          ) : (
-            <button key={p.file} type="button" className="card" onClick={openAnalisis}>
-              {inner}
-            </button>
-          );
-        })}
+              <div className="client">{p.client}</div>
+            </div>
+          </button>
+        ))}
       </div>
+
+      <Lightbox item={abierto} onClose={() => setAbierto(null)} />
     </section>
   );
 }

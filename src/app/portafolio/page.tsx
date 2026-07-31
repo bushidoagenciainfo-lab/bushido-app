@@ -15,13 +15,12 @@ export default function PortafolioPage() {
             <div>
               <div className="view-header-eyebrow">01 · Portafolio</div>
               <h1>
-                Trabajos que <em>hicimos</em>.
+                Esto ya <em>pasó</em>.
               </h1>
             </div>
             <p>
-              Videoclips, campañas, cubrimiento en vivo, editorial y producción de
-              TV. El showreel completo se comparte con clientes que dejan sus
-              datos.
+              Escenarios de talla mundial, campañas para Adidas y Nike, y contenido
+              que la gente compartió sola. Abre cualquier proyecto y míralo completo.
             </p>
           </div>
         </div>
