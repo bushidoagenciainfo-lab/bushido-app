@@ -2875,7 +2875,7 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 .admin-empty { font-family: var(--mono); font-size: 12px; color: var(--bone-ghost); padding: 6px 0; }
 
 /* Overview = KPIs + analítica juntos, como un solo bloque de resumen */
-.admin-overview { display: grid; gap: 12px; margin-bottom: 34px; }
+.admin-overview { display: grid; gap: 12px; margin-bottom: 34px; padding: 0; }
 .admin-kpis { display: grid; grid-template-columns: repeat(3, minmax(120px, 1fr)) 1.8fr; gap: 12px; align-items: stretch; }
 @media (max-width: 760px) { .admin-kpis { grid-template-columns: repeat(3, 1fr); } .kpi-wide { grid-column: 1 / -1; } }
 .kpi { border: 1px solid var(--hairline); border-radius: 12px; background: var(--ink-2); padding: 20px 22px; display: flex; flex-direction: column; gap: 6px; justify-content: center; }
@@ -2890,7 +2890,9 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 .kpi-tag.s-perdido { color: var(--bone-ghost); }
 
 /* analítica */
-.admin-analytics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+/* 2x2: al sumar el panel de formularios son 4; en 3 columnas quedaba uno huérfano
+   en la segunda fila y las barras muy apretadas. */
+.admin-analytics { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 @media (max-width: 860px) { .admin-analytics { grid-template-columns: 1fr; } }
 .admin-panel { border: 1px solid var(--hairline); border-radius: 12px; background: var(--ink-2); padding: 20px 22px; }
 .admin-panel h3 { font-family: var(--mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--sepp); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
@@ -2910,7 +2912,9 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 .admin-sec-hint { font-family: var(--mono); font-size: 10px; color: var(--bone-ghost); letter-spacing: .06em; }
 
 /* ── secciones plegables del panel ── */
-.admin-acc { border: 1px solid var(--hairline); border-radius: 12px; background: var(--ink-2); margin-top: 12px; overflow: hidden; }
+/* padding:0 → el CSS del sitio le mete `section { padding: var(--pad-y) }` (120px)
+   y el acordeón quedaba con un hueco enorme arriba y abajo del título. */
+.admin-acc { border: 1px solid var(--hairline); border-radius: 12px; background: var(--ink-2); margin-top: 12px; overflow: hidden; padding: 0; }
 .admin-acc.open { border-color: rgba(213,50,46,.35); }
 .admin-acc-head {
   width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px;
@@ -2939,8 +2943,18 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 .book-card.e-destacado { border-color: rgba(201,162,74,.5); }
 .book-card.e-aprobado  { border-color: rgba(111,191,142,.4); }
 .book-card.e-pausado   { opacity: .55; }
-.bc-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
-.bc-top strong { color: var(--bone); font-size: 14.5px; }
+.bc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.bc-top strong { color: var(--bone); font-size: 14.5px; display: block; }
+.bc-id { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+/* los seguidores son el dato que se busca primero al armar un casting */
+.bc-seg-box {
+  flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 1px;
+  padding-left: 10px; border-left: 1px solid var(--hairline);
+}
+.bc-seg-n { font-family: var(--serif); font-size: 19px; line-height: 1; color: var(--gold); }
+.bc-seg-l { font-family: var(--mono); font-size: 8px; letter-spacing: .12em; text-transform: uppercase; color: var(--bone-ghost); }
+.bc-frase { font-size: 12px; line-height: 1.45; color: var(--bone-dim); }
+.bc-frase::first-line { color: var(--bone); }
 .bc-city { font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--bone-ghost); }
 .bc-quick { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .bc-seg-badge { font-family: var(--mono); font-size: 10px; font-weight: 600; color: var(--gold); border: 1px solid rgba(201,162,74,.45); border-radius: 999px; padding: 2px 8px; }
@@ -2959,6 +2973,72 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 .bc-seg { font-family: var(--mono); font-size: 10px; color: var(--bone-ghost); }
 .bc-estado { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--bone); background: var(--ink); border: 1px solid var(--hairline); border-radius: 7px; padding: 5px 8px; margin-left: auto; cursor: pointer; }
 .bc-estado.s-destacado { color: var(--gold); border-color: var(--gold); }
+
+/* ── Inteligencia por nicho ── */
+.nichos { display: flex; flex-direction: column; gap: 16px; }
+.nichos-tabs { display: flex; flex-wrap: wrap; gap: 7px; }
+.nicho-tab {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em;
+  color: var(--bone-dim); background: var(--ink); cursor: pointer;
+  border: 1px solid var(--hairline); border-radius: 999px; padding: 7px 12px;
+  transition: color .2s, border-color .2s, background .2s;
+}
+.nicho-tab span {
+  font-size: 9px; color: var(--bone-ghost);
+  background: rgba(237,231,218,.08); border-radius: 999px; padding: 1px 6px;
+}
+.nicho-tab:hover { color: var(--bone); border-color: var(--bone-ghost); }
+.nicho-tab.on { color: var(--bone); background: var(--sepp); border-color: var(--sepp); }
+.nicho-tab.on span { background: rgba(0,0,0,.25); color: var(--bone); }
+
+.nicho-marcas { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
+.nm-label { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--sepp); margin-right: 4px; }
+.nm-chip { font-size: 11.5px; color: var(--bone-dim); border: 1px solid var(--hairline); border-radius: 6px; padding: 3px 9px; }
+.nicho-aviso {
+  font-size: 11.5px; line-height: 1.5; color: var(--bone-ghost);
+  border-left: 2px solid var(--gold); padding: 8px 12px; background: rgba(201,162,74,.05);
+}
+
+.nicho-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 760px) { .nicho-cols { grid-template-columns: 1fr; } }
+.nicho-card { border: 1px solid var(--hairline); border-radius: 11px; background: var(--ink); padding: 18px 20px; }
+.nicho-card.ok { border-color: rgba(111,191,142,.28); }
+.nicho-card.bad { border-color: rgba(213,50,46,.3); }
+.nicho-card h4 {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--bone-dim); margin-bottom: 14px;
+}
+.nicho-card.ok h4 { color: #6FBF8E; }
+.nicho-card.bad h4 { color: var(--sepp); }
+
+.tema-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.tema-list li { display: grid; grid-template-columns: minmax(80px, 33%) 1fr auto; align-items: center; gap: 10px; }
+.tema-n { font-size: 12px; color: var(--bone); text-transform: capitalize; }
+.tema-track { height: 5px; border-radius: 999px; background: rgba(237,231,218,.07); overflow: hidden; }
+.tema-fill { display: block; height: 100%; border-radius: 999px; }
+.tema-fill.ok { background: linear-gradient(90deg, #6FBF8E, #4E9B6C); }
+.tema-fill.bad { background: linear-gradient(90deg, var(--sepp), #8E2320); }
+.tema-c { font-family: var(--mono); font-size: 10px; color: var(--bone-ghost); }
+
+.emo-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.emo-chip {
+  font-family: var(--mono); font-size: 10.5px; color: var(--bone-dim);
+  border: 1px solid var(--hairline); border-radius: 999px; padding: 5px 10px;
+}
+.emo-chip b { color: var(--bone); margin-left: 3px; }
+.emo-chip.warn { color: var(--gold); border-color: rgba(201,162,74,.4); }
+.emo-chip.warn b { color: var(--gold); }
+
+.nicho-detalle > summary {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--bone-ghost); cursor: pointer; padding: 10px 0;
+}
+.nicho-detalle > summary:hover { color: var(--sepp); }
+.frase-list { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+.frase-list li { font-size: 12px; line-height: 1.5; color: var(--bone-dim); padding-left: 12px; position: relative; }
+.frase-list li::before { content: '·'; position: absolute; left: 2px; color: var(--sepp); }
+.frase-list li em { font-style: normal; font-family: var(--mono); font-size: 9.5px; color: var(--bone-ghost); }
 .bc-estado.s-aprobado  { color: #6FBF8E; border-color: #6FBF8E; }
 
 /* leads */

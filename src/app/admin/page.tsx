@@ -1,10 +1,21 @@
 import type { Metadata } from "next";
-import { listLeads, listAnalisis, dashboardStats } from "@/lib/admin";
+import { listLeads, listAnalisis, dashboardStats, inteligenciaNichos, type NichoIntel } from "@/lib/admin";
 import { listCreadores } from "@/lib/creadores";
 import AdminLeads from "@/components/admin/AdminLeads";
 import AdminCreadores, { type CreadorLite } from "@/components/admin/AdminCreadores";
+import AdminNichos from "@/components/admin/AdminNichos";
 import AdminLogout from "@/components/admin/AdminLogout";
 import AdminSection from "@/components/admin/AdminSection";
+
+/** Nombre legible de cada formulario del sitio. */
+const FORMULARIOS: Record<string, string> = {
+  analisis: "Análisis gratis",
+  contacto: "Contacto / brief",
+  talento: "Crew",
+  creador: "Creators UGC",
+  rental: "Alquiler de equipos",
+  descarga: "Descargables",
+};
 
 export const metadata: Metadata = {
   title: "Panel · Bushido",
@@ -36,12 +47,14 @@ export default async function AdminPage() {
   let leads: Awaited<ReturnType<typeof listLeads>> = [];
   let analisis: Array<Record<string, unknown>> = [];
   let creadores: CreadorLite[] = [];
+  let nichos: NichoIntel[] = [];
   try {
-    [stats, leads, analisis, creadores] = await Promise.all([
+    [stats, leads, analisis, creadores, nichos] = await Promise.all([
       dashboardStats(),
       listLeads(100),
       listAnalisis(50),
       listCreadores({ limit: 300 }) as Promise<CreadorLite[]>,
+      inteligenciaNichos(),
     ]);
   } catch (e) {
     error = e instanceof Error ? e.message : "Error cargando datos.";
@@ -89,6 +102,14 @@ export default async function AdminPage() {
           {/* Analítica de interés */}
           <div className="admin-analytics">
             <div className="admin-panel">
+              <h3>Formularios recibidos</h3>
+              <Bars
+                items={Object.entries(stats.porTipo)
+                  .map(([k, v]) => ({ name: FORMULARIOS[k] ?? k, count: v }))
+                  .sort((a, b) => b.count - a.count)}
+              />
+            </div>
+            <div className="admin-panel">
               <h3>Servicios más mirados</h3>
               <Bars items={stats.topServicios} />
             </div>
@@ -104,11 +125,20 @@ export default async function AdminPage() {
         </section>
       )}
 
+      <AdminSection
+        title="Inteligencia por nicho"
+        count={nichos.length}
+        defaultOpen
+        hint="Fortalezas y debilidades de quienes piden el análisis"
+      >
+        <AdminNichos nichos={nichos} />
+      </AdminSection>
+
       <AdminSection title="Book de creadores" count={creadores.length} hint="Privado · castings por nicho">
         <AdminCreadores creadores={creadores} />
       </AdminSection>
 
-      <AdminSection title="Leads" count={leads.length} defaultOpen hint="Solicitudes que entraron">
+      <AdminSection title="Leads" count={leads.length} hint="Todo lo que entra por los formularios del sitio">
         <AdminLeads leads={leads} />
       </AdminSection>
 

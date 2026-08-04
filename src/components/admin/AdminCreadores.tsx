@@ -20,6 +20,33 @@ export interface CreadorLite {
 
 const ESTADOS = ["nuevo", "aprobado", "destacado", "pausado"];
 
+/** 12.400 → "12,4K" · 1.200.000 → "1,2M" · sin dato → "—" */
+function fmtSeguidores(n?: number | null): string {
+  if (!n) return "—";
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(".", ",")}M`;
+  if (n >= 10_000) return `${Math.round(n / 1000)}K`;
+  if (n >= 1000) return `${(n / 1000).toFixed(1).replace(".", ",")}K`;
+  return String(n);
+}
+
+/** Una línea que dice de un vistazo qué es este creador y qué sabe hacer. */
+function frase(c: CreadorLite): string {
+  const nichos = c.nichos ?? [];
+  const formatos = c.formatos ?? [];
+  const n =
+    nichos.length === 0
+      ? "Sin nicho definido"
+      : nichos.length === 1
+        ? nichos[0]
+        : `${nichos[0]} y ${nichos.length - 1} nicho${nichos.length > 2 ? "s" : ""} más`;
+  if (!formatos.length) return `${n} · falta definir formato`;
+  const f =
+    formatos.length === 1
+      ? formatos[0].toLowerCase()
+      : `${formatos[0].toLowerCase()} +${formatos.length - 1}`;
+  return `${n} · mejor en ${f}`;
+}
+
 /** Book vacío: botón para cargar la base inicial de creadores de un clic. */
 function ImportarBase() {
   const [estado, setEstado] = useState<"idle" | "loading" | "done" | "error">("idle");
@@ -134,22 +161,19 @@ export default function AdminCreadores({ creadores }: { creadores: CreadorLite[]
         {filtrados.map((c) => (
           <div className={"book-card e-" + c.estado} key={c.id}>
             <div className="bc-top">
-              <strong>{c.nombre}</strong>
-              <div className="bc-quick">
-                {c.seguidores ? (
-                  <span className="bc-seg-badge">
-                    {c.seguidores >= 1000
-                      ? `${(c.seguidores / 1000).toFixed(c.seguidores >= 10000 ? 0 : 1)}K`
-                      : c.seguidores}
-                  </span>
-                ) : null}
+              <div className="bc-id">
+                <strong>{c.nombre}</strong>
                 {c.ciudad && <span className="bc-city">{c.ciudad}</span>}
               </div>
+              <div className="bc-seg-box">
+                <span className="bc-seg-n">{fmtSeguidores(c.seguidores)}</span>
+                <span className="bc-seg-l">seguidores</span>
+              </div>
             </div>
-            {/* nicho: lo más importante para identificarlo rápido */}
-            <div className="bc-nicho">
-              {c.nichos?.length ? c.nichos.join(" · ") : <em>sin clasificar</em>}
-            </div>
+
+            {/* La frase que resume al creador: qué nicho cubre y en qué formato. */}
+            <p className="bc-frase">{frase(c)}</p>
+
             <div className="bc-social">
               {c.instagram && (
                 <a
