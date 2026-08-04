@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { PortfolioItem } from "@/lib/site";
 import { openAnalisis } from "@/lib/ui";
+import { track } from "@/lib/track";
 
 const foto = (id: string, n: number) =>
   `/portafolio/g/${id}/${String(n).padStart(2, "0")}.jpg`;
@@ -110,10 +111,25 @@ export default function Lightbox({
         )}
 
         <footer className="lb-foot">
-          {item.link ? (
-            <a className="btn btn-ghost" href={item.link} target="_blank" rel="noopener noreferrer">
-              Ver el reel <span className="arrow">↗</span>
-            </a>
+          {item.reels?.length ? (
+            <div className="lb-reels">
+              {item.reels.map((url, k) => (
+                <a
+                  key={url}
+                  className="btn btn-ghost lb-reel"
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => track("reel", item.title)}
+                >
+                  <span className="lb-play" aria-hidden="true">
+                    ▶
+                  </span>
+                  {item.reels!.length > 1 ? `Reel ${k + 1}` : "Ver el reel"}
+                  <span className="arrow">↗</span>
+                </a>
+              ))}
+            </div>
           ) : (
             <span className="lb-note">Fotografía y video · producción Bushido</span>
           )}

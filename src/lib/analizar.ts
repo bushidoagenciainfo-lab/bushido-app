@@ -36,7 +36,7 @@ const PAQUETES = `Marca y crecimiento:
 - "Branding · Identidad esencial" — $1.800.000 · "Sistema de marca" — $3.400.000 · "Rebrand completo" — desde $5.500.000
 Creators, UGC e influencers (el diferencial de Bushido: book propio de creadores por nicho + alianzas directas con creadores grandes):
 - "UGC con data · Starter 4 piezas" — $2.200.000 · "Growth 8 piezas" — $3.900.000 · "Always-on 12 piezas/mes" — desde $5.400.000 (incluye honorarios del creador del book)
-- "Influencers y talento · Campaña 1 a 3 creadores" — $1.800.000 · "Always-on /mes" — $3.200.000 · "Talento estelar y artistas" — cotización por proyecto (la tarifa de cada creador va aparte)
+- "Influencers y talento" — SIEMPRE cotización por campaña o por proyecto, NUNCA des una cifra: la tarifa depende del perfil y del alcance del creador. Aplica a campañas con creadores, influencers de alto alcance y artistas.
 Producción audiovisual:
 - "Videoclip · Básico" — $3.000.000 · "Con concepto" — $5.000.000 · "Premium" — cotización
 - "Mini comercial · Básico" — $1.700.000 · "Con concepto" — $2.800.000 · "Pack lanzamiento" — $4.200.000

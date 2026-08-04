@@ -17,8 +17,30 @@ export interface PortfolioItem {
   client: string;
   fotos: number;            // cuántas fotos tiene la galería (01.jpg…)
   featured?: boolean;
-  link?: string;            // reel publicado (Instagram), si existe
+  reels?: string[];         // reels publicados (Instagram) de este proyecto
 }
+
+/**
+ * Reels publicados que no tienen carpeta de fotos propia (campañas que salieron
+ * solo en video). Se muestran al final del portafolio para que el trabajo en
+ * movimiento también se vea.
+ */
+export interface ReelSuelto {
+  titulo: string;
+  cliente: string;
+  url: string;
+}
+
+export const REELS: ReelSuelto[] = [
+  { titulo: "adidas × Fear of God Athletics", cliente: "adidas", url: "https://www.instagram.com/reel/DM88KNGsuh2/" },
+  { titulo: "Nike Shox", cliente: "Nike", url: "https://www.instagram.com/reel/DMY4_eQswuw/" },
+  { titulo: "Adidas Superstar II", cliente: "adidas Originals", url: "https://www.instagram.com/reel/DLBQUcQs4OG/" },
+  { titulo: "Nike Club Cap OG Flames", cliente: "Nike", url: "https://www.instagram.com/reel/DJaSnmXxi4G/" },
+  { titulo: "adidas Adi Racer Hi", cliente: "adidas", url: "https://www.instagram.com/reel/DJXtCgERIm-/" },
+  { titulo: "adidas Originals · Satin & Denim", cliente: "adidas Originals", url: "https://www.instagram.com/reel/DI7Yv09R_6-/" },
+  { titulo: "Nike Air Pegasus 2K5", cliente: "Nike", url: "https://www.instagram.com/reel/DCE4f_vvUx8/" },
+  { titulo: "Lanzamiento adidas × Korn", cliente: "adidas", url: "https://www.instagram.com/reel/DCH0HnoPwCo/" },
+];
 
 // Las galerías las genera `node scripts/portafolio.mjs` desde Contenido_Aud.
 // La portada de cada álbum = la primera foto por orden alfabético → por eso
@@ -43,13 +65,13 @@ export const PORTFOLIO: PortfolioItem[] = [
   { id: "yomo", cat: "conciertos", label: "En vivo", title: "Yomo", client: "Show en vivo", fotos: 10 },
 
   // ── Moda ──
-  { id: "adidas-samba-diadelosmuertos", cat: "moda", label: "Campaña", title: "Adidas Samba", client: "Día de Muertos", fotos: 10, featured: true, link: "https://www.instagram.com/reel/DJ2sIgaMYUl/" },
-  { id: "jordan-1-retro-high-og-unc-reimagined", cat: "moda", label: "Drop", title: "Air Jordan 1 UNC", client: "Reimagined", fotos: 10, featured: true, link: "https://www.instagram.com/reel/DJp_q5BMpRO/" },
-  { id: "nike-procity", cat: "moda", label: "Drop", title: "Nike Dunk ProCity", client: "Nike SB", fotos: 8, featured: true, link: "https://www.instagram.com/reel/DBuON3YvBwl/" },
+  { id: "adidas-samba-diadelosmuertos", cat: "moda", label: "Campaña", title: "Adidas Samba", client: "Día de Muertos", fotos: 10, featured: true, reels: ["https://www.instagram.com/reel/DJ2sIgaMYUl/"] },
+  { id: "jordan-1-retro-high-og-unc-reimagined", cat: "moda", label: "Drop", title: "Air Jordan 1 UNC", client: "Reimagined", fotos: 10, featured: true, reels: ["https://www.instagram.com/reel/DJp_q5BMpRO/"] },
+  { id: "nike-procity", cat: "moda", label: "Drop", title: "Nike Dunk ProCity", client: "Nike SB", fotos: 8, featured: true, reels: ["https://www.instagram.com/reel/DBuON3YvBwl/"] },
   { id: "real-madrid-adidas", cat: "moda", label: "Campaña", title: "Real Madrid × Adidas", client: "Adidas Football", fotos: 6, featured: true },
   { id: "wales-bonner-x-adidas-ss25", cat: "moda", label: "Campaña", title: "Wales Bonner × Adidas", client: "SS25", fotos: 10, featured: true },
   { id: "adidas-adizero-aruku", cat: "moda", label: "Drop", title: "Adidas Adizero Aruku", client: "Adidas", fotos: 8 },
-  { id: "adidas-megarider-01", cat: "moda", label: "Drop", title: "Adidas Megaride", client: "Adidas", fotos: 6 },
+  { id: "adidas-megarider-01", cat: "moda", label: "Drop", title: "Adidas Megaride", client: "Adidas", fotos: 6, reels: ["https://www.instagram.com/reel/DM_WsaiyJ6_/"] },
   { id: "adidas-neighborhood", cat: "moda", label: "Campaña", title: "Adidas Neighborhood", client: "Adidas Originals", fotos: 10 },
   { id: "adidas-outfit", cat: "moda", label: "Editorial", title: "Adidas Outfit", client: "Adidas", fotos: 10 },
   { id: "adidas-sl-bob", cat: "moda", label: "Campaña", title: "Adidas SL", client: "Adidas Running", fotos: 10 },
@@ -61,10 +83,10 @@ export const PORTFOLIO: PortfolioItem[] = [
   { id: "new-era-fire", cat: "moda", label: "Campaña", title: "New Era Fire", client: "New Era", fotos: 10 },
   { id: "new-era-9forty", cat: "moda", label: "Drop", title: "New Era 9FORTY", client: "New Era", fotos: 9 },
   { id: "new-era-9forty-crinkled-pu", cat: "moda", label: "Drop", title: "New Era 9FORTY Crinkled", client: "New Era", fotos: 8 },
-  { id: "new-era", cat: "moda", label: "Spot", title: "New Era", client: "Spot de campaña", fotos: 3, link: "https://www.instagram.com/reel/DJ7zwTbs6z6/" },
+  { id: "new-era", cat: "moda", label: "Spot", title: "New Era", client: "Spot de campaña", fotos: 3, reels: ["https://www.instagram.com/reel/DJ7zwTbs6z6/"] },
   { id: "nike-air-force-1-fe-by-hype", cat: "moda", label: "Drop", title: "Nike Air Force 1 [FE]", client: "by HYPE", fotos: 5 },
-  { id: "nike-air-max-dn-heat-map", cat: "moda", label: "Drop", title: "Nike Air Max DN", client: "Heat Map", fotos: 6, link: "https://www.instagram.com/reel/DJF0vq3s2ke/" },
-  { id: "nike-dn", cat: "moda", label: "Drop", title: "Nike DN", client: "Nike Sportswear", fotos: 10, link: "https://www.instagram.com/reel/DJF0vq3s2ke/" },
+  { id: "nike-air-max-dn-heat-map", cat: "moda", label: "Drop", title: "Nike Air Max DN", client: "Heat Map", fotos: 6 },
+  { id: "nike-dn", cat: "moda", label: "Drop", title: "Nike DN", client: "Nike Sportswear", fotos: 10, reels: ["https://www.instagram.com/reel/DJF0vq3s2ke/"] },
   { id: "veneno-fire", cat: "moda", label: "Editorial", title: "Veneno Fire", client: "Red Bull", fotos: 4 },
   { id: "veneno-rider", cat: "moda", label: "Editorial", title: "Veneno Rider", client: "Red Bull", fotos: 6 },
 
@@ -82,9 +104,26 @@ export const PORTFOLIO: PortfolioItem[] = [
 
   // ── Contenido de marca ──
   { id: "avela", cat: "contenido", label: "Social", title: "Avela", client: "Contenido de marca", fotos: 10 },
-  { id: "bearsbake", cat: "contenido", label: "Social", title: "Bears Bakery", client: "Contenido de marca", fotos: 7, link: "https://www.instagram.com/p/DOJcn1IjYYH/" },
+  {
+    id: "bearsbake", cat: "contenido", label: "Social", title: "Bears Bakery", client: "Contenido de marca", fotos: 7,
+    reels: [
+      "https://www.instagram.com/p/DOJcn1IjYYH/",
+      "https://www.instagram.com/p/DO9jmCcjSo-/",
+      "https://www.instagram.com/p/DNMOmkIS3-I/",
+      "https://www.instagram.com/p/DNRPnEbyOwL/",
+      "https://www.instagram.com/p/DMBg7s7ydVu/",
+    ],
+  },
   { id: "bianco-bake-lab", cat: "contenido", label: "Social", title: "Bianco Bake Lab", client: "Contenido de marca", fotos: 9 },
-  { id: "esquina-kosher", cat: "contenido", label: "Social", title: "Esquina Kosher", client: "Contenido de marca", fotos: 7, link: "https://www.instagram.com/p/Da3C2IKJohQ/" },
+  {
+    id: "esquina-kosher", cat: "contenido", label: "Social", title: "Esquina Kosher", client: "Contenido de marca", fotos: 7,
+    reels: [
+      "https://www.instagram.com/p/Da3C2IKJohQ/",
+      "https://www.instagram.com/p/DbB7BZZFlHR/",
+      "https://www.instagram.com/p/Dba9j49jvWJ/",
+      "https://www.instagram.com/p/DbL8SO4kfbO/",
+    ],
+  },
 
   // ── Otros formatos ──
   { id: "trucoperro", cat: "videoclip", label: "Music video", title: "Truco Perro", client: "Videoclip musical", fotos: 10, featured: true },
@@ -152,20 +191,20 @@ export const SERVICES: Service[] = [
   {
     slug: "influencers", num: "02", grupo: "creators", cat: "Influencer marketing · Alianzas", title: "Influencers y", titleEm: "talento",
     description:
-      "Lo que casi nadie puede ofrecer: acceso real al talento. Tenemos alianzas directas con creadores grandes — el Mindo, Por la Ventana, Culotauro, FuckNews — y a través de ellas llegamos a prácticamente cualquier influencer o artista del país. No nos quedamos en el contacto: dirigimos y producimos la pieza para que salga con el estándar de tu marca y no con el de un post improvisado.",
+      "Lo que casi nadie puede ofrecer: acceso real al talento. Trabajamos con creadores, influencers y artistas de primer nivel en el país, y tenemos las relaciones para contratar a los perfiles de mayor alcance y reconocimiento cuando la campaña lo pide. No nos quedamos en el contacto: dirigimos y producimos la pieza para que salga con el estándar de tu marca y no con el de un post improvisado.",
     packages: [
-      { name: "Campaña · 1 a 3 creadores", price: "$1.800.000" },
-      { name: "Always-on · campaña /mes", price: "$3.200.000", featured: true },
-      { name: "Talento estelar y artistas", price: "Cotización por proyecto" },
+      { name: "Campaña con creadores", price: "Cotización por campaña", featured: true },
+      { name: "Influencers de alto alcance", price: "Cotización por proyecto" },
+      { name: "Artistas y talento estelar", price: "Cotización por proyecto" },
     ],
     benefits: [
-      "Alianzas directas con creadores grandes — no somos un intermediario frío",
+      "Relaciones directas con talento de alto alcance — no somos un intermediario frío",
       "Selección por audiencia real y encaje con tu nicho, no por vanidad",
       "Producción, dirección y control de calidad a cargo de Bushido",
       "Negociación de tarifas, entregables y derechos de uso",
       "Reporte de resultados por creador y por pieza",
     ],
-    note: "El valor es la gestión y la producción; la tarifa de cada creador se cotiza por perfil. Talento estelar y artistas, siempre por proyecto.",
+    note: "Cada campaña se cotiza a la medida: la tarifa depende del perfil y del alcance del creador. Cuéntanos el objetivo y armamos la propuesta con los nombres que encajan.",
   },
   {
     slug: "pauta", num: "03", grupo: "growth", cat: "Performance", title: "Pauta y", titleEm: "amplificación",

@@ -4,6 +4,12 @@ import { useEffect, useState } from "react";
 import { SERVICES, SERVICE_GROUPS, type Service } from "@/lib/site";
 import { openAnalisis } from "@/lib/ui";
 
+/** Valor numérico de un precio, o null si es "Cotización por proyecto" y similares. */
+function precioNum(p: string): number | null {
+  const n = p.replace(/\D/g, "");
+  return n ? Number(n) : null;
+}
+
 export default function ServiceList() {
   const [active, setActive] = useState<Service | null>(null);
   // Categoría desplegada. Arranca abierta la primera para que no se vea vacío.
@@ -28,9 +34,12 @@ export default function ServiceList() {
           );
           if (!items.length) return null;
           const abierta = openCat === g.key;
-          const desde = items
-            .map((s) => s.packages[0].price)
-            .sort((a, b) => Number(a.replace(/\D/g, "")) - Number(b.replace(/\D/g, "")))[0];
+          // El "desde" ignora los servicios que solo se cotizan (sin cifra).
+          const conCifra = items
+            .map((s) => ({ p: s.packages[0].price, n: precioNum(s.packages[0].price) }))
+            .filter((x): x is { p: string; n: number } => x.n !== null)
+            .sort((a, b) => a.n - b.n);
+          const desde = conCifra.length ? `desde ${conCifra[0].p}` : "a cotizar";
           return (
             <div className={"svc-cat" + (abierta ? " open" : "")} key={g.key}>
               <button
@@ -45,7 +54,7 @@ export default function ServiceList() {
                 </div>
                 <div className="scc-right">
                   <span className="scc-count">{items.length} servicios</span>
-                  <span className="scc-from">desde {desde}</span>
+                  <span className="scc-from">{desde}</span>
                   <span className="scc-toggle" aria-hidden="true">
                     {abierta ? "−" : "+"}
                   </span>
@@ -63,7 +72,13 @@ export default function ServiceList() {
                         {s.title} <em>{s.titleEm}</em>
                       </h3>
                       <div className="from">
-                        Desde <b>{s.packages[0].price}</b>
+                        {precioNum(s.packages[0].price) === null ? (
+                          <b>{s.packages[0].price}</b>
+                        ) : (
+                          <>
+                            Desde <b>{s.packages[0].price}</b>
+                          </>
+                        )}
                       </div>
                       <span className="go">
                         Ver paquetes <span aria-hidden="true">→</span>

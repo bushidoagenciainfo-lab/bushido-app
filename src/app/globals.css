@@ -2678,6 +2678,58 @@ body.lb-open { overflow: hidden; }
   .hero-v2 h1 { animation: none !important; }
 }
 
+/* ══════════ REELS · trabajo en movimiento ══════════ */
+/* distintivo en la ficha del portafolio cuando el proyecto tiene reel publicado */
+.badge-reel {
+  position: absolute; top: 14px; right: 14px; z-index: 3;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 11px; border-radius: 999px;
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--bone); background: rgba(213,50,46,.9);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  box-shadow: 0 6px 18px -6px rgba(0,0,0,.7);
+}
+.badge-reel span { font-size: 8px; }
+
+/* botones de reel dentro del álbum */
+.lb-reels { display: flex; gap: 8px; flex-wrap: wrap; }
+.lb-reel { display: inline-flex; align-items: center; gap: 8px; }
+.lb-play { color: var(--sepp); font-size: 9px; }
+
+/* bloque de reels sin galería propia */
+.reels-sueltos { margin-top: 74px; padding-top: 44px; border-top: 1px solid var(--hairline); }
+.rs-head { margin-bottom: 26px; }
+.rs-num {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .24em; text-transform: uppercase;
+  color: var(--sepp); display: inline-flex; align-items: center; gap: 10px;
+}
+.rs-num::before { content: ''; width: 24px; height: 1px; background: var(--sepp); }
+.rs-head h2 {
+  font-family: var(--serif); font-size: clamp(28px, 3.6vw, 46px); font-weight: 400;
+  color: var(--bone); letter-spacing: -.02em; margin: 8px 0 10px;
+}
+.rs-head h2 em { font-style: italic; color: var(--bone-dim); }
+.rs-head p { color: var(--bone-dim); font-size: 14.5px; line-height: 1.55; max-width: 560px; }
+.rs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.rs-card {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 18px; border-radius: 11px;
+  border: 1px solid var(--hairline); background: var(--ink-2);
+  transition: border-color .25s var(--e-out), background .25s var(--e-out), transform .25s var(--e-out);
+}
+.rs-card:hover { border-color: rgba(213,50,46,.5); background: rgba(213,50,46,.05); transform: translateY(-2px); }
+.rs-play {
+  width: 34px; height: 34px; flex-shrink: 0; display: grid; place-items: center;
+  border-radius: 50%; background: rgba(213,50,46,.15); color: var(--sepp); font-size: 11px;
+  border: 1px solid rgba(213,50,46,.35);
+}
+.rs-card:hover .rs-play { background: var(--sepp); color: var(--bone); }
+.rs-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; }
+.rs-client { font-family: var(--mono); font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--bone-ghost); }
+.rs-title { font-size: 14.5px; color: var(--bone); line-height: 1.3; }
+.rs-go { color: var(--bone-ghost); font-size: 14px; flex-shrink: 0; }
+.rs-card:hover .rs-go { color: var(--sepp); }
+
 /* ══════════ GREMIO · una sola puerta (creator / crew) ══════════ */
 .gf-h2 {
   font-family: var(--serif); font-size: clamp(36px, 4.5vw, 64px); font-weight: 400;
