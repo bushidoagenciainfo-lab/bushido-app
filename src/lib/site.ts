@@ -16,6 +16,7 @@ export interface PortfolioItem {
   title: string;
   client: string;
   fotos: number;            // cuántas fotos tiene la galería (01.jpg…)
+  videos?: number;          // videos propios en /video/<id>/01.mp4… (ver scripts/videos.mjs)
   featured?: boolean;
   reels?: string[];         // reels publicados (Instagram) de este proyecto
 }
@@ -73,12 +74,12 @@ export const PORTFOLIO: PortfolioItem[] = [
   { id: "adidas-adizero-aruku", cat: "moda", label: "Drop", title: "Adidas Adizero Aruku", client: "Adidas", fotos: 8 },
   { id: "adidas-megarider-01", cat: "moda", label: "Drop", title: "Adidas Megaride", client: "Adidas", fotos: 6, reels: ["https://www.instagram.com/reel/DM_WsaiyJ6_/"] },
   { id: "adidas-neighborhood", cat: "moda", label: "Campaña", title: "Adidas Neighborhood", client: "Adidas Originals", fotos: 10 },
-  { id: "adidas-outfit", cat: "moda", label: "Editorial", title: "Adidas Outfit", client: "Adidas", fotos: 10 },
+  { id: "adidas-outfit", cat: "moda", label: "Editorial", title: "Adidas Outfit", client: "Adidas", fotos: 10, videos: 1 },
   { id: "adidas-sl-bob", cat: "moda", label: "Campaña", title: "Adidas SL", client: "Adidas Running", fotos: 10 },
   { id: "airforce1", cat: "moda", label: "Drop", title: "Nike Air Force 1", client: "Nike", fotos: 10 },
-  { id: "new-balance-1000", cat: "moda", label: "Drop", title: "New Balance 1000", client: "New Balance", fotos: 8 },
+  { id: "new-balance-1000", cat: "moda", label: "Drop", title: "New Balance 1000", client: "New Balance", fotos: 8, videos: 3 },
   { id: "new-balance-9060-great-plains", cat: "moda", label: "Drop", title: "New Balance 9060", client: "Great Plains", fotos: 6 },
-  { id: "new-balance-mt10o", cat: "moda", label: "Drop", title: "New Balance MT10", client: "New Balance", fotos: 9 },
+  { id: "new-balance-mt10o", cat: "moda", label: "Drop", title: "New Balance MT10", client: "New Balance", fotos: 9, videos: 1 },
   { id: "new-era-cerrada", cat: "moda", label: "Editorial", title: "New Era Cerrada", client: "New Era", fotos: 10 },
   { id: "new-era-fire", cat: "moda", label: "Campaña", title: "New Era Fire", client: "New Era", fotos: 10 },
   { id: "new-era-9forty", cat: "moda", label: "Drop", title: "New Era 9FORTY", client: "New Era", fotos: 9 },
