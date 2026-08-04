@@ -1,0 +1,7 @@
+# Lo que NO hay que subir cuando se despliega con `vercel --prod` desde la terminal.
+# (Vercel construye el proyecto en su servidor, no necesita nuestra build local.)
+.next
+.data
+node_modules
+.git
+tsconfig.tsbuildinfo
