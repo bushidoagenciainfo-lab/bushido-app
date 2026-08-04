@@ -45,13 +45,21 @@ export default function PortfolioGrid() {
             />
             <div className="scrim" />
             <div className="badge">{p.label}</div>
-            {p.reels?.length ? (
+            {p.videos || p.reels?.length ? (
               <div className="badge-reel">
                 <span aria-hidden="true">▶</span>
-                {p.reels.length > 1 ? `${p.reels.length} reels` : "Reel"}
+                {p.videos
+                  ? p.videos > 1
+                    ? `${p.videos} videos`
+                    : "Video"
+                  : p.reels!.length > 1
+                    ? `${p.reels!.length} reels`
+                    : "Reel"}
               </div>
             ) : null}
-            <div className="lock">{p.fotos} fotos</div>
+            <div className="lock">
+              {p.fotos} fotos{p.videos ? ` · ${p.videos} video${p.videos > 1 ? "s" : ""}` : ""}
+            </div>
             <div className="frame-outline" />
             <div className="meta">
               <div className="meta-left">

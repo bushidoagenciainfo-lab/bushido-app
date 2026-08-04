@@ -2388,10 +2388,26 @@ body.has-cursor .cursor-dot, body.has-cursor .cursor-ring, body.has-cursor .curs
 .proof-l { font-family: var(--mono); font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: var(--bone-ghost); }
 .proof-sep { width: 1px; height: 26px; background: var(--hairline); }
 .proof-note { font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--sepp); }
+/* En móvil el flex-wrap dejaba los números "corridos" (dos arriba y uno suelto
+   abajo). Aquí pasa a rejilla de 3 columnas iguales con divisiones: se lee como
+   una tabla de resultados, que es lo que es. */
 @media (max-width: 640px) {
-  .hero-proof { gap: 12px 16px; padding: 14px 18px; border-radius: 18px; }
+  .hero-proof {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    align-items: start; gap: 0;
+    width: 100%; padding: 15px 8px 13px; border-radius: 16px;
+  }
   .proof-sep { display: none; }
-  .proof-note { width: 100%; text-align: center; }
+  .proof-item { padding: 0 5px; border-left: 1px solid var(--hairline); }
+  .proof-item:first-of-type { border-left: none; }
+  .proof-n { font-size: 21px; }
+  /* min-height: "ME GUSTA" cabe en una línea y las otras en dos; sin esto las
+     columnas quedan de alturas distintas y se ve descuadrado. */
+  .proof-l { font-size: 7.5px; letter-spacing: .07em; line-height: 1.35; min-height: 2.7em; }
+  .proof-note {
+    grid-column: 1 / -1; text-align: center; font-size: 8.5px; letter-spacing: .1em;
+    margin-top: 13px; padding-top: 11px; border-top: 1px solid var(--hairline);
+  }
 }
 
 /* ── El hero debe CABER en pantalla: en monitores anchos pero bajos (laptops)
@@ -2446,6 +2462,16 @@ body.lb-open { overflow: hidden; }
   max-width: 100%; max-height: 62svh; width: auto; height: auto;
   border-radius: 10px; border: 1px solid var(--hairline); object-fit: contain;
 }
+/* Video del álbum. Alto fijo + width:auto: así el navegador saca el ancho de la
+   proporción real del clip (los nuestros son verticales 9:16). Con height:auto
+   el <video> arrancaba en su tamaño por defecto (300x150) y se veía achatado. */
+.lb-video {
+  height: 62svh; width: auto; max-width: 100%;
+  aspect-ratio: 9 / 16;   /* provisional; el componente pone la real al cargar */
+  object-fit: contain;
+  border-radius: 10px; border: 1px solid var(--hairline); background: #000;
+  display: block;
+}
 .lb-nav {
   position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
   width: 46px; height: 46px; display: grid; place-items: center;
@@ -2464,12 +2490,18 @@ body.lb-open { overflow: hidden; }
 }
 .lb-thumb:hover { opacity: .85; }
 .lb-thumb.on { opacity: 1; border-color: var(--sepp); }
+/* la miniatura de un video usa la portada + un play encima */
+.lb-thumb.is-video { position: relative; display: grid; place-items: center; }
+.lb-thumb.is-video::before { content: ''; position: absolute; inset: 0; background: rgba(10,10,11,.45); border-radius: inherit; }
+.lb-thumb.is-video span { position: relative; color: var(--bone); font-size: 13px; text-shadow: 0 2px 8px rgba(0,0,0,.8); }
+.lb-thumb.is-video.on::before { background: rgba(213,50,46,.3); }
 .lb-foot { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding-top: 4px; border-top: 1px solid var(--hairline); }
 .lb-note { font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; color: var(--bone-ghost); }
 @media (max-width: 640px) {
   .lb { padding: 12px; }
   .lb-inner { gap: 10px; }
   .lb-stage img { max-height: 46svh; }
+  .lb-video { height: 46svh; }
   /* flechas más grandes y pegadas al borde: en móvil se tocan con el pulgar */
   .lb-nav { width: 42px; height: 42px; font-size: 24px; }
   .lb-nav.prev { left: 2px; } .lb-nav.next { right: 2px; }

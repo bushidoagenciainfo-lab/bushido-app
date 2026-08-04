@@ -87,12 +87,12 @@ export const PORTFOLIO: PortfolioItem[] = [
   { id: "new-era", cat: "moda", label: "Spot", title: "New Era", client: "Spot de campaña", fotos: 3, reels: ["https://www.instagram.com/reel/DJ7zwTbs6z6/"] },
   { id: "nike-air-force-1-fe-by-hype", cat: "moda", label: "Drop", title: "Nike Air Force 1 [FE]", client: "by HYPE", fotos: 5 },
   { id: "nike-air-max-dn-heat-map", cat: "moda", label: "Drop", title: "Nike Air Max DN", client: "Heat Map", fotos: 6 },
-  { id: "nike-dn", cat: "moda", label: "Drop", title: "Nike DN", client: "Nike Sportswear", fotos: 10, reels: ["https://www.instagram.com/reel/DJF0vq3s2ke/"] },
+  { id: "nike-dn", cat: "moda", label: "Drop", title: "Nike DN", client: "Nike Sportswear", fotos: 10, videos: 1, reels: ["https://www.instagram.com/reel/DJF0vq3s2ke/"] },
   { id: "veneno-fire", cat: "moda", label: "Editorial", title: "Veneno Fire", client: "Red Bull", fotos: 4 },
   { id: "veneno-rider", cat: "moda", label: "Editorial", title: "Veneno Rider", client: "Red Bull", fotos: 6 },
 
   // ── Eventos ──
-  { id: "veneno", cat: "eventos", label: "Activación", title: "Veneno", client: "Red Bull", fotos: 10, featured: true },
+  { id: "veneno", cat: "eventos", label: "Activación", title: "Veneno", client: "Red Bull", fotos: 10, videos: 1, featured: true },
   { id: "forbes-colombia", cat: "eventos", label: "Corporate", title: "Forbes Colombia", client: "Evento corporativo", fotos: 10, featured: true },
   { id: "ciudad-primavera-j-balvin", cat: "eventos", label: "Festival", title: "Ciudad Primavera", client: "J Balvin", fotos: 10 },
   { id: "estrellas-aguila", cat: "eventos", label: "Activación", title: "Estrellas Águila", client: "Cerveza Águila", fotos: 10 },
@@ -128,7 +128,7 @@ export const PORTFOLIO: PortfolioItem[] = [
 
   // ── Otros formatos ──
   { id: "trucoperro", cat: "videoclip", label: "Music video", title: "Truco Perro", client: "Videoclip musical", fotos: 10, featured: true },
-  { id: "cinema-bts", cat: "cinema", label: "Cinema", title: "Cine y series", client: "Behind the scenes", fotos: 10, featured: true },
+  { id: "cinema-bts", cat: "cinema", label: "Cinema", title: "Cine y series", client: "Behind the scenes", fotos: 10, videos: 4, featured: true },
   { id: "historias-de-carceles", cat: "podcast", label: "Podcast", title: "Historias de cárceles", client: "Producción de podcast", fotos: 10, featured: true },
 ];
 
