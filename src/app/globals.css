@@ -2710,6 +2710,20 @@ body.lb-open { overflow: hidden; }
   .hero-v2 h1 { animation: none !important; }
 }
 
+/* Contexto del pop-up en móvil (en desktop manda el panel .modal-hook) */
+.modal-intro { display: none; }
+.mi-tag {
+  display: inline-block; margin-bottom: 10px;
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--gold); border: 1px solid rgba(201,162,74,.4); border-radius: 999px; padding: 5px 11px;
+}
+.modal-intro p { font-size: 13.5px; line-height: 1.55; color: var(--bone-dim); }
+.modal-intro strong { color: var(--bone); font-weight: 400; }
+/* El media query va AQUÍ (después de la regla base) o el display:none lo pisa. */
+@media (max-width: 820px) {
+  .modal-intro { display: block; margin-bottom: 22px; }
+}
+
 /* ══════════ REELS · trabajo en movimiento ══════════ */
 /* distintivo en la ficha del portafolio cuando el proyecto tiene reel publicado */
 .badge-reel {
@@ -2973,6 +2987,29 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 .bc-seg { font-family: var(--mono); font-size: 10px; color: var(--bone-ghost); }
 .bc-estado { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--bone); background: var(--ink); border: 1px solid var(--hairline); border-radius: 7px; padding: 5px 8px; margin-left: auto; cursor: pointer; }
 .bc-estado.s-destacado { color: var(--gold); border-color: var(--gold); }
+
+/* rol del crew + links de su postulación */
+.crew-rol {
+  flex-shrink: 0; font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--sepp);
+  border: 1px solid rgba(213,50,46,.4); border-radius: 999px; padding: 4px 9px;
+}
+.crew-links { display: flex; flex-wrap: wrap; gap: 6px; }
+.crew-link {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--bone-dim); border: 1px solid var(--hairline); border-radius: 6px; padding: 4px 9px;
+}
+.crew-link:hover { color: var(--bone); border-color: var(--bone-ghost); }
+.crew-link.cv { color: var(--gold); border-color: rgba(201,162,74,.45); }
+
+/* estado del informe automático dentro del lead */
+.al-informe {
+  margin-top: 8px; font-family: var(--mono); font-size: 10px; letter-spacing: .04em;
+  padding: 6px 10px; border-radius: 7px; display: inline-block;
+}
+.al-informe.ok { color: #6FBF8E; background: rgba(111,191,142,.08); border: 1px solid rgba(111,191,142,.3); }
+.al-informe.bad { color: var(--sepp); background: rgba(213,50,46,.07); border: 1px solid rgba(213,50,46,.3); }
+.al-informe a { color: inherit; text-decoration: underline; }
 
 /* ── Inteligencia por nicho ── */
 .nichos { display: flex; flex-direction: column; gap: 16px; }

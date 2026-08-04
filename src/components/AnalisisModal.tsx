@@ -92,9 +92,23 @@ export default function AnalisisModal() {
         </aside>
 
         <div className="modal-form-wrap">
+          {/* En móvil el panel de la izquierda (.modal-hook) se oculta por espacio,
+              y el formulario quedaba sin explicar QUÉ es ni QUÉ llega. Este bloque
+              solo se ve en móvil y da ese contexto en tres líneas. */}
+          <div className="modal-intro">
+            <div className="mi-tag">Regalo de bienvenida · Gratis</div>
+            <p>
+              Analizamos tus redes y tu web y te mandamos un <strong>informe con
+              tus puntos débiles, tus oportunidades y un plan</strong> — a tu correo
+              y WhatsApp, en menos de 24 horas.
+            </p>
+          </div>
+
           <LeadForm
             kind="analisis"
-            subtitle="Pide tu análisis · 40 segundos"
+            /* "1 minuto" = lo que toma LLENARLO. La promesa de entrega es una
+               sola en todo el sitio: menos de 24 horas. */
+            subtitle="Análisis gratis · llenarlo toma 1 minuto"
             title={
               <>
                 ¿A dónde te <em>mandamos</em> el informe?

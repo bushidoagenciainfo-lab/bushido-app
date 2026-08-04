@@ -51,6 +51,31 @@ const KIND_LABEL: Record<LeadKind, string> = {
 };
 
 /**
+ * Deja constancia EN EL LEAD de cómo le fue al informe automático.
+ * Sin esto, cuando un análisis no salía había que bucear en los logs de Vercel:
+ * ahora el panel lo muestra al lado del lead.
+ */
+export async function marcarInforme(
+  leadId: string,
+  info: { ok: boolean; url?: string; error?: string }
+): Promise<void> {
+  if (!hasDb()) return;
+  try {
+    const supabase = createClient(SUPABASE_URL as string, SUPABASE_SERVICE_ROLE_KEY as string, {
+      auth: { persistSession: false },
+    });
+    const { data } = await supabase.from("leads").select("meta").eq("id", leadId).single();
+    const meta = {
+      ...((data?.meta as Record<string, unknown>) ?? {}),
+      informe: { ...info, fecha: new Date().toISOString() },
+    };
+    await supabase.from("leads").update({ meta }).eq("id", leadId);
+  } catch (e) {
+    console.error("marcarInforme error:", e);
+  }
+}
+
+/**
  * Store the lead. Uses Supabase when configured, otherwise a local JSON file (dev).
  * Devuelve el id del lead (para enlazarlo con su análisis) o null si no hay BD.
  */

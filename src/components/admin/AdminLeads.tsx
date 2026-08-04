@@ -10,6 +10,14 @@ function fecha(iso?: string) {
     " " + d.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
 }
 
+/** Resultado del informe automático, guardado en lead.meta.informe. */
+function infoInforme(l: LeadRow): { ok: boolean; url?: string; error?: string } | null {
+  const meta = l.meta as Record<string, unknown> | undefined;
+  const i = meta?.informe as { ok?: boolean; url?: string; error?: string } | undefined;
+  if (!i || typeof i.ok !== "boolean") return null;
+  return { ok: i.ok, url: i.url, error: i.error };
+}
+
 export default function AdminLeads({ leads }: { leads: LeadRow[] }) {
   const [rows, setRows] = useState(leads);
   const [busy, setBusy] = useState<string | null>(null);
@@ -76,6 +84,23 @@ export default function AdminLeads({ leads }: { leads: LeadRow[] }) {
               </div>
               {l.project ? <div className="al-project">{l.project}</div> : null}
               {l.message ? <div className="al-msg">“{l.message}”</div> : null}
+              {/* Qué pasó con el informe automático (antes solo se veía en los logs) */}
+              {infoInforme(l) && (
+                <div className={"al-informe" + (infoInforme(l)!.ok ? " ok" : " bad")}>
+                  {infoInforme(l)!.ok ? (
+                    <>
+                      Informe enviado{" "}
+                      {infoInforme(l)!.url && (
+                        <a href={infoInforme(l)!.url} target="_blank" rel="noopener noreferrer">
+                          ver →
+                        </a>
+                      )}
+                    </>
+                  ) : (
+                    <>No se generó: {infoInforme(l)!.error || "motivo desconocido"}</>
+                  )}
+                </div>
+              )}
             </div>
             <div className="al-actions">
               <select

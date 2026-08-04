@@ -2,6 +2,7 @@ import { NextResponse, after } from "next/server";
 import { z } from "zod";
 import { generarAnalisis, hasIA } from "@/lib/analizar";
 import { storeAnalisis, informeUrl, emailInformeListo } from "@/lib/analisis-store";
+import { marcarInforme } from "@/lib/leads";
 import { sendClientWhatsApp } from "@/lib/whatsapp";
 import { forwardToServer } from "@/lib/forward";
 
@@ -60,6 +61,7 @@ export async function POST(request: Request) {
       });
       if (!analisis) {
         console.error("[informe] generarAnalisis devolvió null");
+        if (d.leadId) await marcarInforme(d.leadId, { ok: false, error: "La IA no devolvió resultado." });
         return;
       }
       const id = await storeAnalisis(analisis, d.leadId ?? undefined);
@@ -78,9 +80,16 @@ export async function POST(request: Request) {
         phone: d.phone ?? undefined,
         params: [(d.nombre || "").split(" ")[0] || "hola", analisis.marca, url],
       });
+      if (d.leadId) await marcarInforme(d.leadId, { ok: true, url });
       console.log(`[informe] LISTO en ${Date.now() - t0}ms · ${url}`);
     } catch (e) {
       console.error("[informe] error:", e);
+      if (d.leadId) {
+        await marcarInforme(d.leadId, {
+          ok: false,
+          error: e instanceof Error ? e.message : String(e),
+        });
+      }
     }
   });
 

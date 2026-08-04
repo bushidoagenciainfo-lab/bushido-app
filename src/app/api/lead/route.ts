@@ -5,6 +5,7 @@ import {
   notifyLead,
   sendClientAutoReply,
   classifyProject,
+  marcarInforme,
   type LeadInput,
 } from "@/lib/leads";
 import { hasIA } from "@/lib/analizar";
@@ -126,6 +127,15 @@ export async function POST(request: Request) {
     // 2) análisis: se delega a /api/generar-informe (su propio presupuesto de
     //    tiempo: la búsqueda web sola tarda ~35s y aquí no cabía).
     const secret = process.env.INTERNAL_SECRET || process.env.ANALIZAR_SECRET;
+    // Si no se puede ni intentar, queda escrito en el lead (se ve en /admin).
+    if (lead.kind === "analisis" && leadId && (!hasIA() || !secret)) {
+      await marcarInforme(leadId, {
+        ok: false,
+        error: !hasIA()
+          ? "Falta ANTHROPIC_API_KEY en el entorno."
+          : "Falta INTERNAL_SECRET / ANALIZAR_SECRET en el entorno.",
+      });
+    }
     if (lead.kind === "analisis" && hasIA() && secret) {
       try {
         const res = await fetch(`${baseUrl(request)}/api/generar-informe`, {
@@ -147,8 +157,20 @@ export async function POST(request: Request) {
         });
         console.log(`[after] informe encolado (${res.status}) en ${Date.now() - tStart}ms`);
         if (res.ok) return; // el informe reemplaza al auto-reply genérico
+        if (leadId) {
+          await marcarInforme(leadId, {
+            ok: false,
+            error: `/api/generar-informe respondió ${res.status}`,
+          });
+        }
       } catch (e) {
         console.error("[after] no se pudo encolar el informe:", e);
+        if (leadId) {
+          await marcarInforme(leadId, {
+            ok: false,
+            error: `No se pudo encolar: ${e instanceof Error ? e.message : String(e)}`,
+          });
+        }
         // si falla, cae al auto-reply de abajo como acuse
       }
     }

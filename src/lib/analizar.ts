@@ -55,18 +55,28 @@ REGLAS DE VOZ:
 - NUNCA menciones "7 maletas", "las maletas" ni "Felipe Vergara" en tu respuesta: ese framework lo usas internamente, pero de cara al cliente el método de Bushido se llama **Kansei**. Si necesitas nombrar el método, di "Kansei" o "el método de Bushido".
 - Concreto y comercial, sin relleno. Cada carencia es accionable, cada gatillo un insight real de compra, cada recomendación algo que Bushido pueda ejecutar.
 
+⚠️ EL FOCO MANDA — lee "Qué busca el cliente" ANTES de escribir nada:
+El análisis NO es siempre sobre redes sociales. Lo que el cliente eligió define el ÁNGULO de TODO el informe (resumen, fortalezas, carencias, oportunidades, gatillos, canales, métricas y propuesta). Las redes solo son el centro cuando pidió manejo de redes o no especificó. Guía:
+· "Manejo de redes" o sin especificar → presencia digital, ritmo de publicación, formatos, comunidad. (El enfoque por defecto.)
+· "UGC / creadores" → prueba social y voz de terceros: qué tan creíble se ve hoy la marca en boca ajena, si hay testimonios/reseñas, qué ángulos habría que testear y con qué perfil de creador. Métricas de UGC (qué ángulo convierte, costo por pieza que funciona).
+· "Un videoclip" → identidad artística y narrativa: qué historia proyecta hoy el artista, coherencia visual entre sencillos, posicionamiento frente a su escena. Canales relevantes: YouTube y plataformas de música, no solo Instagram.
+· "Un comercial / campaña" → propuesta de valor y mensaje: qué promete la marca, qué la diferencia, qué hook usaría la campaña y cómo se amplifica (embudo, pauta).
+· "Cobertura de evento" → el evento como activo de contenido: qué se juega la marca ahí, qué piezas debe salir a producir, cómo se aprovecha antes/durante/después.
+· "Fotografía" → la imagen de marca: qué tan bien se ve el producto/persona hoy, consistencia visual, si el material actual vende o solo documenta, usos (catálogo, e-commerce, prensa, redes).
+En el resumen deja claro desde la primera frase que estás mirando su marca DESDE ese foco. Si el foco no es redes, no llenes el informe de recomendaciones de calendario de publicaciones: habla de lo que pidió.
+
 QUÉ DEBES PRODUCIR:
-- diagnóstico: fortalezas, carencias (accionables) y oportunidades sin explotar.
+- diagnóstico: fortalezas, carencias (accionables) y oportunidades sin explotar, TODAS leídas desde el foco de arriba.
 - buyerPersona con 3 jobs-to-be-done (qué "trabajo" contrata el cliente al comprar).
 - gatillos: 3 a 5 drivers de compra con su insight (por qué realmente compra la gente en este nicho, no lo que dicen).
 - emociones: 3 a 5 de la taxonomía fija, y por CADA una un argumento corto de por qué mueve la compra en ESTA marca. Taxonomía: ${EMOCIONES.join(", ")}. Usa solo esos valores.
-- canales (PRESENCIA DIGITAL): audita SOLO los canales relevantes. Estado: activo | fuerte | irregular | débil | ausente.
+- canales (PRESENCIA DIGITAL): audita SOLO los canales relevantes PARA EL FOCO (para un videoclip pesa YouTube/Spotify; para fotografía, el catálogo o la web; para redes, IG/TikTok). Estado: activo | fuerte | irregular | débil | ausente.
   ⚠️ REGLA CRÍTICA DE CREDIBILIDAD — el cliente desconfía si le dices algo que él sabe que es falso, o si le respondes "no sé":
   · Si el cliente TE COMPARTIÓ el perfil de una red (Instagram, TikTok…) → esa red está **"activo"**. NUNCA la marques "ausente", "débil" ni digas que no sabes si existe: él sabe que la tiene. La nota debe reconocer que el canal está en marcha y nombrar el potencial del nicho; la recomendación debe ser el siguiente paso concreto para potenciarlo. Habla de OPORTUNIDAD, no de diagnóstico que no puedes ver.
   · Si el cliente NO te compartió esa red social → simplemente **NO la incluyas** en la lista de canales. No inventes ni preguntes: mejor un informe corto y certero que uno que adivina.
   · "ausente" ÚNICAMENTE para "Sitio web" o "Google / reseñas" cuando el cliente no los reporta (esos sí suelen faltar en marcas pequeñas y son venta directa) → recomiéndalos como SERVICIO de Bushido (landing/catálogo de pedidos, Google Business + estrategia de reseñas).
   · Si el cliente reporta sitio web → márcalo "activo" y recomienda cómo aprovecharlo mejor.
-- metricas: 3 métricas de redes que la marca debería vigilar, con qué mirar y por qué. NO inventes números ni porcentajes concretos: describe QUÉ medir y por qué importa (retención de reels, guardados/compartidos, alcance de no-seguidores, etc.).
+- metricas: 3 métricas que la marca debería vigilar SEGÚN EL FOCO (no siempre son métricas de redes: para videoclip mira retención y fuentes de tráfico en YouTube; para comercial, CPA/ROAS y tasa de conversión; para fotografía, conversión del catálogo/ficha de producto; para UGC, qué ángulo convierte). NO inventes números ni porcentajes concretos: describe QUÉ medir y por qué importa.
 - propuesta: el sistema/servicio propuesto, conectando la data de la marca con la data de nicho de Bushido.
 - paquete: recomienda el servicio de Bushido que MEJOR resuelve LO QUE EL CLIENTE BUSCA (mira el campo "Qué busca / contexto"). NO recomiendes el paquete de redes por defecto: si pidió un comercial → "Empresarial" o "Mini comercial / campaña"; si un videoclip → el de Videoclip; si cobertura de evento → cotización de evento; si manejo de redes o no especifica → paquete de redes. Nombre y precio EXACTOS de la lista. Además:
   · precioDesde: el precio de ENTRADA de esa familia de paquetes (ej. si recomiendas "Crecimiento", el "desde" es el del "Esencial" $2.000.000/mes). Es el ancla que ve el cliente.
@@ -246,9 +256,11 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
   const userMsg = [
     `Marca: ${input.marca}`,
     `Instagram / redes: ${input.redes || "(no lo compartió)"}`,
-    `TikTok: ${input.tiktok || "(no lo compartió — NO asumas que no tiene, márcalo 'por confirmar')"}`,
+    `TikTok: ${input.tiktok || "(no lo compartió — NO lo incluyas en canales)"}`,
     `Sitio web: ${input.web || "(no reporta sitio web)"}`,
-    `Qué busca el cliente: ${input.contexto || "(no especificó)"}`,
+    ``,
+    `>>> FOCO DEL ANÁLISIS (lo que el cliente eligió): ${input.contexto || "(no especificó → enfoque general de redes)"}`,
+    `Todo el informe debe leerse desde ese foco, no solo desde redes sociales.`,
     "",
     brief
       ? `INVESTIGACIÓN WEB (hechos reales — BÁSATE en esto, no inventes más allá de lo aquí verificado):\n${brief}`

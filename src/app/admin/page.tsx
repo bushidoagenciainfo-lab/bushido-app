@@ -4,6 +4,7 @@ import { listCreadores } from "@/lib/creadores";
 import AdminLeads from "@/components/admin/AdminLeads";
 import AdminCreadores, { type CreadorLite } from "@/components/admin/AdminCreadores";
 import AdminNichos from "@/components/admin/AdminNichos";
+import AdminCrew from "@/components/admin/AdminCrew";
 import AdminLogout from "@/components/admin/AdminLogout";
 import AdminSection from "@/components/admin/AdminSection";
 
@@ -51,7 +52,7 @@ export default async function AdminPage() {
   try {
     [stats, leads, analisis, creadores, nichos] = await Promise.all([
       dashboardStats(),
-      listLeads(100),
+      listLeads(200),
       listAnalisis(50),
       listCreadores({ limit: 300 }) as Promise<CreadorLite[]>,
       inteligenciaNichos(),
@@ -59,6 +60,9 @@ export default async function AdminPage() {
   } catch (e) {
     error = e instanceof Error ? e.message : "Error cargando datos.";
   }
+
+  // Los realizadores (crew) entran como leads kind="talento" desde /gremio.
+  const crew = leads.filter((l) => l.kind === "talento");
 
   return (
     <main className="admin">
@@ -132,6 +136,14 @@ export default async function AdminPage() {
         hint="Fortalezas y debilidades de quienes piden el análisis"
       >
         <AdminNichos nichos={nichos} />
+      </AdminSection>
+
+      <AdminSection
+        title="Banco de crew"
+        count={crew.length}
+        hint="Realizadores: foto, cámara, edición, color, sonido"
+      >
+        <AdminCrew crew={crew} />
       </AdminSection>
 
       <AdminSection title="Book de creadores" count={creadores.length} hint="Privado · castings por nicho">
