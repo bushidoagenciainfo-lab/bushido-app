@@ -8,10 +8,10 @@ export const metadata: Metadata = { title: "Descargables Bushido" };
 // el nombre de `file`. Mientras no exista el archivo (file sin definir), la
 // tarjeta solo capta el correo y dice "te lo enviamos pronto".
 const GIFTS: Gift[] = [
-  { tag: "Color · 10 LUTs", title: "Pack de LUTs", desc: "Nuestro look base de color, listo para DaVinci, Premiere y FCP.", file: "/descargables/luts-bushido.zip" },
-  { tag: "Foto · 12 presets", title: "Presets de foto", desc: "Revelado editorial de Bushido para Lightroom móvil y escritorio.", file: "/descargables/presets-bushido.zip" },
-  { tag: "Diseño · 6 fuentes", title: "Tipografías", desc: "La selección de fuentes que usamos para títulos y subtítulos.", file: "/descargables/tipografias-bushido.zip" },
-  { tag: "Video · overlays", title: "Overlays + plugins", desc: "Texturas de grano, film burn y transiciones para tus ediciones.", file: "/descargables/overlays-bushido.zip" },
+  { tag: "Color · 37 LUTs", title: "Pack de LUTs", desc: "Nuestras conversiones de S-Log3 y looks base .cube, listas para DaVinci, Premiere y FCP.", file: "/descargables/luts-bushido.zip" },
+  { tag: "Foto · 10 presets", title: "Presets de foto", desc: "Revelado editorial de Bushido en .xmp para Lightroom móvil y escritorio.", file: "/descargables/presets-bushido.zip" },
+  { tag: "Diseño · 9 fuentes", title: "Tipografías", desc: "La selección de fuentes que usamos para títulos y subtítulos.", file: "/descargables/tipografias-bushido.zip" },
+  { tag: "Video · 8 recursos", title: "Overlays + presets", desc: "Light leaks en video y presets de efecto (.prfpset) para Premiere.", file: "/descargables/overlays-bushido.zip" },
 ];
 
 export default function DescargablesPage() {

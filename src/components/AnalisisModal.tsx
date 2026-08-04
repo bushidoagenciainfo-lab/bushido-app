@@ -120,6 +120,7 @@ export default function AnalisisModal() {
                 placeholder: "Elige (opcional)",
                 options: [
                   "Manejo de redes",
+                  "UGC / creadores",
                   "Un videoclip",
                   "Un comercial / campaña",
                   "Cobertura de evento",

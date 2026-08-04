@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { NICHOS_CREADOR, FORMATOS_CREADOR } from "@/lib/creadores-taxonomia";
+import MultiSelect from "./MultiSelect";
 
 type Status = "idle" | "loading" | "done" | "error";
 
@@ -12,11 +13,13 @@ export default function CreatorForm() {
   const [nichos, setNichos] = useState<string[]>([]);
   const [formatos, setFormatos] = useState<string[]>([]);
 
-  const toggle = (arr: string[], set: (v: string[]) => void, v: string) =>
-    set(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
-
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!nichos.length) {
+      setError("Elige al menos un nicho.");
+      setStatus("error");
+      return;
+    }
     setStatus("loading");
     setError("");
     const fd = new FormData(e.currentTarget);
@@ -102,37 +105,24 @@ export default function CreatorForm() {
           </div>
         </div>
 
-        <div className="field">
-          <label>Tu nicho <span className="req">*</span></label>
-          <div className="chip-group">
-            {NICHOS_CREADOR.map((n) => (
-              <button
-                key={n}
-                type="button"
-                className={"chip" + (nichos.includes(n) ? " on" : "")}
-                onClick={() => toggle(nichos, setNichos, n)}
-              >
-                {n}
-              </button>
-            ))}
-          </div>
-        </div>
+        <MultiSelect
+          label="Tu nicho"
+          required
+          hint="(puedes elegir varios)"
+          options={NICHOS_CREADOR}
+          value={nichos}
+          onChange={setNichos}
+          placeholder="Elige tu nicho"
+        />
 
-        <div className="field">
-          <label>Qué sabes hacer</label>
-          <div className="chip-group">
-            {FORMATOS_CREADOR.map((f) => (
-              <button
-                key={f}
-                type="button"
-                className={"chip" + (formatos.includes(f) ? " on" : "")}
-                onClick={() => toggle(formatos, setFormatos, f)}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
-        </div>
+        <MultiSelect
+          label="Qué sabes hacer"
+          hint="(formatos)"
+          options={FORMATOS_CREADOR}
+          value={formatos}
+          onChange={setFormatos}
+          placeholder="Elige los formatos"
+        />
 
         <div className="form-row">
           <div className="field">

@@ -101,24 +101,8 @@
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.9'/></svg>");
   }
 
-  /* ─────────────────────────────  LETTERBOX INTRO / TRANSITION  ─────── */
-  .letterbox {
-    position: fixed; left: 0; right: 0; z-index: 200;
-    background: #000; height: 50vh;
-    pointer-events: none;
-  }
-  .letterbox.top { top: 0; transform: translateY(-100%); }
-  .letterbox.bot { bottom: 0; transform: translateY(100%); }
-  .letterbox.play-in.top { animation: barIn 0.5s var(--e-in-out) forwards; }
-  .letterbox.play-in.bot { animation: barIn 0.5s var(--e-in-out) forwards; }
-  .letterbox.play-out.top { animation: barUp 1.1s var(--e-in-out) forwards; }
-  .letterbox.play-out.bot { animation: barDown 1.1s var(--e-in-out) forwards; }
-  @keyframes barIn  { to { transform: translateY(0); } }
-  @keyframes barUp  { from { transform: translateY(0); } to { transform: translateY(-100%); } }
-  @keyframes barDown { from { transform: translateY(0); } to { transform: translateY(100%); } }
-  /* first-load: bars start closed and open */
-  .first-load .letterbox.top { transform: translateY(0); animation: barUp 1.1s var(--e-in-out) 0.3s forwards; }
-  .first-load .letterbox.bot { transform: translateY(0); animation: barDown 1.1s var(--e-in-out) 0.3s forwards; }
+  /* Las franjas negras (letterbox) se eliminaron: causaban la franja negra en
+     pantallas bajas y el parpadeo en cada cambio de pestaña. No reintroducir. */
 
   /* ─────────────────────────────  NAV  ───────────────────────────── */
   .nav {
@@ -135,10 +119,11 @@
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 20px 60px -20px rgba(0,0,0,0.6);
     width: calc(100% - 40px); max-width: 940px;
     justify-content: space-between;
-    opacity: 0;
-    animation: navIn 0.9s var(--e-out) 1.2s forwards;
+    /* Sin animación de entrada: antes tenía opacity:0 + 1.2s de espera (para que
+       abrieran las franjas negras) y eso era el "parpadeo" al cargar y en cada
+       pestaña. La barra simplemente está ahí. */
+    opacity: 1;
   }
-  @keyframes navIn { to { opacity: 1; } }
   .nav-brand {
     font-family: var(--brut);
     font-size: 20px; letter-spacing: 0.28em;
@@ -1777,7 +1762,7 @@
   content: ''; position: absolute; left: 2%; right: 6%; bottom: 0.12em;
   height: 0.055em; background: var(--sepp);
   transform: scaleX(0); transform-origin: left;
-  animation: underline 1.3s var(--e-out) 0.9s forwards;
+  animation: underline 1s var(--e-out) 0.25s forwards;
 }
 .hero-v2 .sub {
   font-size: clamp(16px, 1.5vw, 21px); color: var(--bone-dim);
@@ -2160,13 +2145,10 @@ body.drawer-open { overflow: hidden; }
   text-shadow: 0 2px 30px rgba(0,0,0,0.75), 0 0 60px rgba(0,0,0,0.5);
 }
 
-/* ══════════════ Letterbox · parpadeo cinematográfico (carga y cambio de sección) ══════════════ */
-.lb { position: fixed; left: 0; right: 0; height: 52vh; background: #000; z-index: 400; pointer-events: none; }
-.lb-top { top: 0; animation: lbUp 0.6s cubic-bezier(0.65,0.05,0.35,1) forwards; }
-.lb-bot { bottom: 0; animation: lbDown 0.6s cubic-bezier(0.65,0.05,0.35,1) forwards; }
-@keyframes lbUp { from { transform: translateY(0); } to { transform: translateY(-101%); } }
-@keyframes lbDown { from { transform: translateY(0); } to { transform: translateY(101%); } }
-@media (prefers-reduced-motion: reduce) { .lb { display: none; } }
+/* (Aquí vivía el "parpadeo" de franjas negras. Eliminado: además de tapar el hero,
+   sus reglas `.lb` chocaban con el Lightbox del portafolio — mismo nombre de clase —
+   y le metían `pointer-events:none` + `height:52vh`, por eso el álbum se abría pero
+   no dejaba pasar fotos.) */
 
 /* ── cursor personalizado (anillo + punto) ── */
 .cursor-ring { transition: transform 0.13s ease-out, width 0.25s var(--e-out), height 0.25s var(--e-out), border-color 0.25s var(--e-out); }
@@ -2444,7 +2426,11 @@ body.lb-open { overflow: hidden; }
 .lb-inner {
   width: 100%; max-width: 1080px; max-height: 94svh;
   display: flex; flex-direction: column; gap: 14px;
+  overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
 }
+/* el álbum SÍ recibe clics (una regla vieja de las franjas negras se los bloqueaba) */
+.lb, .lb * { pointer-events: auto; }
+.lb-stage { touch-action: pan-y; }
 .lb-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .lb-cat { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--sepp); margin-bottom: 6px; }
 .lb-head h3 { font-family: var(--serif); font-weight: 400; font-size: clamp(22px,3vw,32px); color: var(--bone); line-height: 1.1; }
@@ -2469,6 +2455,7 @@ body.lb-open { overflow: hidden; }
 .lb-nav:hover { background: var(--sepp); border-color: var(--sepp); }
 .lb-nav.prev { left: 8px; } .lb-nav.next { right: 8px; }
 .lb-count { position: absolute; bottom: 10px; right: 12px; font-family: var(--mono); font-size: 10px; letter-spacing: .1em; color: var(--bone-dim); background: rgba(10,10,11,.7); padding: 5px 10px; border-radius: 999px; }
+.lb-swipe { display: none; }
 .lb-thumbs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
 .lb-thumb {
   width: 62px; height: 62px; flex-shrink: 0; border-radius: 7px; cursor: pointer;
@@ -2481,8 +2468,19 @@ body.lb-open { overflow: hidden; }
 .lb-note { font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; color: var(--bone-ghost); }
 @media (max-width: 640px) {
   .lb { padding: 12px; }
-  .lb-stage img { max-height: 48svh; }
-  .lb-thumb { width: 48px; height: 48px; }
+  .lb-inner { gap: 10px; }
+  .lb-stage img { max-height: 46svh; }
+  /* flechas más grandes y pegadas al borde: en móvil se tocan con el pulgar */
+  .lb-nav { width: 42px; height: 42px; font-size: 24px; }
+  .lb-nav.prev { left: 2px; } .lb-nav.next { right: 2px; }
+  .lb-swipe {
+    display: block; position: absolute; bottom: 10px; left: 12px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: .1em; color: var(--bone-ghost);
+    background: rgba(10,10,11,.7); padding: 5px 10px; border-radius: 999px;
+  }
+  .lb-thumbs { gap: 6px; }
+  .lb-thumb { width: 52px; height: 52px; }
+  .lb-foot { padding-top: 8px; }
   .lb-foot .btn { flex: 1; justify-content: center; }
 }
 
@@ -2678,6 +2676,82 @@ body.lb-open { overflow: hidden; }
 
 @media (prefers-reduced-motion: reduce) {
   .hero-v2 h1 { animation: none !important; }
+}
+
+/* ══════════ GREMIO · una sola puerta (creator / crew) ══════════ */
+.gf-h2 {
+  font-family: var(--serif); font-size: clamp(36px, 4.5vw, 64px); font-weight: 400;
+  line-height: 1; letter-spacing: -.02em; color: var(--bone); margin-bottom: 20px;
+}
+.gf-switch {
+  border: 1px solid var(--hairline); border-radius: 14px; background: var(--ink-2);
+  padding: 22px 22px 20px; margin-bottom: 18px;
+}
+.gf-q {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--sepp); margin-bottom: 16px;
+}
+.gf-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.gf-opt {
+  display: flex; flex-direction: column; gap: 8px; text-align: left;
+  padding: 18px 18px 16px; border-radius: 11px; cursor: pointer;
+  border: 1px solid var(--hairline); background: rgba(237,231,218,.02);
+  transition: border-color .25s var(--e-out), background .25s var(--e-out), transform .25s var(--e-out);
+}
+.gf-opt:hover { border-color: rgba(213,50,46,.45); transform: translateY(-2px); }
+.gf-opt.on { border-color: var(--sepp); background: rgba(213,50,46,.08); }
+.gf-opt-k {
+  font-family: var(--serif); font-size: 24px; color: var(--bone); line-height: 1;
+}
+.gf-opt.on .gf-opt-k { color: var(--sepp); font-style: italic; }
+.gf-opt-d { font-size: 12.5px; line-height: 1.45; color: var(--bone-dim); }
+.gf-hint {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .1em;
+  color: var(--bone-ghost); text-align: center; padding: 26px 0;
+}
+@media (max-width: 560px) { .gf-opts { grid-template-columns: 1fr; } }
+
+/* ══════════ Desplegable de selección múltiple ══════════ */
+.ms { position: relative; }
+.ms-trigger {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 13px 16px; border-radius: 9px; cursor: pointer; text-align: left;
+  border: 1px solid var(--hairline); background: rgba(10,10,11,.5);
+  color: var(--bone-ghost); font-size: 14px; font-family: inherit;
+  transition: border-color .2s var(--e-out), color .2s var(--e-out);
+}
+.ms-trigger.filled { color: var(--bone); }
+.ms-trigger:hover, .ms-trigger.open { border-color: var(--sepp); }
+.ms-caret { color: var(--sepp); font-size: 11px; transition: transform .2s var(--e-out); }
+.ms-trigger.open .ms-caret { transform: rotate(180deg); }
+.ms-panel {
+  position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + 6px);
+  max-height: 260px; overflow-y: auto; overscroll-behavior: contain;
+  border: 1px solid var(--hairline); border-radius: 10px; background: #101012;
+  box-shadow: 0 24px 60px -18px rgba(0,0,0,.8);
+  animation: catIn .18s var(--e-out);
+}
+.ms-opt {
+  width: 100%; display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px; border: none; background: none; cursor: pointer;
+  color: var(--bone-dim); font-size: 13.5px; font-family: inherit; text-align: left;
+  transition: background .15s, color .15s;
+}
+.ms-opt:hover { background: rgba(237,231,218,.05); color: var(--bone); }
+.ms-opt.on { color: var(--bone); }
+.ms-box {
+  width: 17px; height: 17px; flex-shrink: 0; display: grid; place-items: center;
+  border: 1px solid var(--hairline); border-radius: 5px; font-size: 11px; color: var(--ink);
+}
+.ms-opt.on .ms-box { background: var(--sepp); border-color: var(--sepp); color: var(--bone); }
+.ms-foot {
+  position: sticky; bottom: 0; display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; padding: 9px 14px; background: #101012; border-top: 1px solid var(--hairline);
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em; color: var(--bone-ghost);
+}
+.ms-foot button {
+  border: none; background: none; cursor: pointer; color: var(--sepp);
+  font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
 }
 
 /* ══════════════════════════ PANEL ADMIN (/admin) ══════════════════════════ */

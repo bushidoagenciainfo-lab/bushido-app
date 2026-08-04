@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { PortfolioItem } from "@/lib/site";
 import { openAnalisis } from "@/lib/ui";
 
@@ -16,6 +16,7 @@ export default function Lightbox({
   onClose: () => void;
 }) {
   const [i, setI] = useState(1);
+  const touch = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => setI(1), [item?.id]);
 
@@ -43,6 +44,20 @@ export default function Lightbox({
 
   if (!item) return null;
 
+  // Deslizar con el dedo (móvil): el gesto natural para pasar fotos.
+  const onTouchStart = (e: React.TouchEvent) => {
+    const t = e.changedTouches[0];
+    touch.current = { x: t.clientX, y: t.clientY };
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (!touch.current) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touch.current.x;
+    const dy = t.clientY - touch.current.y;
+    touch.current = null;
+    if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) (dx < 0 ? next : prev)();
+  };
+
   return (
     <div className="lb" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="lb-inner">
@@ -60,7 +75,7 @@ export default function Lightbox({
           </button>
         </header>
 
-        <div className="lb-stage">
+        <div className="lb-stage" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
           {item.fotos > 1 && (
             <button type="button" className="lb-nav prev" onClick={prev} aria-label="Anterior">
               ‹
@@ -76,6 +91,7 @@ export default function Lightbox({
           <span className="lb-count">
             {i} / {item.fotos}
           </span>
+          {item.fotos > 1 && <span className="lb-swipe">Desliza →</span>}
         </div>
 
         {item.fotos > 1 && (

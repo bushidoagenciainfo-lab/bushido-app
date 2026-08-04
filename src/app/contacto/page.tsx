@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import LeadForm from "@/components/LeadForm";
 import Footer from "@/components/Footer";
-import { WHATSAPP, EMAIL } from "@/lib/site";
+import { WHATSAPP, WHATSAPP_DISPLAY, EMAIL } from "@/lib/site";
 
 export const metadata: Metadata = { title: "Contacto · Bushido", description: "Hablemos de tu proyecto audiovisual. Escríbenos por WhatsApp o correo y recibe una propuesta a la medida en menos de 24 horas." };
 
@@ -36,7 +36,7 @@ export default function ContactoPage() {
                 target="_blank"
                 rel="noopener"
               >
-                +57 300 892 3390
+                {WHATSAPP_DISPLAY}
               </a>
               <p className="sub">Respondemos en horario laboral</p>
             </div>

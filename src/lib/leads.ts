@@ -119,15 +119,24 @@ export async function storeLead(lead: LeadInput): Promise<string | null> {
 }
 
 // ── Cotización interna: clasificación automática por tipo de proyecto ──
+// Los rangos deben cuadrar con los paquetes de SERVICES en src/lib/site.ts.
 const CLASSIFY: Record<string, { cat: string; rango: string }> = {
+  // opciones del formulario de contacto
   "Videoclip musical": { cat: "Música · Videoclip", rango: "$3.000.000 – $5.000.000" },
   "Cobertura de evento": { cat: "Eventos", rango: "$1.000.000 – $2.500.000" },
-  "Reels / contenido de marca": { cat: "Contenido · Reels", rango: "$500.000 – $2.400.000" },
+  "Reels / contenido de marca": { cat: "Contenido · Reels", rango: "$400.000 – $1.700.000" },
   "Mini comercial / campaña": { cat: "Campaña", rango: "$1.700.000 – $4.200.000" },
   "Video corporativo": { cat: "Empresa", rango: "$2.800.000 – $6.500.000+" },
   "Video de producto": { cat: "Producto", rango: "$550.000 – $3.000.000" },
-  "Fotografía editorial": { cat: "Editorial", rango: "cotización a medida" },
+  "Fotografía editorial": { cat: "Editorial", rango: "$1.200.000 – $3.200.000" },
   "Otro / múltiples": { cat: "General", rango: "cotización a medida" },
+  // opciones del pop-up de análisis
+  "Manejo de redes": { cat: "Redes · Mensual", rango: "$2.000.000 – $4.300.000 /mes" },
+  "Un videoclip": { cat: "Música · Videoclip", rango: "$3.000.000 – $5.000.000" },
+  "Un comercial / campaña": { cat: "Campaña", rango: "$1.700.000 – $4.200.000" },
+  "UGC / creadores": { cat: "Creators · UGC", rango: "$2.200.000 – $5.400.000" },
+  Fotografía: { cat: "Editorial", rango: "$1.200.000 – $3.200.000" },
+  "Aún no sé": { cat: "General", rango: "cotización a medida" },
 };
 
 export function classifyProject(project?: string): { cat: string; rango: string } | null {

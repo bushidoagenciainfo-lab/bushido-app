@@ -13,7 +13,7 @@ export const maxDuration = 60;
  */
 export async function GET(request: Request) {
   const out: Record<string, unknown> = {};
-  // ?wa=573008923390 → envía la plantilla REAL a ese número y muestra el error de Meta
+  // ?wa=573016706168 → envía la plantilla REAL a ese número y muestra el error de Meta
   const waTest = new URL(request.url).searchParams.get("wa");
   // ?waba=899817986501868 → lista las plantillas REALES de esa cuenta (nombre + idioma exactos)
   const wabaId = new URL(request.url).searchParams.get("waba") || process.env.WHATSAPP_WABA_ID;
@@ -154,7 +154,7 @@ export async function GET(request: Request) {
       }),
     };
   } else {
-    out.whatsapp_envio = "Para probar el envío: /api/admin/diag?wa=573008923390";
+    out.whatsapp_envio = "Para probar el envío: /api/admin/diag?wa=573016706168";
   }
 
   return NextResponse.json(out, { status: 200 });

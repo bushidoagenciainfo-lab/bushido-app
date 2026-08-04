@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import TalentForm from "@/components/TalentForm";
-import CreatorForm from "@/components/CreatorForm";
+import GremioForm from "@/components/GremioForm";
 import AnalisisButton from "@/components/AnalisisButton";
 import Footer from "@/components/Footer";
 
@@ -70,16 +69,17 @@ export default function GremioPage() {
             </article>
 
             <article className="gremio-card">
-              <div className="gremio-num">03 / Talento</div>
+              <div className="gremio-num">03 / Talento y aliados</div>
               <h3>
-                Banco de <em>talentos</em>
+                Creators y <em>crew</em>
               </h3>
               <p>
-                ¿Eres fotógrafo, editor, colorista, sonidista, productor o DP? Deja
-                tu hoja de vida y portafolio abajo. Te llamamos cuando salga un
-                proyecto que encaje.
+                ¿Creas contenido para marcas o trabajas en producción? Un solo
+                formulario: eliges de qué lado estás y llenas solo lo tuyo. Te
+                escribimos cuando salga un proyecto que encaje.
               </p>
               <ul className="gremio-list">
+                <li>Creators UGC</li>
                 <li>Foto/Video</li>
                 <li>Edición</li>
                 <li>Color</li>
@@ -113,85 +113,10 @@ export default function GremioPage() {
           </div>
         </section>
 
-        {/* Banco de talentos */}
+        {/* Postulación unificada: la primera pregunta decide creator o crew */}
         <section id="talento" style={{ paddingTop: 40 }}>
-          <div className="brief-wrap" style={{ maxWidth: 1200 }}>
-            <div className="brief-copy">
-              <div className="section-num">Banco de crew · Producción</div>
-              <h2
-                style={{
-                  fontFamily: "var(--serif)",
-                  fontSize: "clamp(36px, 4.5vw, 64px)",
-                  fontWeight: 400,
-                  lineHeight: 1,
-                  letterSpacing: "-0.02em",
-                  color: "var(--bone)",
-                  marginBottom: 20,
-                }}
-              >
-                Trabaja con <em style={{ color: "var(--sepp)", fontStyle: "italic" }}>nosotros</em>.
-              </h2>
-              <p style={{ color: "var(--bone-dim)", fontSize: 15, lineHeight: 1.6, marginBottom: 32 }}>
-                Sumamos gente al equipo por proyecto. Deja tus datos, tu CV y links
-                a tu trabajo. Cuando salga algo que encaje con tu perfil, te
-                escribimos.
-              </p>
-              <ul className="brief-perks">
-                <li>
-                  Proyectos reales · <span>no prácticas sin pago</span>
-                </li>
-                <li>
-                  Pago justo por rol · <span>acordado antes de arrancar</span>
-                </li>
-                <li>
-                  Crédito en la pieza · <span>tu nombre importa</span>
-                </li>
-              </ul>
-            </div>
-
-            <TalentForm />
-          </div>
-        </section>
-
-        {/* ── Book de creadores UGC / influencers ── */}
-        <section id="creadores" style={{ paddingTop: 40 }}>
-          <div className="brief-wrap" style={{ maxWidth: 1200 }}>
-            <div className="brief-copy">
-              <div className="section-num">Book de creadores · UGC</div>
-              <h2
-                style={{
-                  fontFamily: "var(--serif)",
-                  fontSize: "clamp(36px, 4.5vw, 64px)",
-                  fontWeight: 400,
-                  lineHeight: 1,
-                  letterSpacing: "-0.02em",
-                  color: "var(--bone)",
-                  marginBottom: 20,
-                }}
-              >
-                ¿Eres <em style={{ color: "var(--sepp)", fontStyle: "italic" }}>creator</em>?
-              </h2>
-              <p style={{ color: "var(--bone-dim)", fontSize: 15, lineHeight: 1.6, marginBottom: 32 }}>
-                Estamos armando el book de creadores de Bushido: gente que produce
-                UGC real para marcas. No hacemos casting por seguidores — lo hacemos
-                por nicho, formato y qué tan bien conecta tu contenido con la
-                audiencia correcta.
-              </p>
-              <ul className="brief-perks">
-                <li>
-                  Briefs con dirección · <span>no te dejamos improvisando</span>
-                </li>
-                <li>
-                  Marcas reales · <span>pago por pieza, acordado antes</span>
-                </li>
-                <li>
-                  Micro también cuenta · <span>importa el nicho, no el tamaño</span>
-                </li>
-              </ul>
-            </div>
-
-            <CreatorForm />
-          </div>
+          <span id="creadores" style={{ display: "block", height: 0 }} aria-hidden="true" />
+          <GremioForm />
         </section>
 
         <section>

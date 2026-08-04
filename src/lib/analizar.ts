@@ -29,14 +29,22 @@ export function hasIA(): boolean {
 }
 
 // ── Contexto de negocio: paquetes REALES de Bushido para aterrizar la recomendación ──
-const PAQUETES = `Paquetes de redes (mensual, mínimo 3 meses, pauta aparte):
-- "Paquete de redes · Esencial" — $2.000.000 / mes
-- "Paquete de redes · Crecimiento" — $3.200.000 / mes
-- "Paquete de redes · Posicionamiento" — $4.300.000 / mes
-À la carte:
-- "Reel suelto" — $400.000 · "Pack 3 reels" — $1.000.000 · "Pack 6 reels" — $1.700.000
-- "Videoclip · Básico" — $3.000.000 · "Videoclip · Con concepto" — $5.000.000 · "Videoclip · Premium" — cotización
-- "Empresarial" — desde $6.500.000`;
+const PAQUETES = `Marca y crecimiento:
+- "Paquete de redes · Esencial" — $2.000.000 / mes · "Crecimiento" — $3.200.000 / mes · "Posicionamiento" — $4.300.000 / mes (mínimo 3 meses; la inversión en pauta la pone el cliente)
+- "Estrategia Kansei · Auditoría express" — $900.000 · "Estrategia 90 días" — $2.400.000 · "Con acompañamiento" — desde $3.500.000
+- "Pauta y amplificación · Fee gestión" — $1.200.000 / mes · "Performance" — $1.900.000 / mes · "Full-funnel" — desde $2.800.000 / mes (fee de gestión; la inversión va aparte)
+- "Branding · Identidad esencial" — $1.800.000 · "Sistema de marca" — $3.400.000 · "Rebrand completo" — desde $5.500.000
+Creators, UGC e influencers (el diferencial de Bushido: book propio de creadores por nicho + alianzas directas con creadores grandes):
+- "UGC con data · Starter 4 piezas" — $2.200.000 · "Growth 8 piezas" — $3.900.000 · "Always-on 12 piezas/mes" — desde $5.400.000 (incluye honorarios del creador del book)
+- "Influencers y talento · Campaña 1 a 3 creadores" — $1.800.000 · "Always-on /mes" — $3.200.000 · "Talento estelar y artistas" — cotización por proyecto (la tarifa de cada creador va aparte)
+Producción audiovisual:
+- "Videoclip · Básico" — $3.000.000 · "Con concepto" — $5.000.000 · "Premium" — cotización
+- "Mini comercial · Básico" — $1.700.000 · "Con concepto" — $2.800.000 · "Pack lanzamiento" — $4.200.000
+- "Video corporativo · Corto" — $2.800.000 · "Mediano" — $4.500.000 · "Paquete empresarial" — desde $6.500.000
+- "Cobertura de eventos · 3 horas" — $1.000.000 · "6 horas" — $1.600.000 · "Día completo" — $2.500.000
+- "Fotografía · Media jornada" — $1.200.000 · "Día completo" — $2.000.000 · "Campaña editorial" — desde $3.200.000
+- "Video de producto · 1 producto" — $550.000 · "Pack 3" — $1.400.000 · "Catálogo hasta 10" — $3.000.000
+- "Reel suelto" — $400.000 · "Pack 3 reels" — $1.000.000 · "Pack 6 reels" — $1.700.000`;
 
 const SYSTEM = `Eres el estratega de contenido de Bushido, una agencia audiovisual de Bogotá, Colombia (bushidoav.com). Tu criterio es cinematográfico, editorial y comercial: no vendes horas de cámara, vendes criterio visual que hace que la gente recuerde y compre. Hablas con seguridad, sin humo, como quien ya vio el patrón mil veces.
 
