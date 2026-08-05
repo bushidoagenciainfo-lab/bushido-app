@@ -99,8 +99,9 @@ export async function businessDiscovery(usuario: string): Promise<IgResultado> {
         return {
           ok: false,
           error:
-            "(#10) Falta permiso o el IG_USER_ID no es una cuenta de Instagram business. " +
-            "Abre /api/admin/diag y mira el bloque «instagram».",
+            "(#10) Al token le falta el permiso instagram_manage_insights (el que " +
+            "habilita leer OTRAS cuentas). Regenera el token del usuario del sistema " +
+            "marcándolo. Verifica en /api/admin/diag → bloque «instagram».",
         };
       }
       return { ok: false, error: `@${username}: ${m}` };

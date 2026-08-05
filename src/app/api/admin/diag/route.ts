@@ -187,9 +187,13 @@ export async function GET(request: Request) {
         error?: { message?: string };
       };
       if (d.data) {
-        const faltan = ["instagram_basic", "pages_read_engagement"].filter(
-          (p) => !(d.data?.scopes ?? []).includes(p)
-        );
+        // Business Discovery exige instagram_manage_insights ADEMÁS de los
+        // básicos: es el permiso que habilita leer datos de OTRAS cuentas.
+        const faltan = [
+          "instagram_basic",
+          "pages_read_engagement",
+          "instagram_manage_insights",
+        ].filter((p) => !(d.data?.scopes ?? []).includes(p));
         ig.token = {
           valido: d.data.is_valid,
           app: d.data.application,

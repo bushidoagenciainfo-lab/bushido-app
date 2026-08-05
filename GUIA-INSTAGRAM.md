@@ -34,8 +34,13 @@ Ya tienes una app de Meta creada (la de WhatsApp). Entra a
 **developers.facebook.com → tu app**.
 
 1. **Add products** → agrega **Instagram Graph API**
-2. En **App Review → Permissions**, necesitas: `instagram_basic` y
-   `pages_read_engagement`
+2. En **App Review → Permissions**, necesitas estos cuatro:
+   - `instagram_basic`
+   - `pages_read_engagement`
+   - `pages_show_list`
+   - **`instagram_manage_insights`** ← el que habilita consultar OTRAS cuentas.
+     Sin él, todo falla con `(#10) Application does not have permission`
+
    *(en modo desarrollo funcionan sin revisión si tú eres admin de la app)*
 
 ## Paso 3 · Sacar el token y el ID
@@ -93,7 +98,9 @@ Con un **usuario del sistema**, cuyos tokens no caducan:
 4. **Generar nuevo token**:
    - App: Bushido Ingesta
    - Caducidad: **Nunca**
-   - Permisos: `instagram_basic`, `pages_read_engagement`, `pages_show_list`
+   - Permisos: `instagram_basic`, `pages_read_engagement`, `pages_show_list` y
+     **`instagram_manage_insights`** ← sin este último Meta responde
+     `(#10) Application does not have permission`
 5. **Cópialo al momento**: Facebook solo lo muestra una vez (si se pierde,
    generas otro)
 
