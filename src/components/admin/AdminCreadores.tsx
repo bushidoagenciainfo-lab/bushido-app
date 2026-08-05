@@ -250,14 +250,15 @@ export default function AdminCreadores({ creadores }: { creadores: CreadorLite[]
       }
       const fallos = (d.reportes ?? [])
         .filter((r: { ok: boolean }) => !r.ok)
-        .slice(0, 3)
-        .map((r: { error?: string }) => r.error)
-        .join(" · ");
+        .slice(0, 4)
+        .map((r: { usuario?: string; error?: string }) => `@${r.usuario}: ${r.error}`)
+        .join("\n");
       setSync({
         estado: "done",
         msg:
-          `${d.logrados} completados${d.fallidos ? ` · ${d.fallidos} sin datos` : ""}` +
-          `${d.pendientes ? ` · quedan ${d.pendientes}, vuelve a darle` : ""}` +
+          `${d.conSeguidores ?? 0} con seguidores · ${d.conNicho ?? 0} con nicho nuevo` +
+          `${d.fallidos ? ` · ${d.fallidos} sin datos` : ""}` +
+          `${d.pendientes ? `\n⏳ Quedan ${d.pendientes} por clasificar: vuelve a darle al botón.` : ""}` +
           (fallos ? `\n${fallos}` : ""),
       });
       setTimeout(() => window.location.reload(), 1500);
