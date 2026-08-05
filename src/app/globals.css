@@ -3002,6 +3002,13 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 .crew-link:hover { color: var(--bone); border-color: var(--bone-ghost); }
 .crew-link.cv { color: var(--gold); border-color: rgba(201,162,74,.45); }
 
+/* aviso cuando el CV adjunto no sirve (pesado o formato incorrecto) */
+.file-drop.err { border-color: var(--sepp); }
+.file-err {
+  margin-top: 8px; font-size: 12px; line-height: 1.5; color: var(--sepp);
+  border-left: 2px solid var(--sepp); padding-left: 10px;
+}
+
 /* botón de envío manual del informe + resultado del envío */
 .al-gen-send { border-color: rgba(111,191,142,.5) !important; color: #6FBF8E !important; }
 .al-gen-send:hover { background: rgba(111,191,142,.12) !important; }

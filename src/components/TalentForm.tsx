@@ -4,21 +4,52 @@ import { useState } from "react";
 
 type Status = "idle" | "loading" | "done" | "error";
 
+/**
+ * Tope real de subida: el servidor donde vive el sitio corta las peticiones que
+ * pasan de ~4,5 MB, así que un CV más pesado ni siquiera llega y el navegador
+ * lo reporta como "error de conexión". Avisamos ANTES de enviar.
+ */
+const MAX_CV = 4 * 1024 * 1024; // 4 MB
+const mb = (b: number) => (b / 1024 / 1024).toFixed(1).replace(".", ",");
+
 export default function TalentForm() {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
   const [fileName, setFileName] = useState("");
+  const [fileError, setFileError] = useState("");
+
+  function elegirArchivo(f?: File | null) {
+    setFileError("");
+    if (!f) {
+      setFileName("");
+      return;
+    }
+    if (f.size > MAX_CV) {
+      setFileName("");
+      setFileError(
+        `Ese archivo pesa ${mb(f.size)} MB y el máximo es 4 MB. ` +
+          `Súbelo a Drive o Dropbox y pega el enlace en “Otros links”, o comprímelo.`
+      );
+      return;
+    }
+    setFileName(f.name);
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (fileError) {
+      setError("Revisa el archivo antes de enviar.");
+      setStatus("error");
+      return;
+    }
     setStatus("loading");
     setError("");
     const form = e.currentTarget;
+    const fd = new FormData(form);
+    // si el archivo se rechazó, no lo mandamos (el resto de la postulación sí vale)
+    if (!fileName) fd.delete("cv");
     try {
-      const res = await fetch("/api/talent", {
-        method: "POST",
-        body: new FormData(form),
-      });
+      const res = await fetch("/api/talent", { method: "POST", body: fd });
       const data = await res.json();
       if (!res.ok || !data.ok) {
         setError(data.error || "No pudimos enviar tu postulación.");
@@ -29,7 +60,11 @@ export default function TalentForm() {
       form.reset();
       setFileName("");
     } catch {
-      setError("Error de conexión. Intenta de nuevo.");
+      setError(
+        fileName
+          ? "No se pudo enviar. Suele ser el archivo adjunto: quítalo y pega el enlace de tu CV en “Otros links”."
+          : "Error de conexión. Revisa tu internet e intenta de nuevo."
+      );
       setStatus("error");
     }
   }
@@ -108,10 +143,10 @@ export default function TalentForm() {
           <label htmlFor="t-cv">
             Adjunta tu CV{" "}
             <span style={{ color: "var(--bone-ghost)", fontWeight: "normal" }}>
-              (PDF, DOC o DOCX · máx 8MB)
+              (opcional · PDF, DOC o DOCX · máx 4 MB)
             </span>
           </label>
-          <label htmlFor="t-cv" className="file-drop">
+          <label htmlFor="t-cv" className={"file-drop" + (fileError ? " err" : "")}>
             <span>{fileName || "Elegir archivo…"}</span>
             <span className="file-btn">Subir</span>
           </label>
@@ -121,8 +156,9 @@ export default function TalentForm() {
             type="file"
             accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             style={{ display: "none" }}
-            onChange={(e) => setFileName(e.target.files?.[0]?.name || "")}
+            onChange={(e) => elegirArchivo(e.target.files?.[0])}
           />
+          {fileError && <p className="file-err">{fileError}</p>}
         </div>
 
         <div className="form-row">

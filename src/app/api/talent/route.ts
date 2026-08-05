@@ -11,7 +11,9 @@ const ALLOWED = new Set([
   "application/msword",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ]);
-const MAX = 8 * 1024 * 1024; // 8 MB
+// El hosting corta las peticiones que pasan de ~4,5 MB: por encima de eso el
+// envío ni llega aquí y el navegador lo muestra como "error de conexión".
+const MAX = 4 * 1024 * 1024; // 4 MB
 
 export async function POST(request: Request) {
   let form: FormData;
@@ -45,7 +47,14 @@ export async function POST(request: Request) {
       );
     }
     if (file.size > MAX) {
-      return NextResponse.json({ ok: false, error: "El CV supera 8 MB." }, { status: 422 });
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            "El CV supera 4 MB. Súbelo a Drive y pega el enlace en “Otros links”, o comprímelo.",
+        },
+        { status: 422 }
+      );
     }
     const buf = Buffer.from(await file.arrayBuffer());
     const safe = (file.name || "cv").replace(/[^a-zA-Z0-9._-]/g, "_");
