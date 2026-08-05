@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { generarAnalisis, hasIA } from "@/lib/analizar";
 import { storeAnalisis, informeUrl, emailInformeListo } from "@/lib/analisis-store";
+import { sendClientWhatsApp } from "@/lib/whatsapp";
+import { marcarInforme } from "@/lib/leads";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -43,7 +45,7 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ ok: false, error: "Datos inválidos.", issues: parsed.error.issues }, { status: 422 });
   }
-  const { marca, redes, tiktok, web, contexto, leadId, email, nombre, enviarCliente, profundo } =
+  const { marca, redes, tiktok, web, contexto, leadId, email, nombre, phone, enviarCliente, profundo } =
     parsed.data;
 
   let analisis;
@@ -74,10 +76,34 @@ export async function POST(request: Request) {
   }
 
   const url = informeUrl(id);
-  if (enviarCliente && email) {
-    emailInformeListo({ email, nombre: nombre ?? undefined, marca, url }).catch((e) =>
-      console.error("emailInformeListo:", e)
-    );
+
+  // Envío al cliente: SOLO si se pide explícitamente (botón "Enviar al cliente"),
+  // para que Maick pueda revisar el informe antes de que salga.
+  const envio: { correo?: string; whatsapp?: string } = {};
+  if (enviarCliente) {
+    if (email) {
+      const r = await emailInformeListo({ email, nombre: nombre ?? undefined, marca, url }).then(
+        () => "enviado",
+        (e) => `falló: ${e instanceof Error ? e.message : String(e)}`
+      );
+      envio.correo = r;
+    } else {
+      envio.correo = "sin correo";
+    }
+
+    if (phone) {
+      const wa = await sendClientWhatsApp({
+        phone,
+        params: [(nombre || "").split(" ")[0] || "hola", marca, url],
+      });
+      envio.whatsapp = wa?.ok ? "enviado" : `falló: ${wa?.error ?? "sin respuesta"}`;
+    } else {
+      envio.whatsapp = "sin número";
+    }
   }
-  return NextResponse.json({ ok: true, id, url });
+
+  if (leadId) {
+    await marcarInforme(leadId, { ok: true, url });
+  }
+  return NextResponse.json({ ok: true, id, url, envio });
 }

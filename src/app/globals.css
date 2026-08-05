@@ -3002,6 +3002,14 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 .crew-link:hover { color: var(--bone); border-color: var(--bone-ghost); }
 .crew-link.cv { color: var(--gold); border-color: rgba(201,162,74,.45); }
 
+/* botón de envío manual del informe + resultado del envío */
+.al-gen-send { border-color: rgba(111,191,142,.5) !important; color: #6FBF8E !important; }
+.al-gen-send:hover { background: rgba(111,191,142,.12) !important; }
+.al-envio {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .04em; color: var(--bone-ghost);
+  border: 1px solid var(--hairline); border-radius: 6px; padding: 5px 9px;
+}
+
 /* estado del informe automático dentro del lead */
 .al-informe {
   margin-top: 8px; font-family: var(--mono); font-size: 10px; letter-spacing: .04em;

@@ -21,7 +21,9 @@ function infoInforme(l: LeadRow): { ok: boolean; url?: string; error?: string } 
 export default function AdminLeads({ leads }: { leads: LeadRow[] }) {
   const [rows, setRows] = useState(leads);
   const [busy, setBusy] = useState<string | null>(null);
-  const [result, setResult] = useState<Record<string, { url?: string; error?: string }>>({});
+  const [result, setResult] = useState<
+    Record<string, { url?: string; error?: string; envio?: string }>
+  >({});
 
   async function cambiarEstado(id: string, status: string) {
     setRows((rs) => rs.map((r) => (r.id === id ? { ...r, status } : r)));
@@ -32,7 +34,11 @@ export default function AdminLeads({ leads }: { leads: LeadRow[] }) {
     }).catch(() => {});
   }
 
-  async function generar(lead: LeadRow, profundo = false) {
+  /**
+   * `enviarCliente` en false = solo genera el informe (para revisarlo).
+   * En true = además se lo manda al cliente por correo y WhatsApp.
+   */
+  async function generar(lead: LeadRow, profundo = false, enviarCliente = false) {
     setBusy(lead.id);
     setResult((r) => ({ ...r, [lead.id]: {} }));
     try {
@@ -50,11 +56,20 @@ export default function AdminLeads({ leads }: { leads: LeadRow[] }) {
           nombre: lead.name,
           phone: lead.phone,
           profundo,
+          enviarCliente,
         }),
       });
       const data = await res.json().catch(() => ({}));
-      if (res.ok && data.url) setResult((r) => ({ ...r, [lead.id]: { url: data.url } }));
-      else setResult((r) => ({ ...r, [lead.id]: { error: data.error || "Falló." } }));
+      if (res.ok && data.url) {
+        const e = data.envio as { correo?: string; whatsapp?: string } | undefined;
+        setResult((r) => ({
+          ...r,
+          [lead.id]: {
+            url: data.url,
+            envio: e ? `Correo: ${e.correo ?? "—"} · WhatsApp: ${e.whatsapp ?? "—"}` : undefined,
+          },
+        }));
+      } else setResult((r) => ({ ...r, [lead.id]: { error: data.error || "Falló." } }));
     } catch {
       setResult((r) => ({ ...r, [lead.id]: { error: "Error de red." } }));
     } finally {
@@ -132,10 +147,25 @@ export default function AdminLeads({ leads }: { leads: LeadRow[] }) {
                 {busy === l.id ? "…" : "＋ Profundo (con web)"}
               </button>
               {res?.url && (
-                <a href={res.url} target="_blank" rel="noopener noreferrer" className="al-link">
-                  Ver informe →
-                </a>
+                <>
+                  <a href={res.url} target="_blank" rel="noopener noreferrer" className="al-link">
+                    Ver informe →
+                  </a>
+                  {/* Generar NO envía: primero lo revisas, luego lo mandas. */}
+                  {!res.envio && (
+                    <button
+                      type="button"
+                      className="al-gen al-gen-send"
+                      onClick={() => generar(l, false, true)}
+                      disabled={busy === l.id}
+                      title="Le manda el informe al cliente por correo y WhatsApp"
+                    >
+                      Enviar al cliente ↗
+                    </button>
+                  )}
+                </>
               )}
+              {res?.envio && <span className="al-envio">{res.envio}</span>}
               {res?.error && <span className="al-err">{res.error}</span>}
             </div>
           </div>
