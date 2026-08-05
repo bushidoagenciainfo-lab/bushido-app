@@ -18,6 +18,18 @@ export interface CreadorLite {
   notas?: string | null;
 }
 
+/** Una ficha sirve para un casting cuando tiene nicho + formato + audiencia. */
+function completa(c: CreadorLite): boolean {
+  return Boolean(c.nichos?.length && c.formatos?.length && c.seguidores);
+}
+function falta(c: CreadorLite): string[] {
+  const f: string[] = [];
+  if (!c.nichos?.length) f.push("nicho");
+  if (!c.formatos?.length) f.push("formato");
+  if (!c.seguidores) f.push("seguidores");
+  return f;
+}
+
 const ESTADOS = ["nuevo", "aprobado", "destacado", "pausado"];
 
 /** 12.400 → "12,4K" · 1.200.000 → "1,2M" · sin dato → "—" */
@@ -90,6 +102,116 @@ function ImportarBase() {
   );
 }
 
+/**
+ * Editor rápido de la ficha. Está pensado para completar muchas seguidas:
+ * abres el perfil, miras los seguidores, marcas nicho y formato, guardas.
+ */
+function EditorFicha({
+  creador,
+  onGuardar,
+  onCancelar,
+}: {
+  creador: CreadorLite;
+  onGuardar: (campos: Partial<CreadorLite>) => void;
+  onCancelar: () => void;
+}) {
+  const [nichos, setNichos] = useState<string[]>(creador.nichos ?? []);
+  const [formatos, setFormatos] = useState<string[]>(creador.formatos ?? []);
+  const [seguidores, setSeguidores] = useState(creador.seguidores ? String(creador.seguidores) : "");
+  const [tarifa, setTarifa] = useState(creador.tarifa ?? "");
+
+  const toggle = (arr: string[], set: (v: string[]) => void, v: string) =>
+    set(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
+
+  const ig = creador.instagram?.replace(/^@/, "");
+
+  return (
+    <div className="bc-editor">
+      {ig && (
+        <a
+          className="bce-abrir"
+          href={`https://instagram.com/${ig}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Abrir @{ig} para ver sus seguidores ↗
+        </a>
+      )}
+
+      <label className="bce-label">Nicho</label>
+      <div className="bce-chips">
+        {NICHOS_CREADOR.map((n) => (
+          <button
+            key={n}
+            type="button"
+            className={"bce-chip" + (nichos.includes(n) ? " on" : "")}
+            onClick={() => toggle(nichos, setNichos, n)}
+          >
+            {n}
+          </button>
+        ))}
+      </div>
+
+      <label className="bce-label">Qué sabe hacer</label>
+      <div className="bce-chips">
+        {FORMATOS_CREADOR.map((f) => (
+          <button
+            key={f}
+            type="button"
+            className={"bce-chip" + (formatos.includes(f) ? " on" : "")}
+            onClick={() => toggle(formatos, setFormatos, f)}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
+
+      <div className="bce-row">
+        <div>
+          <label className="bce-label">Seguidores</label>
+          <input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            placeholder="12000"
+            value={seguidores}
+            onChange={(e) => setSeguidores(e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="bce-label">Tarifa por pieza</label>
+          <input
+            type="text"
+            placeholder="$150.000"
+            value={tarifa}
+            onChange={(e) => setTarifa(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="bce-acciones">
+        <button
+          type="button"
+          className="bce-guardar"
+          onClick={() =>
+            onGuardar({
+              nichos,
+              formatos,
+              seguidores: seguidores ? Number(seguidores) : null,
+              tarifa,
+            })
+          }
+        >
+          Guardar
+        </button>
+        <button type="button" className="bce-cancelar" onClick={onCancelar}>
+          Cancelar
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /** Book de creadores en el panel: filtra por ciudad, nicho y formato para armar castings. */
 export default function AdminCreadores({ creadores }: { creadores: CreadorLite[] }) {
   const [rows, setRows] = useState(creadores);
@@ -97,6 +219,27 @@ export default function AdminCreadores({ creadores }: { creadores: CreadorLite[]
   const [nicho, setNicho] = useState("");
   const [formato, setFormato] = useState("");
   const [q, setQ] = useState("");
+  const [soloIncompletas, setSoloIncompletas] = useState(false);
+  const [editando, setEditando] = useState<string | null>(null);
+
+  const salud = {
+    total: rows.length,
+    completas: rows.filter(completa).length,
+    sinNicho: rows.filter((c) => !c.nichos?.length).length,
+    sinFormato: rows.filter((c) => !c.formatos?.length).length,
+    sinSeguidores: rows.filter((c) => !c.seguidores).length,
+  };
+
+  /** Guarda los campos completados de una ficha. */
+  async function guardar(id: string, campos: Partial<CreadorLite>) {
+    setRows((rs) => rs.map((r) => (r.id === id ? { ...r, ...campos } : r)));
+    setEditando(null);
+    await fetch("/api/admin/creador-editar", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ id, ...campos }),
+    }).catch(() => {});
+  }
 
   const ciudades = useMemo(
     () => [...new Set(creadores.map((c) => c.ciudad).filter(Boolean))] as string[],
@@ -104,6 +247,7 @@ export default function AdminCreadores({ creadores }: { creadores: CreadorLite[]
   );
 
   const filtrados = rows.filter((c) => {
+    if (soloIncompletas && completa(c)) return false;
     if (ciudad && c.ciudad !== ciudad) return false;
     if (nicho && !(c.nichos ?? []).includes(nicho)) return false;
     if (formato && !(c.formatos ?? []).includes(formato)) return false;
@@ -129,6 +273,36 @@ export default function AdminCreadores({ creadores }: { creadores: CreadorLite[]
 
   return (
     <div className="admin-book">
+      {/* Sin esto el book es una agenda: aquí se ve cuánto sirve de verdad */}
+      <div className="book-salud">
+        <div className="bs-barra">
+          <span
+            className="bs-fill"
+            style={{ width: `${salud.total ? (salud.completas / salud.total) * 100 : 0}%` }}
+          />
+        </div>
+        <div className="bs-texto">
+          <strong>
+            {salud.completas} de {salud.total}
+          </strong>{" "}
+          fichas sirven para un casting (nicho + formato + audiencia)
+        </div>
+        <div className="bs-faltas">
+          {salud.sinNicho > 0 && <span>{salud.sinNicho} sin nicho</span>}
+          {salud.sinFormato > 0 && <span>{salud.sinFormato} sin formato</span>}
+          {salud.sinSeguidores > 0 && <span>{salud.sinSeguidores} sin seguidores</span>}
+          {salud.completas < salud.total && (
+            <button
+              type="button"
+              className={"bs-btn" + (soloIncompletas ? " on" : "")}
+              onClick={() => setSoloIncompletas((v) => !v)}
+            >
+              {soloIncompletas ? "Ver todas" : "Completar las que faltan →"}
+            </button>
+          )}
+        </div>
+      </div>
+
       <div className="book-filtros">
         <input
           className="book-search"
@@ -207,6 +381,22 @@ export default function AdminCreadores({ creadores }: { creadores: CreadorLite[]
               </div>
             ) : null}
             {c.notas && <p className="bc-notas">{c.notas}</p>}
+
+            {/* Completar la ficha: nicho, formato y seguidores */}
+            {editando === c.id ? (
+              <EditorFicha
+                creador={c}
+                onGuardar={(campos) => guardar(c.id, campos)}
+                onCancelar={() => setEditando(null)}
+              />
+            ) : (
+              !completa(c) && (
+                <button type="button" className="bc-completar" onClick={() => setEditando(c.id)}>
+                  Falta {falta(c).join(", ")} · completar →
+                </button>
+              )
+            )}
+
             <div className="bc-foot">
               {c.tarifa ? <span className="bc-seg">{c.tarifa}</span> : null}
               <select

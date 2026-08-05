@@ -128,5 +128,74 @@ export async function setCreadorEstado(id: string, estado: string): Promise<void
   if (hasDb()) {
     const { error } = await db().from("creadores").update({ estado }).eq("id", id);
     if (error) throw new Error(error.message);
+    return;
   }
+  await updateLocal(id, { estado } as Partial<CreadorRow>);
+}
+
+/**
+ * Campos que se pueden completar a mano desde el panel.
+ * `seguidores` admite null para poder BORRAR un dato mal puesto.
+ */
+export type CreadorEdit = Partial<
+  Pick<CreadorInput, "nichos" | "formatos" | "tarifa" | "instagram" | "tiktok" | "notas">
+> & { seguidores?: number | null };
+
+/**
+ * Completa la ficha de un creador. Es lo que convierte la lista de contactos
+ * importada del documento en data utilizable para castings.
+ */
+export async function updateCreador(id: string, campos: CreadorEdit): Promise<void> {
+  const limpio: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(campos)) {
+    if (v === undefined) continue;
+    limpio[k] = v === "" ? null : v;
+  }
+  if (!Object.keys(limpio).length) return;
+
+  if (hasDb()) {
+    const { error } = await db().from("creadores").update(limpio).eq("id", id);
+    if (error) throw new Error(error.message);
+    return;
+  }
+  await updateLocal(id, limpio as Partial<CreadorRow>);
+}
+
+/** Igual pero contra el archivo local (dev). */
+async function updateLocal(id: string, campos: Partial<CreadorRow>): Promise<void> {
+  const file = await localFile();
+  if (!file) return;
+  try {
+    const all = JSON.parse(await fs.readFile(file, "utf8")) as CreadorRow[];
+    const row = all.find((c) => c.id === id);
+    if (!row) return;
+    Object.assign(row, campos);
+    await fs.writeFile(file, JSON.stringify(all, null, 2), "utf8");
+  } catch {
+    /* dev best-effort */
+  }
+}
+
+/** Qué tan usable está el book: sin esto es una agenda, no data. */
+export interface SaludBook {
+  total: number;
+  conNicho: number;
+  conFormato: number;
+  conSeguidores: number;
+  conContacto: number;
+  completas: number;
+}
+export function saludBook(rows: CreadorRow[]): SaludBook {
+  const tiene = (v: unknown) => (Array.isArray(v) ? v.length > 0 : Boolean(v));
+  return {
+    total: rows.length,
+    conNicho: rows.filter((c) => tiene(c.nichos)).length,
+    conFormato: rows.filter((c) => tiene(c.formatos)).length,
+    conSeguidores: rows.filter((c) => tiene(c.seguidores)).length,
+    conContacto: rows.filter((c) => tiene(c.telefono) || tiene(c.email)).length,
+    // "completa" = sirve para un casting: nicho + formato + tamaño de audiencia
+    completas: rows.filter(
+      (c) => tiene(c.nichos) && tiene(c.formatos) && tiene(c.seguidores)
+    ).length,
+  };
 }

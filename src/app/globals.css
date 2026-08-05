@@ -3026,6 +3026,70 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 .al-informe.bad { color: var(--sepp); background: rgba(213,50,46,.07); border: 1px solid rgba(213,50,46,.3); }
 .al-informe a { color: inherit; text-decoration: underline; }
 
+/* ── Salud del book: cuánto de la lista es data usable ── */
+.book-salud {
+  border: 1px solid var(--hairline); border-radius: 11px; background: var(--ink);
+  padding: 16px 18px; margin-bottom: 14px;
+}
+.bs-barra { height: 6px; border-radius: 999px; background: rgba(237,231,218,.07); overflow: hidden; margin-bottom: 12px; }
+.bs-fill { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #6FBF8E, #4E9B6C); transition: width .4s var(--e-out); }
+.bs-texto { font-size: 13px; color: var(--bone-dim); margin-bottom: 10px; }
+.bs-texto strong { color: var(--bone); font-weight: 400; font-family: var(--serif); font-size: 16px; }
+.bs-faltas { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; }
+.bs-faltas span {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--gold); border: 1px solid rgba(201,162,74,.35); border-radius: 999px; padding: 4px 9px;
+}
+.bs-btn {
+  margin-left: auto; font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--sepp); background: none; cursor: pointer;
+  border: 1px solid rgba(213,50,46,.4); border-radius: 999px; padding: 5px 11px;
+}
+.bs-btn:hover, .bs-btn.on { background: var(--sepp); color: var(--bone); border-color: var(--sepp); }
+
+/* ── Completar la ficha de un creador ── */
+.bc-completar {
+  width: 100%; text-align: left; cursor: pointer;
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--gold); background: rgba(201,162,74,.06);
+  border: 1px dashed rgba(201,162,74,.4); border-radius: 8px; padding: 8px 10px;
+}
+.bc-completar:hover { background: rgba(201,162,74,.14); color: var(--bone); }
+.bc-editor {
+  display: flex; flex-direction: column; gap: 8px;
+  border: 1px solid rgba(213,50,46,.35); border-radius: 9px; padding: 12px; background: rgba(10,10,11,.6);
+}
+.bce-abrir {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .06em; color: var(--sepp);
+  border-bottom: 1px solid rgba(213,50,46,.4); align-self: flex-start; padding-bottom: 2px;
+}
+.bce-label { font-family: var(--mono); font-size: 8.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--bone-ghost); }
+.bce-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.bce-chip {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .04em; cursor: pointer;
+  color: var(--bone-dim); background: none; border: 1px solid var(--hairline);
+  border-radius: 999px; padding: 4px 8px;
+}
+.bce-chip:hover { color: var(--bone); border-color: var(--bone-ghost); }
+.bce-chip.on { color: var(--bone); background: var(--sepp); border-color: var(--sepp); }
+.bce-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.bce-row input {
+  width: 100%; margin-top: 3px; padding: 8px 10px; font-size: 12.5px; font-family: inherit;
+  color: var(--bone); background: var(--ink); border: 1px solid var(--hairline); border-radius: 7px;
+}
+.bce-row input:focus { outline: none; border-color: var(--sepp); }
+.bce-acciones { display: flex; gap: 7px; margin-top: 2px; }
+.bce-guardar {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink); background: var(--bone); border: none; border-radius: 7px; padding: 8px 14px; cursor: pointer;
+}
+.bce-guardar:hover { background: var(--sepp); color: var(--bone); }
+.bce-cancelar {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--bone-ghost); background: none; border: 1px solid var(--hairline); border-radius: 7px;
+  padding: 8px 12px; cursor: pointer;
+}
+
 /* ── Inteligencia por nicho ── */
 .nichos { display: flex; flex-direction: column; gap: 16px; }
 .nichos-tabs { display: flex; flex-wrap: wrap; gap: 7px; }
