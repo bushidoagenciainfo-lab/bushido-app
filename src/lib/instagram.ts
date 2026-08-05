@@ -94,6 +94,15 @@ export async function businessDiscovery(usuario: string): Promise<IgResultado> {
       if (/access token/i.test(m)) {
         return { ok: false, error: `Token de Instagram inválido o vencido: ${m}` };
       }
+      // (#10) no es culpa de la cuenta consultada: es configuración nuestra
+      if (data.error.code === 10 || /does not have permission/i.test(m)) {
+        return {
+          ok: false,
+          error:
+            "(#10) Falta permiso o el IG_USER_ID no es una cuenta de Instagram business. " +
+            "Abre /api/admin/diag y mira el bloque «instagram».",
+        };
+      }
       return { ok: false, error: `@${username}: ${m}` };
     }
     if (!data.business_discovery) {

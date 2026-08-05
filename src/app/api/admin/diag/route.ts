@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
 import { sendClientWhatsApp, toWhatsAppNumber } from "@/lib/whatsapp";
+import { businessDiscovery } from "@/lib/instagram";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -17,6 +18,8 @@ export async function GET(request: Request) {
   const waTest = new URL(request.url).searchParams.get("wa");
   // ?waba=899817986501868 → lista las plantillas REALES de esa cuenta (nombre + idioma exactos)
   const wabaId = new URL(request.url).searchParams.get("waba") || process.env.WHATSAPP_WABA_ID;
+  // ?ig=usuario → prueba Business Discovery contra ese perfil
+  const igTest = new URL(request.url).searchParams.get("ig");
 
   // ── 1. Variables de entorno presentes ──
   const env = {
@@ -156,6 +159,81 @@ export async function GET(request: Request) {
   } else {
     out.whatsapp_envio = "Para probar el envío: /api/admin/diag?wa=573016706168";
   }
+
+  // ── 8. Instagram Business Discovery (book de creadores) ──
+  const igUser = process.env.IG_USER_ID;
+  const igTok = process.env.IG_ACCESS_TOKEN;
+  const ig: Record<string, unknown> = {
+    IG_USER_ID: igUser ? `puesto (${igUser})` : "FALTA",
+    IG_ACCESS_TOKEN: igTok ? `puesto (${igTok.length} caracteres)` : "FALTA",
+  };
+
+  if (igUser && igTok) {
+    const v = process.env.IG_GRAPH_VERSION || "v21.0";
+
+    // 8a. ¿El token qué permisos tiene y cuándo vence?
+    try {
+      const r = await fetch(
+        `https://graph.facebook.com/${v}/debug_token?input_token=${encodeURIComponent(igTok)}&access_token=${encodeURIComponent(igTok)}`
+      );
+      const d = (await r.json()) as {
+        data?: {
+          scopes?: string[];
+          expires_at?: number;
+          type?: string;
+          application?: string;
+          is_valid?: boolean;
+        };
+        error?: { message?: string };
+      };
+      if (d.data) {
+        const faltan = ["instagram_basic", "pages_read_engagement"].filter(
+          (p) => !(d.data?.scopes ?? []).includes(p)
+        );
+        ig.token = {
+          valido: d.data.is_valid,
+          app: d.data.application,
+          tipo: d.data.type,
+          vence: d.data.expires_at
+            ? new Date(d.data.expires_at * 1000).toLocaleString("es-CO")
+            : "nunca",
+          permisos: d.data.scopes,
+          PERMISOS_QUE_FALTAN: faltan.length ? faltan : "ninguno ✓",
+        };
+      } else {
+        ig.token = d.error?.message ?? d;
+      }
+    } catch (e) {
+      ig.token = `no se pudo inspeccionar: ${e instanceof Error ? e.message : e}`;
+    }
+
+    // 8b. ¿El IG_USER_ID es de verdad una cuenta de Instagram business?
+    try {
+      const r = await fetch(
+        `https://graph.facebook.com/${v}/${igUser}?fields=id,username,name,followers_count&access_token=${encodeURIComponent(igTok)}`
+      );
+      const d = await r.json();
+      ig.cuenta = d?.error
+        ? `❌ ${d.error.message} — ¿seguro que ese ID es el de la CUENTA DE INSTAGRAM y no el de la página de Facebook? Sácalo con: me/accounts?fields=instagram_business_account{id,username}`
+        : d;
+    } catch (e) {
+      ig.cuenta = `no se pudo consultar: ${e instanceof Error ? e.message : e}`;
+    }
+
+    // 8c. ¿Qué cuentas de Instagram ve este token? (la respuesta al ID correcto)
+    try {
+      const r = await fetch(
+        `https://graph.facebook.com/${v}/me/accounts?fields=name,instagram_business_account{id,username}&access_token=${encodeURIComponent(igTok)}`
+      );
+      ig.paginas_y_cuentas_ig = await r.json();
+    } catch (e) {
+      ig.paginas_y_cuentas_ig = `no se pudo consultar: ${e instanceof Error ? e.message : e}`;
+    }
+
+    // 8d. Prueba real de Business Discovery
+    ig.prueba = await businessDiscovery(igTest || "bushido.aa");
+  }
+  out.instagram = ig;
 
   return NextResponse.json(out, { status: 200 });
 }
