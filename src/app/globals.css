@@ -3047,6 +3047,28 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 }
 .bs-btn:hover, .bs-btn.on { background: var(--sepp); color: var(--bone); border-color: var(--sepp); }
 
+/* traer datos desde Instagram */
+.bs-sync { margin-top: 14px; padding-top: 13px; border-top: 1px solid var(--hairline); display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.bs-sync-btn {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink); background: var(--gold); border: none; border-radius: 999px;
+  padding: 8px 15px; cursor: pointer;
+}
+.bs-sync-btn:hover:not(:disabled) { background: var(--bone); }
+.bs-sync-btn:disabled { opacity: .55; cursor: default; }
+.bs-sync-nota { font-size: 11px; color: var(--bone-ghost); line-height: 1.4; flex: 1; min-width: 200px; }
+.bs-sync-msg { width: 100%; font-family: var(--mono); font-size: 10.5px; line-height: 1.5; color: #6FBF8E; white-space: pre-line; }
+.bs-sync-msg.err { color: var(--sepp); }
+.bc-falta-fila { display: flex; gap: 6px; align-items: stretch; }
+.bc-falta-fila .bc-completar { flex: 1; }
+.bc-traer {
+  flex-shrink: 0; width: 34px; cursor: pointer; font-size: 13px;
+  color: var(--gold); background: rgba(201,162,74,.08);
+  border: 1px dashed rgba(201,162,74,.4); border-radius: 8px;
+}
+.bc-traer:hover:not(:disabled) { background: var(--gold); color: var(--ink); }
+.bc-traer:disabled { opacity: .4; cursor: default; }
+
 /* ── Completar la ficha de un creador ── */
 .bc-completar {
   width: 100%; text-align: left; cursor: pointer;

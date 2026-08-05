@@ -12,11 +12,72 @@ type Status = "idle" | "loading" | "done" | "error";
 const MAX_CV = 4 * 1024 * 1024; // 4 MB
 const mb = (b: number) => (b / 1024 / 1024).toFixed(1).replace(".", ",");
 
+/**
+ * Roles de una producción audiovisual, agrupados por área.
+ * Incluye coordinación (project manager, productor ejecutivo) porque son los
+ * perfiles que después nos ayudan a coordinar equipos, no solo a ejecutar.
+ */
+const ROLES = [
+  {
+    grupo: "Dirección",
+    roles: ["Director", "Director de fotografía (DP)", "Asistente de dirección", "Guionista"],
+  },
+  {
+    grupo: "Producción y coordinación",
+    roles: [
+      "Productor",
+      "Productor ejecutivo",
+      "Productor de campo",
+      "Project manager / Coordinador",
+      "Asistente de producción",
+      "Scout de locaciones",
+      "Casting",
+    ],
+  },
+  {
+    grupo: "Cámara y luz",
+    roles: [
+      "Camarógrafo / Operador",
+      "Fotógrafo",
+      "Foquista",
+      "Gaffer / Luminotécnico",
+      "Grip",
+      "Piloto de dron",
+    ],
+  },
+  {
+    grupo: "Arte",
+    roles: [
+      "Director de arte",
+      "Ambientación / Utilería",
+      "Vestuario / Styling",
+      "Maquillaje y peinado",
+    ],
+  },
+  { grupo: "Sonido", roles: ["Sonidista", "Microfonista", "Post de audio / Musicalización"] },
+  {
+    grupo: "Postproducción",
+    roles: [
+      "Editor",
+      "Colorista",
+      "Motion graphics",
+      "VFX / Composición",
+      "Diseñador gráfico",
+      "Ilustrador / 3D",
+    ],
+  },
+  {
+    grupo: "Contenido y estrategia",
+    roles: ["Community manager", "Estratega de contenido", "Copywriter", "Pauta / Performance"],
+  },
+] as const;
+
 export default function TalentForm() {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
   const [fileName, setFileName] = useState("");
   const [fileError, setFileError] = useState("");
+  const [rol, setRol] = useState("");
 
   function elegirArchivo(f?: File | null) {
     setFileError("");
@@ -48,6 +109,9 @@ export default function TalentForm() {
     const fd = new FormData(form);
     // si el archivo se rechazó, no lo mandamos (el resto de la postulación sí vale)
     if (!fileName) fd.delete("cv");
+    // "Otro" se guarda con el rol que la persona escribió, no como "Otro"
+    const otro = (fd.get("role_otro") as string)?.trim();
+    if (fd.get("role") === "Otro" && otro) fd.set("role", `Otro · ${otro}`);
     try {
       const res = await fetch("/api/talent", { method: "POST", body: fd });
       const data = await res.json();
@@ -59,6 +123,7 @@ export default function TalentForm() {
       setStatus("done");
       form.reset();
       setFileName("");
+      setRol("");
     } catch {
       setError(
         fileName
@@ -123,21 +188,44 @@ export default function TalentForm() {
             <label htmlFor="t-role">
               Tu rol <span className="req">*</span>
             </label>
-            <select id="t-role" name="role" required defaultValue="">
+            <select
+              id="t-role"
+              name="role"
+              required
+              value={rol}
+              onChange={(e) => setRol(e.target.value)}
+            >
               <option value="" disabled>
                 Selecciona uno
               </option>
-              <option>Fotógrafo / Cámara</option>
-              <option>Editor</option>
-              <option>Colorista</option>
-              <option>Sonidista</option>
-              <option>Productor</option>
-              <option>Director / DP</option>
-              <option>Diseñador / Motion</option>
+              {ROLES.map((g) => (
+                <optgroup key={g.grupo} label={g.grupo}>
+                  {g.roles.map((r) => (
+                    <option key={r}>{r}</option>
+                  ))}
+                </optgroup>
+              ))}
               <option>Otro</option>
             </select>
           </div>
         </div>
+
+        {/* Si su rol no está en la lista, que lo escriba: el oficio audiovisual
+            tiene más cargos de los que quepan en un desplegable. */}
+        {rol === "Otro" && (
+          <div className="field">
+            <label htmlFor="t-role-otro">
+              ¿Cuál es tu rol? <span className="req">*</span>
+            </label>
+            <input
+              id="t-role-otro"
+              name="role_otro"
+              type="text"
+              required
+              placeholder="Ej: Supervisor de guion, Coordinador de dobles, Data manager…"
+            />
+          </div>
+        )}
 
         <div className="field">
           <label htmlFor="t-cv">

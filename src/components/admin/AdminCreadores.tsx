@@ -221,6 +221,10 @@ export default function AdminCreadores({ creadores }: { creadores: CreadorLite[]
   const [q, setQ] = useState("");
   const [soloIncompletas, setSoloIncompletas] = useState(false);
   const [editando, setEditando] = useState<string | null>(null);
+  const [sync, setSync] = useState<{ estado: "idle" | "loading" | "done" | "error"; msg: string }>({
+    estado: "idle",
+    msg: "",
+  });
 
   const salud = {
     total: rows.length,
@@ -229,6 +233,38 @@ export default function AdminCreadores({ creadores }: { creadores: CreadorLite[]
     sinFormato: rows.filter((c) => !c.formatos?.length).length,
     sinSeguidores: rows.filter((c) => !c.seguidores).length,
   };
+
+  /** Trae seguidores y deduce nicho desde Instagram (Business Discovery). */
+  async function enriquecer(payload: { id?: string; todos?: boolean }) {
+    setSync({ estado: "loading", msg: "Consultando Instagram…" });
+    try {
+      const res = await fetch("/api/admin/creador-enriquecer", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const d = await res.json();
+      if (!res.ok || !d.ok) {
+        setSync({ estado: "error", msg: d.error || "No se pudo consultar Instagram." });
+        return;
+      }
+      const fallos = (d.reportes ?? [])
+        .filter((r: { ok: boolean }) => !r.ok)
+        .slice(0, 3)
+        .map((r: { error?: string }) => r.error)
+        .join(" · ");
+      setSync({
+        estado: "done",
+        msg:
+          `${d.logrados} completados${d.fallidos ? ` · ${d.fallidos} sin datos` : ""}` +
+          `${d.pendientes ? ` · quedan ${d.pendientes}, vuelve a darle` : ""}` +
+          (fallos ? `\n${fallos}` : ""),
+      });
+      setTimeout(() => window.location.reload(), 1500);
+    } catch {
+      setSync({ estado: "error", msg: "Error de red." });
+    }
+  }
 
   /** Guarda los campos completados de una ficha. */
   async function guardar(id: string, campos: Partial<CreadorLite>) {
@@ -297,8 +333,27 @@ export default function AdminCreadores({ creadores }: { creadores: CreadorLite[]
               className={"bs-btn" + (soloIncompletas ? " on" : "")}
               onClick={() => setSoloIncompletas((v) => !v)}
             >
-              {soloIncompletas ? "Ver todas" : "Completar las que faltan →"}
+              {soloIncompletas ? "Ver todas" : "Ver las que faltan →"}
             </button>
+          )}
+        </div>
+
+        {/* Autocompletar desde Instagram: seguidores reales + nicho deducido */}
+        <div className="bs-sync">
+          <button
+            type="button"
+            className="bs-sync-btn"
+            onClick={() => enriquecer({ todos: true })}
+            disabled={sync.estado === "loading"}
+          >
+            {sync.estado === "loading" ? "Consultando Instagram…" : "⟳ Traer datos de Instagram"}
+          </button>
+          <span className="bs-sync-nota">
+            Seguidores reales y nicho deducido del perfil. Solo funciona con cuentas Business o
+            Creator.
+          </span>
+          {sync.msg && (
+            <p className={"bs-sync-msg" + (sync.estado === "error" ? " err" : "")}>{sync.msg}</p>
           )}
         </div>
       </div>
@@ -391,9 +446,22 @@ export default function AdminCreadores({ creadores }: { creadores: CreadorLite[]
               />
             ) : (
               !completa(c) && (
-                <button type="button" className="bc-completar" onClick={() => setEditando(c.id)}>
-                  Falta {falta(c).join(", ")} · completar →
-                </button>
+                <div className="bc-falta-fila">
+                  <button type="button" className="bc-completar" onClick={() => setEditando(c.id)}>
+                    Falta {falta(c).join(", ")} · completar a mano →
+                  </button>
+                  {c.instagram && (
+                    <button
+                      type="button"
+                      className="bc-traer"
+                      onClick={() => enriquecer({ id: c.id })}
+                      disabled={sync.estado === "loading"}
+                      title="Trae seguidores y nicho desde Instagram"
+                    >
+                      ⟳
+                    </button>
+                  )}
+                </div>
               )
             )}
 
