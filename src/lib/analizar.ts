@@ -6,6 +6,7 @@
 // pipeline sigue funcionando, solo no se genera el informe automático).
 
 import Anthropic from "@anthropic-ai/sdk";
+import { businessDiscovery, hasInstagram } from "./instagram";
 import { EMOCIONES, NICHOS, type Analisis, type EmocionDetalle, type Emocion, type Nicho } from "./analisis";
 
 export interface AnalizarInput {
@@ -26,6 +27,54 @@ const KEY = process.env.ANTHROPIC_API_KEY;
 
 export function hasIA(): boolean {
   return Boolean(KEY);
+}
+
+/**
+ * Trae el perfil real de Instagram y lo formatea como evidencia para el prompt.
+ * Sin esto el modelo analiza a ciegas y solo puede repetir lugares comunes del
+ * nicho — que es exactamente lo que hacía que 3 marcas distintas recibieran
+ * prácticamente el mismo informe.
+ */
+async function perfilInstagram(redes?: string): Promise<string> {
+  if (!redes || !hasInstagram()) return "";
+  const r = await businessDiscovery(redes).catch(() => null);
+  if (!r?.ok || !r.perfil) return "";
+  const p = r.perfil;
+
+  const posts = (p.media ?? []).map((m, i) => {
+    const inter =
+      typeof m.like_count === "number"
+        ? `${m.like_count} likes, ${m.comments_count ?? 0} comentarios`
+        : "sin métricas públicas";
+    const texto = (m.caption ?? "(sin texto)").replace(/\s+/g, " ").slice(0, 220);
+    return `  ${i + 1}. [${m.media_type ?? "?"}] ${inter}\n     "${texto}"`;
+  });
+
+  // Tasa de interacción: el dato que revela si la audiencia responde de verdad
+  let engagement = "";
+  const conLikes = (p.media ?? []).filter((m) => typeof m.like_count === "number");
+  if (p.followers_count && conLikes.length) {
+    const prom =
+      conLikes.reduce((s, m) => s + (m.like_count ?? 0) + (m.comments_count ?? 0), 0) /
+      conLikes.length;
+    const pct = (prom / p.followers_count) * 100;
+    engagement =
+      `\nInteracción promedio: ${prom.toFixed(0)} por publicación = ${pct.toFixed(2)}% de sus seguidores.` +
+      `\n(Referencia del sector: <1% es flojo, 1-3% normal, >3% fuerte. Úsalo para juzgar, y dilo con nombre propio.)`;
+  }
+
+  return [
+    "DATOS REALES DE SU INSTAGRAM (obtenidos ahora de la API oficial de Meta —",
+    "esto NO es suposición: es lo que hay en su perfil. ÚSALO como evidencia central):",
+    `Usuario: @${p.username}${p.name ? ` · ${p.name}` : ""}`,
+    `Seguidores: ${p.followers_count ?? "—"} · Publicaciones totales: ${p.media_count ?? "—"}`,
+    p.biography ? `Biografía textual: "${p.biography}"` : "Biografía: VACÍA (dato relevante).",
+    p.website ? `Enlace en bio: ${p.website}` : "Enlace en bio: NO tiene (dato relevante).",
+    engagement,
+    posts.length ? `\nÚltimas publicaciones:\n${posts.join("\n")}` : "\n(No devolvió publicaciones.)",
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 // ── Contexto de negocio: paquetes REALES de Bushido para aterrizar la recomendación ──
@@ -50,8 +99,30 @@ const SYSTEM = `Eres el estratega de contenido de Bushido, una agencia audiovisu
 
 Analizas una marca aplicando el framework de las "7 maletas de cualquier compra" de Felipe Vergara: toda compra la mueve un motivo (racional o emocional) — el "gatillo" que dispara la decisión. Tu trabajo es descubrir esos gatillos y traducirlos en un plan de contenido y de presencia digital accionable, del que Bushido pueda encargarse.
 
+⛔ LA PRUEBA QUE TIENES QUE PASAR — léela antes de escribir:
+Si este informe le sirviera igual a OTRA marca del mismo nicho, está mal y hay que rehacerlo.
+Alguien comparó tres análisis de marcas distintas y encontró los mismos diagnósticos: eso es un fracaso, no un método.
+
+PROHIBIDO escribir (son relleno que aplica a cualquiera):
+- "falta constancia", "publicar con más frecuencia", "definir una línea editorial"
+- "mejorar los hooks", "no detiene el scroll", "aprovechar las tendencias"
+- "contar más la historia detrás de la marca", "mostrar el behind the scenes"
+- "interactuar más con la comunidad", "usar más llamados a la acción"
+- "optimizar el perfil", "trabajar el storytelling", "generar más valor"
+Si una frase tuya podría estar en el informe de una repostería Y en el de un artista, bórrala.
+
+CÓMO SE VE UN DIAGNÓSTICO REAL:
+- Cita EVIDENCIA concreta del perfil: números de seguidores, la biografía textual, lo que dicen sus últimas publicaciones, su tasa de interacción. Nombra lo que viste.
+  · Flojo: "Le falta constancia en las publicaciones".
+  · Real: "Con 2.600 seguidores promedias 40 interacciones por post (1,5%): la gente que ya te sigue sí responde, el problema es que no estás llegando a nadie nuevo".
+- Señala la CONTRADICCIÓN: casi toda marca dice una cosa y hace otra. Encuéntrala. Si la bio promete "envíos a todo el país" pero ninguna publicación habla de eso, dilo.
+- Di lo INCÓMODO. Si el contenido se ve amateur, si el precio no se justifica con lo que muestra, si lleva 200 publicaciones sin resultado, dilo con respeto pero sin rodeos. Un diagnóstico que solo halaga no vale nada y el cliente lo nota.
+- Si algo NO se puede saber con los datos disponibles, dilo abiertamente en vez de rellenar con suposiciones bonitas.
+- Las fortalezas también deben ser específicas: "producto fotogénico" no dice nada; "las fotos de producto sobre fondo blanco tienen un nivel que la mayoría de tu competencia no tiene" sí.
+
 REGLAS DE VOZ:
 - Español COLOMBIANO (tú/usted; NUNCA argentino: nada de "vos/pedí/contame").
+- Cero relleno corporativo. Frases cortas. Si algo se puede decir en 8 palabras, no uses 20.
 - NUNCA menciones "7 maletas", "las maletas" ni "Felipe Vergara" en tu respuesta: ese framework lo usas internamente, pero de cara al cliente el método de Bushido se llama **Kansei**. Si necesitas nombrar el método, di "Kansei" o "el método de Bushido".
 - Concreto y comercial, sin relleno. Cada carencia es accionable, cada gatillo un insight real de compra, cada recomendación algo que Bushido pueda ejecutar.
 
@@ -252,6 +323,11 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
   // gratis va sin ella para que llegue rápido y sin riesgo de timeout.
   const brief = input.profundo ? await investigar(client, input) : "";
 
+  // PASO 1b: el perfil REAL de Instagram (rápido, ~300ms). Esto es lo que
+  // separa un análisis específico de uno genérico: sin datos, el modelo solo
+  // puede decir obviedades del nicho.
+  const perfil = await perfilInstagram(input.redes);
+
   // PASO 2: estructurar el análisis usando esos hechos
   const userMsg = [
     `Marca: ${input.marca}`,
@@ -262,12 +338,16 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
     `>>> FOCO DEL ANÁLISIS (lo que el cliente eligió): ${input.contexto || "(no especificó → enfoque general de redes)"}`,
     `Todo el informe debe leerse desde ese foco, no solo desde redes sociales.`,
     "",
+    perfil,
+    "",
     brief
       ? `INVESTIGACIÓN WEB (hechos reales — BÁSATE en esto, no inventes más allá de lo aquí verificado):\n${brief}`
-      : "(sin investigación web disponible — infiere del nicho con prudencia)",
+      : "",
     "",
     "Analiza esta marca y devuelve el informe estructurado. Recuerda la regla de honestidad de canales y recomienda el servicio que resuelve lo que el cliente busca.",
-  ].join("\n");
+  ]
+    .filter((l) => l !== "")
+    .join("\n");
 
   // Config que YA funcionaba en producción (no la aprietes: si el modelo se corta,
   // el informe nunca llega). El timeout va holgado dentro de los 60s de la ruta.

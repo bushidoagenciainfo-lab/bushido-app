@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
-import { sendClientWhatsApp, toWhatsAppNumber } from "@/lib/whatsapp";
+import {
+  sendClientWhatsApp,
+  toWhatsAppNumber,
+  hasWhatsAppAlert,
+  alertaBushidoWhatsApp,
+} from "@/lib/whatsapp";
 import { businessDiscovery } from "@/lib/instagram";
 
 export const runtime = "nodejs";
@@ -159,6 +164,36 @@ export async function GET(request: Request) {
   } else {
     out.whatsapp_envio = "Para probar el envío: /api/admin/diag?wa=573016706168";
   }
+
+  // ── 7b. Alertas a MI WhatsApp/Telegram cuando entra un lead ──
+  const alertPhone = process.env.WHATSAPP_ALERT_PHONE;
+  const alertKey = process.env.WHATSAPP_ALERT_APIKEY;
+  const alertas: Record<string, unknown> = {
+    whatsapp_personal: hasWhatsAppAlert()
+      ? "configurado ✓"
+      : `FALTA: ${!alertPhone ? "WHATSAPP_ALERT_PHONE " : ""}${!alertKey ? "WHATSAPP_ALERT_APIKEY" : ""}`.trim(),
+    telegram: process.env.TELEGRAM_BOT_TOKEN
+      ? process.env.TELEGRAM_CHAT_ID
+        ? "configurado ✓"
+        : "FALTA TELEGRAM_CHAT_ID"
+      : "FALTA TELEGRAM_BOT_TOKEN",
+    como_activar_whatsapp:
+      "1) Agrega +34 621 33 33 11 a tus contactos. 2) Mándale por WhatsApp: " +
+      "'I allow callmebot to send me messages'. 3) Te responde con tu apikey. " +
+      "4) En Vercel: WHATSAPP_ALERT_PHONE=573016706168 y WHATSAPP_ALERT_APIKEY=esa_clave. 5) Redeploy.",
+  };
+  // ?alerta=1 → manda una alerta de prueba a tu WhatsApp personal
+  if (new URL(request.url).searchParams.get("alerta")) {
+    if (hasWhatsAppAlert()) {
+      await alertaBushidoWhatsApp("🔔 Prueba de alerta desde el panel de Bushido.");
+      alertas.envio_prueba = "enviada — revisa tu WhatsApp";
+    } else {
+      alertas.envio_prueba = "no se pudo: falta configurar (ver arriba)";
+    }
+  } else {
+    alertas.envio_prueba = "Para probar: /api/admin/diag?alerta=1";
+  }
+  out.alertas_de_lead = alertas;
 
   // ── 8. Instagram Business Discovery (book de creadores) ──
   const igUser = process.env.IG_USER_ID;
