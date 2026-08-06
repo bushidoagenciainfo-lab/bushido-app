@@ -195,6 +195,47 @@ export async function GET(request: Request) {
   }
   out.alertas_de_lead = alertas;
 
+  // ── 7c. Bandeja de WhatsApp: ¿existe la tabla y están llegando mensajes? ──
+  const bandeja: Record<string, unknown> = {
+    WHATSAPP_VERIFY_TOKEN: process.env.WHATSAPP_VERIFY_TOKEN ? "puesto ✓" : "FALTA",
+    url_del_webhook: "https://bushidoav.com/api/whatsapp/webhook",
+  };
+  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    try {
+      const c = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, {
+        auth: { persistSession: false },
+      });
+      const { count, error } = await c
+        .from("wa_mensajes")
+        .select("id", { count: "exact", head: true });
+      if (error) {
+        bandeja.tabla = /does not exist|schema cache/i.test(error.message)
+          ? "❌ NO EXISTE — corre supabase/wa_mensajes.sql en Supabase → SQL Editor"
+          : `❌ ${error.message}`;
+      } else {
+        bandeja.tabla = "existe ✓";
+        bandeja.mensajes_guardados = count ?? 0;
+        if ((count ?? 0) === 0) {
+          bandeja.diagnostico =
+            "La tabla está vacía: Meta aún no ha entregado nada. Revisa en la app de Meta → " +
+            "WhatsApp → Configuración → Webhook, que el campo 'messages' esté SUSCRITO y que " +
+            "la app esté en modo Activo. Luego mándate un WhatsApp al número de Bushido.";
+        }
+        const { data: ultimos } = await c
+          .from("wa_mensajes")
+          .select("created_at, wa_id, nombre, direccion, texto")
+          .order("created_at", { ascending: false })
+          .limit(3);
+        if (ultimos?.length) bandeja.ultimos = ultimos;
+      }
+    } catch (e) {
+      bandeja.tabla = `no se pudo comprobar: ${e instanceof Error ? e.message : e}`;
+    }
+  } else {
+    bandeja.tabla = "sin Supabase configurado";
+  }
+  out.bandeja_whatsapp = bandeja;
+
   // ── 8. Instagram Business Discovery (book de creadores) ──
   const igUser = process.env.IG_USER_ID;
   const igTok = process.env.IG_ACCESS_TOKEN;
