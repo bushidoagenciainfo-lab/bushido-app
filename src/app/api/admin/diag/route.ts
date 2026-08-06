@@ -242,6 +242,33 @@ export async function GET(request: Request) {
             "(suscripción o número), no del código. Prueba con el enlace 'Probar' de la fila " +
             "'messages' en la app de Meta.";
 
+        // ¿Qué URL tiene Meta registrada de verdad para la app? Es lo único que
+        // no se puede comprobar mirando la interfaz.
+        const appId = process.env.META_APP_ID || "1379273724268514";
+        const appSecret = process.env.META_APP_SECRET;
+        if (appSecret) {
+          try {
+            const r = await fetch(
+              `https://graph.facebook.com/v21.0/${appId}/subscriptions?access_token=${appId}|${appSecret}`
+            );
+            const d = await r.json();
+            bandeja.url_registrada_en_meta = d?.error
+              ? `❌ ${d.error.message}`
+              : (d?.data ?? []).map(
+                  (s: { object?: string; callback_url?: string; active?: boolean; fields?: Array<{ name?: string }> }) =>
+                    `${s.object}: ${s.callback_url} · activo=${s.active} · campos=${(s.fields ?? [])
+                      .map((f) => f.name)
+                      .join(",")}`
+                );
+          } catch (e) {
+            bandeja.url_registrada_en_meta = `no se pudo consultar: ${e instanceof Error ? e.message : e}`;
+          }
+        } else {
+          bandeja.url_registrada_en_meta =
+            "Para verlo necesito META_APP_SECRET en Vercel (Meta → Configuración de la app → " +
+            "Básica → Clave secreta de la app → Mostrar). Es lo único que falta por comprobar.";
+        }
+
         // ── El paso que la interfaz de Meta NO muestra ──
         // Suscribir el campo "messages" en la app no basta: la CUENTA de
         // WhatsApp (WABA) tiene que estar suscrita a la app, y eso solo se
