@@ -66,11 +66,31 @@ La bandeja te muestra en cada conversación cuánto tiempo te queda
 (*"puedes responder · 18h restantes"*) o si ya se cerró. **Es la razón por la
 que hay que contestar el mismo día.**
 
+## Paso 4 · Suscribir la cuenta a la app (el que nadie menciona)
+
+Suscribir el campo `messages` en la app **no basta**. Además, tu cuenta de
+WhatsApp Business (WABA) tiene que estar suscrita a la app — y eso **no aparece
+en la interfaz de Meta**, solo se hace por API.
+
+Si no lo haces, Meta acepta el webhook, muestra `messages` en azul… y no entrega
+ningún mensaje. Sin avisar.
+
+Se resuelve solo:
+
+1. Copia el **identificador de tu cuenta de WhatsApp Business** (Meta → WhatsApp
+   → Configuración de la API, arriba)
+2. Ponlo en Vercel como `WHATSAPP_WABA_ID` y redespliega
+3. Abre `https://bushidoav.com/api/admin/diag?suscribir=1`
+4. En el bloque `bandeja_whatsapp`, `apps_suscritas` debe listar tu app
+
+*(Si no quieres tocar Vercel: `\/api\/admin\/diag?waba=TU_ID&suscribir=1`.)*
+
 ## Si no aparece nada
 
 | Síntoma | Causa |
 |---|---|
-| La sección dice que no hay conversaciones | Falta activar el campo `messages` en Meta (paso 3.5) |
+| La sección dice que no hay conversaciones | Falta el campo `messages` (paso 3.5) **o la suscripción de la WABA (paso 4)** |
+| El diag dice `mensajes_guardados: 0` con la tabla creada | Casi siempre es el paso 4 |
 | Meta no valida el webhook | El `WHATSAPP_VERIFY_TOKEN` no coincide, o falta el Redeploy |
 | "No se pudo enviar: pasaron más de 24 horas" | Es la ventana de Meta, no un error |
 | Todo funciona pero no llegan avisos al celular | Falta `WHATSAPP_ALERT_PHONE` / `WHATSAPP_ALERT_APIKEY` |
