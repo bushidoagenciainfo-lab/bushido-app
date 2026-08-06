@@ -269,6 +269,31 @@ export async function GET(request: Request) {
             "Básica → Clave secreta de la app → Mostrar). Es lo único que falta por comprobar.";
         }
 
+        // ⚠️ Un webhook puesto en el NÚMERO sobrescribe el de la app y no se ve
+        // en ninguna pantalla. Suele quedar de intentos con otros proveedores.
+        if (process.env.WHATSAPP_PHONE_ID && process.env.WHATSAPP_TOKEN) {
+          const auth = { authorization: `Bearer ${process.env.WHATSAPP_TOKEN}` };
+          const url = `https://graph.facebook.com/v21.0/${process.env.WHATSAPP_PHONE_ID}`;
+          try {
+            if (new URL(request.url).searchParams.get("quitar_override")) {
+              const r = await fetch(`${url}/settings`, {
+                method: "POST",
+                headers: { ...auth, "content-type": "application/json" },
+                body: JSON.stringify({ webhooks: { override_callback_uri: "" } }),
+              });
+              bandeja.override_eliminado = await r.json();
+            }
+            const r = await fetch(`${url}/settings?fields=webhooks`, { headers: auth });
+            const d = await r.json();
+            const ov = d?.webhooks?.override_callback_uri;
+            bandeja.webhook_propio_del_numero = ov
+              ? `❌ HAY UNO: ${ov} — se está llevando TUS mensajes. Bórralo con /api/admin/diag?quitar_override=1`
+              : "no hay (correcto: manda el de la app)";
+          } catch (e) {
+            bandeja.webhook_propio_del_numero = `no se pudo consultar: ${e instanceof Error ? e.message : e}`;
+          }
+        }
+
         // ── El paso que la interfaz de Meta NO muestra ──
         // Suscribir el campo "messages" en la app no basta: la CUENTA de
         // WhatsApp (WABA) tiene que estar suscrita a la app, y eso solo se
