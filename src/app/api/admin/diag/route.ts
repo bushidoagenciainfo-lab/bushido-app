@@ -229,6 +229,19 @@ export async function GET(request: Request) {
           .limit(3);
         if (ultimos?.length) bandeja.ultimos = ultimos;
 
+        // ¿Meta está tocando el webhook? Esto lo responde sin lugar a dudas.
+        const { data: golpes } = await c
+          .from("events")
+          .select("created_at, name")
+          .eq("type", "wa_webhook")
+          .order("created_at", { ascending: false })
+          .limit(5);
+        bandeja.meta_toca_el_webhook = golpes?.length
+          ? golpes
+          : "❌ NUNCA. Meta no ha llamado ni una vez a la URL. El problema está del lado de Meta " +
+            "(suscripción o número), no del código. Prueba con el enlace 'Probar' de la fila " +
+            "'messages' en la app de Meta.";
+
         // ── El paso que la interfaz de Meta NO muestra ──
         // Suscribir el campo "messages" en la app no basta: la CUENTA de
         // WhatsApp (WABA) tiene que estar suscrita a la app, y eso solo se

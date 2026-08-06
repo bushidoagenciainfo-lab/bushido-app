@@ -53,6 +53,24 @@ function contenido(m: Record<string, unknown>): { texto: string; tipo: string } 
   }
 }
 
+/**
+ * Deja constancia de CADA llamada que hace Meta, aunque después falle el
+ * procesamiento. Sin esto no hay forma de saber si Meta está entregando o no.
+ */
+async function registrarGolpe(resumen: string) {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return;
+  try {
+    const { createClient } = await import("@supabase/supabase-js");
+    await createClient(url, key, { auth: { persistSession: false } })
+      .from("events")
+      .insert({ type: "wa_webhook", name: resumen.slice(0, 300), path: "/api/whatsapp/webhook" });
+  } catch (e) {
+    console.error("[wa:webhook] no se pudo registrar el golpe:", e);
+  }
+}
+
 /** Recibe los mensajes entrantes y los guarda en la bandeja. */
 export async function POST(request: Request) {
   let body: {
@@ -65,11 +83,22 @@ export async function POST(request: Request) {
       }>;
     }>;
   };
+  let crudo = "";
   try {
-    body = await request.json();
+    crudo = await request.text();
+    body = JSON.parse(crudo);
   } catch {
+    await registrarGolpe(`POST sin JSON válido: ${crudo.slice(0, 150)}`);
     return NextResponse.json({ ok: true }); // nunca dar error a Meta
   }
+
+  // Rastro ANTES de procesar: si algo falla después, igual sabemos que llegó.
+  const primerCambio = body.entry?.[0]?.changes?.[0]?.value;
+  await registrarGolpe(
+    primerCambio?.messages?.length
+      ? `mensaje de ${primerCambio.contacts?.[0]?.wa_id ?? "?"}`
+      : `evento sin mensajes (probablemente un estado): ${crudo.slice(0, 120)}`
+  );
 
   try {
     for (const entry of body.entry ?? []) {
