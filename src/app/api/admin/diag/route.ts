@@ -316,6 +316,42 @@ export async function GET(request: Request) {
           }
         }
 
+        // ── Reinicio completo de la suscripción (?resuscribir=1) ──
+        // Última carta cuando todo está bien configurado y Meta igual no entrega:
+        // borra la suscripción y la vuelve a crear desde cero por API.
+        if (new URL(request.url).searchParams.get("resuscribir") && wabaId) {
+          const pasos: Record<string, unknown> = {};
+          const tok = process.env.WHATSAPP_TOKEN as string;
+          const auth = { authorization: `Bearer ${tok}` };
+          const appId2 = process.env.META_APP_ID || "1379273724268514";
+          const secret2 = process.env.META_APP_SECRET;
+          try {
+            // 1. fuera la suscripción "user" fantasma (campos vacíos, misma URL)
+            if (secret2) {
+              const r = await fetch(
+                `https://graph.facebook.com/v21.0/${appId2}/subscriptions?object=user&access_token=${appId2}|${secret2}`,
+                { method: "DELETE" }
+              );
+              pasos["1_borrar_suscripcion_user"] = await r.json();
+            }
+            // 2. desconectar la app de la cuenta
+            const del = await fetch(
+              `https://graph.facebook.com/v21.0/${wabaId}/subscribed_apps`,
+              { method: "DELETE", headers: auth }
+            );
+            pasos["2_desconectar_waba"] = await del.json();
+            // 3. volver a conectarla
+            const add = await fetch(
+              `https://graph.facebook.com/v21.0/${wabaId}/subscribed_apps`,
+              { method: "POST", headers: auth }
+            );
+            pasos["3_reconectar_waba"] = await add.json();
+          } catch (e) {
+            pasos.error = e instanceof Error ? e.message : String(e);
+          }
+          bandeja.reinicio_de_suscripcion = pasos;
+        }
+
         // ── El paso que la interfaz de Meta NO muestra ──
         // Suscribir el campo "messages" en la app no basta: la CUENTA de
         // WhatsApp (WABA) tiene que estar suscrita a la app, y eso solo se
