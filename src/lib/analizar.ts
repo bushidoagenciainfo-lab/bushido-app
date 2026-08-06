@@ -21,6 +21,12 @@ export interface AnalizarInput {
    * Úsalo desde el panel para clientes que ya contrataron.
    */
   profundo?: boolean;
+  /**
+   * Cuánto puede tardar el modelo. El envío automático corre en una ruta de 60s
+   * (por eso 50s por defecto), pero desde el panel hay 120s: ahí conviene dar
+   * más margen o se corta con "Request timed out" teniendo tiempo de sobra.
+   */
+  timeoutMs?: number;
 }
 
 const KEY = process.env.ANTHROPIC_API_KEY;
@@ -361,7 +367,7 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
       system: SYSTEM,
       messages: [{ role: "user", content: userMsg }],
     },
-    { timeout: 50000, maxRetries: 1 }
+    { timeout: input.timeoutMs ?? 50000, maxRetries: 1 }
   );
   console.log(`[analizar] informe estructurado en ${Date.now() - t1}ms (profundo=${!!input.profundo})`);
 

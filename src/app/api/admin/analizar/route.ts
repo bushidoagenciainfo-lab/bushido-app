@@ -57,6 +57,8 @@ export async function POST(request: Request) {
       web: web ?? undefined,
       contexto: contexto ?? undefined,
       profundo: profundo ?? false,
+      // esta ruta tiene 120s (maxDuration): aprovéchalos en vez de cortar a los 50
+      timeoutMs: 100_000,
     });
   } catch (err) {
     console.error("generarAnalisis:", err);

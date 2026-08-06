@@ -78,7 +78,7 @@ export async function businessDiscovery(usuario: string): Promise<IgResultado> {
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(12000) });
     const data = (await res.json()) as {
-      business_discovery?: IgPerfil;
+      business_discovery?: IgPerfil & { media?: { data?: IgMedia[] } | IgMedia[] };
       error?: { message?: string; code?: number; error_subcode?: number };
     };
 
@@ -109,7 +109,13 @@ export async function businessDiscovery(usuario: string): Promise<IgResultado> {
     if (!data.business_discovery) {
       return { ok: false, error: `@${username}: Meta no devolvió datos.` };
     }
-    return { ok: true, perfil: data.business_discovery };
+    // Meta envuelve las publicaciones en { media: { data: [...] } }, no en un
+    // array plano. Lo normalizamos aquí para que quien lo use reciba siempre
+    // un array (antes reventaba con "(i.media ?? []).map is not a function").
+    const bd = data.business_discovery;
+    const bruto = bd.media as IgMedia[] | { data?: IgMedia[] } | undefined;
+    const media = Array.isArray(bruto) ? bruto : (bruto?.data ?? []);
+    return { ok: true, perfil: { ...bd, media } };
   } catch (e) {
     return {
       ok: false,
