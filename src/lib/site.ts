@@ -370,9 +370,10 @@ export const NAV = [
   { href: "/contacto", label: "Contacto" },
 ];
 
-export const WHATSAPP = "573016706168";
+/** El número conectado a la Cloud API: es el que recibe en la bandeja del panel. */
+export const WHATSAPP = "573015706168";
 /** El mismo número, formateado para mostrar. */
-export const WHATSAPP_DISPLAY = "+57 301 670 6168";
+export const WHATSAPP_DISPLAY = "+57 301 570 6168";
 export const EMAIL = "servicios@bushidoav.com";
 
 // Redes sociales (footer).

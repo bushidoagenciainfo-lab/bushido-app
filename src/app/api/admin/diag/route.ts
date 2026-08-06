@@ -162,7 +162,7 @@ export async function GET(request: Request) {
       }),
     };
   } else {
-    out.whatsapp_envio = "Para probar el envío: /api/admin/diag?wa=573016706168";
+    out.whatsapp_envio = "Para probar el envío: /api/admin/diag?wa=573008923390";
   }
 
   // ── 7b. Alertas a MI WhatsApp/Telegram cuando entra un lead ──
@@ -180,7 +180,8 @@ export async function GET(request: Request) {
     como_activar_whatsapp:
       "1) Agrega +34 621 33 33 11 a tus contactos. 2) Mándale por WhatsApp: " +
       "'I allow callmebot to send me messages'. 3) Te responde con tu apikey. " +
-      "4) En Vercel: WHATSAPP_ALERT_PHONE=573016706168 y WHATSAPP_ALERT_APIKEY=esa_clave. 5) Redeploy.",
+      "4) En Vercel: WHATSAPP_ALERT_PHONE=tu número PERSONAL (no el de la API) " +
+      "y WHATSAPP_ALERT_APIKEY=esa_clave. 5) Redeploy.",
   };
   // ?alerta=1 → manda una alerta de prueba a tu WhatsApp personal
   if (new URL(request.url).searchParams.get("alerta")) {
