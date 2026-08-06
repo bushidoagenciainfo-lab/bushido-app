@@ -227,6 +227,34 @@ export async function GET(request: Request) {
           .order("created_at", { ascending: false })
           .limit(3);
         if (ultimos?.length) bandeja.ultimos = ultimos;
+
+        // ── El paso que la interfaz de Meta NO muestra ──
+        // Suscribir el campo "messages" en la app no basta: la CUENTA de
+        // WhatsApp (WABA) tiene que estar suscrita a la app, y eso solo se
+        // hace por API. Si falta, Meta no entrega NADA y no avisa.
+        if (wabaId && process.env.WHATSAPP_TOKEN) {
+          const auth = { authorization: `Bearer ${process.env.WHATSAPP_TOKEN}` };
+          const base = `https://graph.facebook.com/v21.0/${wabaId}/subscribed_apps`;
+          try {
+            if (new URL(request.url).searchParams.get("suscribir")) {
+              const r = await fetch(base, { method: "POST", headers: auth });
+              bandeja.suscripcion_realizada = await r.json();
+            }
+            const r = await fetch(base, { headers: auth });
+            const d = await r.json();
+            const apps = (d?.data ?? []) as Array<{ whatsapp_business_api_data?: { name?: string } }>;
+            bandeja.apps_suscritas = apps.length
+              ? apps.map((a) => a.whatsapp_business_api_data?.name ?? "?")
+              : "❌ NINGUNA — este es el problema. Abre /api/admin/diag?suscribir=1 para conectarla.";
+          } catch (e) {
+            bandeja.apps_suscritas = `no se pudo consultar: ${e instanceof Error ? e.message : e}`;
+          }
+        } else {
+          bandeja.apps_suscritas =
+            "Para comprobarlo necesito el id de tu cuenta de WhatsApp Business: " +
+            "ponlo en Vercel como WHATSAPP_WABA_ID, o abre /api/admin/diag?waba=TU_ID " +
+            "(lo ves en Meta → WhatsApp → Configuración de la API).";
+        }
       }
     } catch (e) {
       bandeja.tabla = `no se pudo comprobar: ${e instanceof Error ? e.message : e}`;
