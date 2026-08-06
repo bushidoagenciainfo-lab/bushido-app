@@ -269,6 +269,28 @@ export async function GET(request: Request) {
             "Básica → Clave secreta de la app → Mostrar). Es lo único que falta por comprobar.";
         }
 
+        // Estado real del número. `platform_type` es la clave: si NO dice
+        // CLOUD_API, el número vive en otra plataforma y los webhooks de la
+        // Cloud API nunca se van a disparar (aunque el envío sí funcione).
+        if (process.env.WHATSAPP_PHONE_ID && process.env.WHATSAPP_TOKEN) {
+          try {
+            const r = await fetch(
+              `https://graph.facebook.com/v21.0/${process.env.WHATSAPP_PHONE_ID}` +
+                `?fields=display_phone_number,status,name_status,platform_type,code_verification_status,quality_rating`,
+              { headers: { authorization: `Bearer ${process.env.WHATSAPP_TOKEN}` } }
+            );
+            const d = await r.json();
+            bandeja.estado_del_numero = d?.error ? `❌ ${d.error.message}` : d;
+            if (d?.platform_type && d.platform_type !== "CLOUD_API") {
+              bandeja.ALERTA_PLATAFORMA =
+                `El número está en ${d.platform_type}, no en CLOUD_API. Por eso envía pero NO recibe: ` +
+                `los webhooks de la Cloud API solo funcionan con números en esa plataforma.`;
+            }
+          } catch (e) {
+            bandeja.estado_del_numero = `no se pudo consultar: ${e instanceof Error ? e.message : e}`;
+          }
+        }
+
         // ⚠️ Un webhook puesto en el NÚMERO sobrescribe el de la app y no se ve
         // en ninguna pantalla. Suele quedar de intentos con otros proveedores.
         if (process.env.WHATSAPP_PHONE_ID && process.env.WHATSAPP_TOKEN) {
