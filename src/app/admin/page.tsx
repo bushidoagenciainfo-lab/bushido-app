@@ -5,6 +5,8 @@ import AdminLeads from "@/components/admin/AdminLeads";
 import AdminCreadores, { type CreadorLite } from "@/components/admin/AdminCreadores";
 import AdminNichos from "@/components/admin/AdminNichos";
 import AdminCrew from "@/components/admin/AdminCrew";
+import AdminWhatsApp from "@/components/admin/AdminWhatsApp";
+import { listConversaciones, type WaConversacion } from "@/lib/wa-inbox";
 import AdminLogout from "@/components/admin/AdminLogout";
 import AdminSection from "@/components/admin/AdminSection";
 
@@ -49,13 +51,15 @@ export default async function AdminPage() {
   let analisis: Array<Record<string, unknown>> = [];
   let creadores: CreadorLite[] = [];
   let nichos: NichoIntel[] = [];
+  let conversaciones: WaConversacion[] = [];
   try {
-    [stats, leads, analisis, creadores, nichos] = await Promise.all([
+    [stats, leads, analisis, creadores, nichos, conversaciones] = await Promise.all([
       dashboardStats(),
       listLeads(200),
       listAnalisis(50),
       listCreadores({ limit: 300 }) as Promise<CreadorLite[]>,
       inteligenciaNichos(),
+      listConversaciones().catch(() => [] as WaConversacion[]),
     ]);
   } catch (e) {
     error = e instanceof Error ? e.message : "Error cargando datos.";
@@ -128,6 +132,19 @@ export default async function AdminPage() {
           </div>
         </section>
       )}
+
+      <AdminSection
+        title="WhatsApp"
+        count={conversaciones.length}
+        defaultOpen={conversaciones.some((c) => c.sinLeer > 0)}
+        hint={
+          conversaciones.reduce((s, c) => s + c.sinLeer, 0) > 0
+            ? `${conversaciones.reduce((s, c) => s + c.sinLeer, 0)} sin leer`
+            : "Conversaciones con clientes"
+        }
+      >
+        <AdminWhatsApp conversaciones={conversaciones} />
+      </AdminSection>
 
       <AdminSection
         title="Inteligencia por nicho"

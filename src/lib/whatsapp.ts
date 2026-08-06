@@ -87,6 +87,52 @@ async function postTemplate(to: string, lang: string, params: string[]) {
 }
 
 /**
+ * Mensaje de TEXTO LIBRE. Solo funciona dentro de la ventana de 24 horas desde
+ * el último mensaje del cliente; fuera de ella Meta lo rechaza (error 131047) y
+ * hay que usar una plantilla.
+ */
+export async function sendTextoLibre(opts: {
+  phone: string;
+  texto: string;
+}): Promise<{ ok: boolean; id?: string; error?: string }> {
+  if (!WA_TOKEN || !WA_PHONE_ID) return { ok: false, error: "WhatsApp sin configurar." };
+  const to = toWhatsAppNumber(opts.phone);
+  if (!to) return { ok: false, error: "Teléfono inválido." };
+
+  try {
+    const res = await fetch(`https://graph.facebook.com/v21.0/${WA_PHONE_ID}/messages`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${WA_TOKEN}`, "content-type": "application/json" },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        recipient_type: "individual",
+        to,
+        type: "text",
+        text: { preview_url: true, body: opts.texto },
+      }),
+      signal: AbortSignal.timeout(10000),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const msg = data?.error?.message ?? `HTTP ${res.status}`;
+      const code = data?.error?.code;
+      if (code === 131047 || /24 hour|re-engagement/i.test(String(msg))) {
+        return {
+          ok: false,
+          error:
+            "Pasaron más de 24 horas desde su último mensaje: Meta ya no deja texto libre. " +
+            "Escríbele tú desde otro número o espera a que él vuelva a escribir.",
+        };
+      }
+      return { ok: false, error: String(msg) };
+    }
+    return { ok: true, id: data?.messages?.[0]?.id };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "fallo de red" };
+  }
+}
+
+/**
  * Envía al cliente el mensaje de plantilla. `params` rellena {{1}}, {{2}}, {{3}}…
  * en el orden de la plantilla (nombre, marca, link del informe).
  * Si el idioma configurado no coincide con el que Meta registró, reintenta con
