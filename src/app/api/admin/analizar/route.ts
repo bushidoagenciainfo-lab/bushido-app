@@ -107,5 +107,7 @@ export async function POST(request: Request) {
   if (leadId) {
     await marcarInforme(leadId, { ok: true, url });
   }
-  return NextResponse.json({ ok: true, id, url, envio });
+  // `envio` solo viaja si de verdad se pidió enviar; si no, el panel creía que
+  // ya se había mandado y escondía el botón "Enviar al cliente".
+  return NextResponse.json({ ok: true, id, url, ...(enviarCliente ? { envio } : {}) });
 }

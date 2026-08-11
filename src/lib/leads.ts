@@ -147,20 +147,20 @@ export async function storeLead(lead: LeadInput): Promise<string | null> {
 // Los rangos deben cuadrar con los paquetes de SERVICES en src/lib/site.ts.
 const CLASSIFY: Record<string, { cat: string; rango: string }> = {
   // opciones del formulario de contacto
-  "Videoclip musical": { cat: "Música · Videoclip", rango: "$3.000.000 – $5.000.000" },
-  "Cobertura de evento": { cat: "Eventos", rango: "$1.000.000 – $2.500.000" },
-  "Reels / contenido de marca": { cat: "Contenido · Reels", rango: "$400.000 – $1.700.000" },
-  "Mini comercial / campaña": { cat: "Campaña", rango: "$1.700.000 – $4.200.000" },
-  "Video corporativo": { cat: "Empresa", rango: "$2.800.000 – $6.500.000+" },
-  "Video de producto": { cat: "Producto", rango: "$550.000 – $3.000.000" },
-  "Fotografía editorial": { cat: "Editorial", rango: "$1.200.000 – $3.200.000" },
+  "Videoclip musical": { cat: "Música · Videoclip", rango: "$3.900.000 – $6.500.000" },
+  "Cobertura de evento": { cat: "Eventos", rango: "$1.400.000 – $3.400.000" },
+  "Reels / contenido de marca": { cat: "Contenido", rango: "$800.000 – $3.900.000" },
+  "Mini comercial / campaña": { cat: "Campaña", rango: "$2.600.000 – $5.900.000" },
+  "Video corporativo": { cat: "Empresa", rango: "$3.600.000 – $8.000.000+" },
+  "Video de producto": { cat: "Producto", rango: "$800.000 – $4.800.000" },
+  "Fotografía editorial": { cat: "Content Day", rango: "$1.800.000 – $4.800.000" },
   "Otro / múltiples": { cat: "General", rango: "cotización a medida" },
   // opciones del pop-up de análisis
   "Manejo de redes": { cat: "Growth System", rango: "$2.500.000 – $5.200.000 /mes" },
-  "Un videoclip": { cat: "Música · Videoclip", rango: "$3.000.000 – $5.000.000" },
-  "Un comercial / campaña": { cat: "Campaña", rango: "$1.700.000 – $4.200.000" },
-  "UGC / creadores": { cat: "Creators · UGC", rango: "$2.200.000 – $5.400.000" },
-  Fotografía: { cat: "Editorial", rango: "$1.200.000 – $3.200.000" },
+  "Un videoclip": { cat: "Música · Videoclip", rango: "$3.900.000 – $6.500.000" },
+  "Un comercial / campaña": { cat: "Campaña", rango: "$2.600.000 – $5.900.000" },
+  "UGC / creadores": { cat: "Creator Matching", rango: "$2.200.000 – $5.400.000" },
+  Fotografía: { cat: "Content Day", rango: "$1.800.000 – $4.800.000" },
   "Aún no sé": { cat: "General", rango: "cotización a medida" },
 };
 

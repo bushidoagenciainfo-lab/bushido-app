@@ -3026,6 +3026,17 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 .al-informe.bad { color: var(--sepp); background: rgba(213,50,46,.07); border: 1px solid rgba(213,50,46,.3); }
 .al-informe a { color: inherit; text-decoration: underline; }
 
+/* alcance concreto de cada plan, dentro de su fila del drawer */
+.row-incluye {
+  grid-column: 1 / -1; list-style: none; display: flex; flex-wrap: wrap; gap: 6px;
+  margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--hairline);
+}
+.row-incluye li {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .04em; color: var(--bone-ghost);
+  border: 1px solid var(--hairline); border-radius: 999px; padding: 4px 9px;
+}
+.row.featured .row-incluye li { color: var(--bone-dim); border-color: rgba(213,50,46,.3); }
+
 /* ══════════ Calculadora de precios por criterios ══════════ */
 .pricing { display: flex; flex-direction: column; gap: 12px; }
 .pr-cols { display: grid; grid-template-columns: 1.15fr 1fr; gap: 12px; }
@@ -3100,13 +3111,25 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 .pr-nota { margin-top: 12px; font-size: 11.5px; line-height: 1.55; color: var(--bone-ghost); }
 
 /* selector de indicativo del teléfono (antes el +57 era fijo) */
+/* Ancho fijo y texto recortado: el nombre del país solo se ve al desplegar. */
+/* flex 0 0 = ancho fijo aunque el texto de la opción sea largo */
 .prefix-sel {
-  flex-shrink: 0; border: none; background: none; cursor: pointer;
-  font-family: var(--mono); font-size: 13px; color: var(--bone);
-  padding: 0 10px 0 14px; max-width: 108px;
+  flex: 0 0 76px; width: 76px; min-width: 0; max-width: 76px;
+  border: none; background: none; cursor: pointer;
+  font-family: var(--mono); font-size: 13px; color: var(--bone-dim);
+  padding: 0 4px 0 14px;
+  appearance: none; -webkit-appearance: none;
+  text-overflow: ellipsis; white-space: nowrap; overflow: hidden;
 }
-.prefix-sel:focus { outline: none; color: var(--sepp); }
+.prefix-wrap > input { flex: 1 1 auto; min-width: 0; }
+.prefix-sel:focus { outline: none; color: var(--bone); }
 .prefix-sel option { background: var(--ink-2); color: var(--bone); }
+/* flechita propia, para no depender de la del sistema */
+.prefix-wrap { position: relative; }
+.prefix-wrap::before {
+  content: '⌄'; position: absolute; left: 58px; top: 50%; transform: translateY(-70%);
+  font-size: 12px; color: var(--bone-ghost); pointer-events: none;
+}
 
 /* ══════════ El método (home): la web vende el sistema ══════════ */
 .metodo-head { max-width: 760px; margin-bottom: 46px; }

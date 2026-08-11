@@ -5,26 +5,26 @@ import type { LeadKind } from "@/lib/leads";
 
 /** Indicativos para el selector del teléfono. Colombia primero, luego el resto. */
 const INDICATIVOS = [
-  { pais: "Colombia", cod: "+57", bandera: "🇨🇴" },
-  { pais: "México", cod: "+52", bandera: "🇲🇽" },
-  { pais: "Estados Unidos", cod: "+1", bandera: "🇺🇸" },
-  { pais: "España", cod: "+34", bandera: "🇪🇸" },
-  { pais: "Argentina", cod: "+54", bandera: "🇦🇷" },
-  { pais: "Chile", cod: "+56", bandera: "🇨🇱" },
-  { pais: "Perú", cod: "+51", bandera: "🇵🇪" },
-  { pais: "Ecuador", cod: "+593", bandera: "🇪🇨" },
-  { pais: "Venezuela", cod: "+58", bandera: "🇻🇪" },
-  { pais: "Panamá", cod: "+507", bandera: "🇵🇦" },
-  { pais: "Costa Rica", cod: "+506", bandera: "🇨🇷" },
-  { pais: "Guatemala", cod: "+502", bandera: "🇬🇹" },
-  { pais: "Rep. Dominicana", cod: "+1809", bandera: "🇩🇴" },
-  { pais: "Brasil", cod: "+55", bandera: "🇧🇷" },
-  { pais: "Uruguay", cod: "+598", bandera: "🇺🇾" },
-  { pais: "Paraguay", cod: "+595", bandera: "🇵🇾" },
-  { pais: "Bolivia", cod: "+591", bandera: "🇧🇴" },
-  { pais: "Puerto Rico", cod: "+1787", bandera: "🇵🇷" },
-  { pais: "Italia", cod: "+39", bandera: "🇮🇹" },
-  { pais: "Reino Unido", cod: "+44", bandera: "🇬🇧" },
+  { pais: "Colombia", cod: "+57" },
+  { pais: "México", cod: "+52" },
+  { pais: "Estados Unidos", cod: "+1" },
+  { pais: "España", cod: "+34" },
+  { pais: "Argentina", cod: "+54" },
+  { pais: "Chile", cod: "+56" },
+  { pais: "Perú", cod: "+51" },
+  { pais: "Ecuador", cod: "+593" },
+  { pais: "Venezuela", cod: "+58" },
+  { pais: "Panamá", cod: "+507" },
+  { pais: "Costa Rica", cod: "+506" },
+  { pais: "Guatemala", cod: "+502" },
+  { pais: "Rep. Dominicana", cod: "+1809" },
+  { pais: "Brasil", cod: "+55" },
+  { pais: "Uruguay", cod: "+598" },
+  { pais: "Paraguay", cod: "+595" },
+  { pais: "Bolivia", cod: "+591" },
+  { pais: "Puerto Rico", cod: "+1787" },
+  { pais: "Italia", cod: "+39" },
+  { pais: "Reino Unido", cod: "+44" },
 ] as const;
 
 export interface LeadField {
@@ -176,7 +176,7 @@ export default function LeadForm({
           <select className="prefix-sel" name={`${f.name}_ind`} defaultValue={f.prefix} aria-label="País">
             {INDICATIVOS.map((p) => (
               <option key={p.cod + p.pais} value={p.cod}>
-                {p.bandera} {p.cod}
+                {p.cod} · {p.pais}
               </option>
             ))}
           </select>

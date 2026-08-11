@@ -121,6 +121,13 @@ export default function ServiceList() {
                   <div key={p.name} className={"row" + (p.featured ? " featured" : "")}>
                     <span className="lbl">{p.name}</span>
                     <span className="val">{p.price}</span>
+                    {p.incluye?.length ? (
+                      <ul className="row-incluye">
+                        {p.incluye.map((i) => (
+                          <li key={i}>{i}</li>
+                        ))}
+                      </ul>
+                    ) : null}
                   </div>
                 ))}
               </div>

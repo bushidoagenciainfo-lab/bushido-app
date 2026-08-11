@@ -23,9 +23,9 @@ export default function Hero() {
           Hacemos lo que la gente <span className="italic">recuerda</span>.
         </h1>
         <p className="sub">
-          No vendemos horas de cámara. Construimos <em>criterio visual</em> para
-          artistas, marcas y compañías que necesitan contenido que funcione — y
-          que se quede.
+          Cualquiera produce contenido. Lo difícil es saber{" "}
+          <em>cuál vale la pena producir</em>. Investigamos antes de encender la
+          cámara — y cada pieza nos enseña algo para la siguiente.
         </p>
         <div className="actions">
           <AnalisisButton className="btn btn-primary">

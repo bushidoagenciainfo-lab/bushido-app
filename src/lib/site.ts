@@ -147,6 +147,9 @@ export interface ServicePackage {
   name: string;
   price: string;
   featured?: boolean;
+  /** Alcance concreto de ESE plan. El plan de entrada no es el mismo trabajo
+   *  más barato: es menos trabajo. Si no, nadie sube de plan. */
+  incluye?: string[];
 }
 // Familias de servicio: agrupan la oferta para que se lea ordenada.
 // La web se organiza por SOLUCIONES, no por servicios sueltos: primero la
@@ -268,16 +271,43 @@ export const SERVICES: Service[] = [
     description:
       "No es un paquete de contenido: es un sistema de inteligencia continua. Cada mes investigamos, formulamos una hipótesis, producimos para probarla y medimos qué pasó — y ese aprendizaje entra a tu tablero. No compras 10 reels: compras que cada mes sepamos más de tu negocio.",
     packages: [
-      { name: "Insight · /mes", price: "$2.500.000" },
-      { name: "Evolution · /mes", price: "$3.900.000", featured: true },
-      { name: "Dominance · /mes", price: "$5.200.000" },
+      {
+        name: "Insight · /mes",
+        price: "$2.500.000",
+        incluye: [
+          "Hasta 5 activos al mes",
+          "1 jornada de rodaje",
+          "Auditoría y tablero de aprendizajes",
+          "Una hipótesis por ciclo",
+        ],
+      },
+      {
+        name: "Evolution · /mes",
+        price: "$3.900.000",
+        featured: true,
+        incluye: [
+          "Hasta 8 activos al mes",
+          "2 jornadas + pieza de storytelling",
+          "Diseño gráfico y fotografía",
+          "Testeo A/B de ángulos y reporte mensual",
+        ],
+      },
+      {
+        name: "Dominance · /mes",
+        price: "$5.200.000",
+        incluye: [
+          "Hasta 12 activos al mes",
+          "Project Manager y equipo dedicado",
+          "Creator Matching incluido",
+          "Somos tu departamento creativo",
+        ],
+      },
     ],
     benefits: [
-      "Hasta 10 activos audiovisuales al mes — la estrategia decide el formato, no el paquete",
-      "Auditoría continua + tablero con lo que aprendimos de tu marca",
-      "Un Content Day por mes (dos en Evolution y Dominance)",
-      "Hipótesis, testeo y reporte de qué funcionó y por qué",
-      "Project Manager y equipo dedicado en Dominance",
+      "La estrategia decide el formato de cada activo, no una lista fija",
+      "Auditoría continua y tablero con lo que vamos aprendiendo de tu marca",
+      "Una hipótesis por ciclo: producimos para probarla, no por llenar el calendario",
+      "Reporte de qué funcionó y por qué — eso define el mes siguiente",
     ],
     note: "Mínimo 3 meses — un sistema necesita ciclos para aprender. Incluye la gestión de campañas Meta; la inversión publicitaria la pones tú (recomendado desde $800.000/mes).",
   },
@@ -286,22 +316,26 @@ export const SERVICES: Service[] = [
     description:
       "Piezas puntuales para una necesidad concreta. Te lo decimos claro: un reel suelto no es estrategia, y sin un sistema detrás es difícil que mueva la aguja. Sirve para un lanzamiento puntual o para probarnos — si publicas constante, el sistema mensual rinde mucho más.",
     packages: [
-      { name: "1 Reel", price: "$400.000" },
-      { name: "Pack 3 Reels", price: "$1.000.000", featured: true },
-      { name: "Pack 6 Reels", price: "$1.700.000" },
-      { name: "+ Guión y concepto", price: "+$200.000" },
+      { name: "1 pieza", price: "$800.000" },
+      { name: "3 piezas", price: "$2.100.000", featured: true },
+      { name: "6 piezas", price: "$3.900.000" },
     ],
-    benefits: ["Hasta 60s por pieza", "Listo para publicar", "Dirección creativa incluida"],
-    note: "À la carte · para el flujo mensual, mira Paquetes de redes.",
+    benefits: [
+      "Concepto y guion antes de grabar",
+      "Camarógrafo, asistente y editor — no es una sola persona con un celular",
+      "Hasta 60s por pieza, lista para publicar",
+      "Dirección creativa en cada corte",
+    ],
+    note: "Una pieza suelta cuesta lo que cuesta porque lleva equipo detrás. Si vas a publicar cada mes, el sistema rinde el doble por el mismo dinero.",
   },
   {
     slug: "eventos", num: "04", grupo: "produccion", cat: "Eventos", title: "Cobertura de", titleEm: "eventos",
     description: "Fotografía + Reel highlight con entrega el mismo día. Conciertos, lanzamientos y corporativos.",
     packages: [
-      { name: "Hasta 3 horas", price: "$1.000.000" },
-      { name: "Hasta 6 horas", price: "$1.600.000" },
-      { name: "Día completo", price: "$2.500.000" },
-      { name: "+ Entrega mismo día", price: "+$300.000" },
+      { name: "Hasta 3 horas", price: "$1.400.000" },
+      { name: "Hasta 6 horas", price: "$2.200.000", featured: true },
+      { name: "Día completo", price: "$3.400.000" },
+      { name: "+ Entrega mismo día", price: "+$400.000" },
     ],
     benefits: ["Fotos + 1–2 Reels", "Viáticos en Bogotá incluidos", "Entrega express opcional"],
     note: "Ideal para prensa, giras y activaciones de marca.",
@@ -310,9 +344,9 @@ export const SERVICES: Service[] = [
     slug: "comercial", num: "02", grupo: "produccion", cat: "Campaña", title: "Mini", titleEm: "comercial",
     description: "Para lanzamientos de producto, marca y campañas digitales. Narrativa completa, hasta 90 segundos.",
     packages: [
-      { name: "Básico", price: "$1.700.000" },
-      { name: "Con concepto", price: "$2.800.000" },
-      { name: "Pack lanzamiento", price: "$4.200.000", featured: true },
+      { name: "Básico", price: "$2.600.000" },
+      { name: "Con concepto", price: "$3.900.000" },
+      { name: "Pack lanzamiento", price: "$5.900.000", featured: true },
     ],
     benefits: ["Narrativa de hasta 90s", "Pack lanzamiento: 1 comercial + 3 cortes para redes", "Dirección de arte"],
     note: "Cuando el lanzamiento merece una pieza con historia.",
@@ -321,9 +355,9 @@ export const SERVICES: Service[] = [
     slug: "corporativo", num: "03", grupo: "produccion", cat: "Empresa", title: "Video", titleEm: "corporativo",
     description: "Institucional, testimoniales, capacitación y presentación de marca. Producción completa para empresas.",
     packages: [
-      { name: "Corto (2–3 min)", price: "$2.800.000" },
-      { name: "Mediano (5–7 min)", price: "$4.500.000" },
-      { name: "Paquete empresarial", price: "Desde $6.500.000" },
+      { name: "Corto (2–3 min)", price: "$3.600.000" },
+      { name: "Mediano (5–7 min)", price: "$5.600.000", featured: true },
+      { name: "Paquete empresarial", price: "Desde $8.000.000" },
     ],
     benefits: ["Incluye gráficas", "2 rondas de revisión", "Guion y entrevistas dirigidas"],
     note: "Para empresas que quieren verse a la altura de lo que hacen.",
@@ -333,9 +367,9 @@ export const SERVICES: Service[] = [
     description:
       "Una jornada diseñada para construir tu biblioteca de contenido, no para llenar un carrete. Antes de la cámara hay un plan: qué piezas necesita tu estrategia este trimestre y en qué orden se graban para aprovechar cada montaje. Sales con material para semanas, no con fotos sueltas.",
     packages: [
-      { name: "Media jornada", price: "$1.200.000" },
-      { name: "Content Day completo", price: "$2.000.000", featured: true },
-      { name: "Campaña editorial", price: "Desde $3.200.000" },
+      { name: "Media jornada", price: "$1.800.000" },
+      { name: "Content Day completo", price: "$3.200.000", featured: true },
+      { name: "Campaña editorial", price: "Desde $4.800.000" },
     ],
     benefits: [
       "Plan de rodaje según la estrategia, no según la ocurrencia del día",
@@ -349,9 +383,9 @@ export const SERVICES: Service[] = [
     slug: "producto", num: "06", grupo: "produccion", cat: "Producto", title: "Video de", titleEm: "producto",
     description: "Para e-commerce, redes y publicidad. Muestra el producto de forma que vende.",
     packages: [
-      { name: "1 producto", price: "$550.000" },
-      { name: "Pack 3 productos", price: "$1.400.000" },
-      { name: "Catálogo (hasta 10)", price: "$3.000.000" },
+      { name: "1 producto", price: "$800.000" },
+      { name: "Pack 3 productos", price: "$2.100.000", featured: true },
+      { name: "Catálogo (hasta 10)", price: "$4.800.000" },
     ],
     benefits: ["Múltiples ángulos", "Optimizado para conversión", "Fondo y styling"],
     note: "El detalle que hace que un producto se vea deseable.",
@@ -360,9 +394,9 @@ export const SERVICES: Service[] = [
     slug: "videoclip", num: "01", grupo: "produccion", cat: "Música", title: "Video", titleEm: "clip",
     description: "Concepto, locación, dirección y colorización. Para artistas que van al siguiente nivel.",
     packages: [
-      { name: "Básico (1 locación)", price: "$3.000.000" },
-      { name: "Con concepto (2–3 loc.)", price: "$5.000.000", featured: true },
-      { name: "Premium", price: "Cotización" },
+      { name: "Básico (1 locación)", price: "$3.900.000" },
+      { name: "Con concepto (2–3 loc.)", price: "$6.500.000", featured: true },
+      { name: "Premium", price: "Cotización por proyecto" },
     ],
     benefits: ["Dirección + producción", "Corrección de color", "Concepto y locaciones"],
     note: "Nuestro ADN: el sujeto y el giro inesperado.",

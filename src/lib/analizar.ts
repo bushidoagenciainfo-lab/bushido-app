@@ -93,13 +93,13 @@ Creators, UGC e influencers (el diferencial de Bushido: book propio de creadores
 - "Creator Matching · Starter 4 piezas" — $2.200.000 · "Growth 8 piezas" — $3.900.000 · "Always-on 12 piezas/mes" — desde $5.400.000 (incluye honorarios del creador del book)
 - "Influencers y talento" — SIEMPRE cotización por campaña o por proyecto, NUNCA des una cifra: la tarifa depende del perfil y del alcance del creador. Aplica a campañas con creadores, influencers de alto alcance y artistas.
 Producción audiovisual:
-- "Videoclip · Básico" — $3.000.000 · "Con concepto" — $5.000.000 · "Premium" — cotización
-- "Mini comercial · Básico" — $1.700.000 · "Con concepto" — $2.800.000 · "Pack lanzamiento" — $4.200.000
-- "Video corporativo · Corto" — $2.800.000 · "Mediano" — $4.500.000 · "Paquete empresarial" — desde $6.500.000
-- "Cobertura de eventos · 3 horas" — $1.000.000 · "6 horas" — $1.600.000 · "Día completo" — $2.500.000
-- "Bushido Content Day · Media jornada" — $1.200.000 · "Content Day completo" — $2.000.000 · "Campaña editorial" — desde $3.200.000
-- "Video de producto · 1 producto" — $550.000 · "Pack 3" — $1.400.000 · "Catálogo hasta 10" — $3.000.000
-- "Reel suelto" — $400.000 · "Pack 3 reels" — $1.000.000 · "Pack 6 reels" — $1.700.000`;
+- "Videoclip · Básico" — $3.900.000 · "Con concepto" — $6.500.000 · "Premium" — cotización por proyecto
+- "Mini comercial · Básico" — $2.600.000 · "Con concepto" — $3.900.000 · "Pack lanzamiento" — $5.900.000
+- "Video corporativo · Corto" — $3.600.000 · "Mediano" — $5.600.000 · "Paquete empresarial" — desde $8.000.000
+- "Cobertura de eventos · 3 horas" — $1.400.000 · "6 horas" — $2.200.000 · "Día completo" — $3.400.000
+- "Bushido Content Day · Media jornada" — $1.800.000 · "Content Day completo" — $3.200.000 · "Campaña editorial" — desde $4.800.000
+- "Video de producto · 1 producto" — $800.000 · "Pack 3" — $2.100.000 · "Catálogo hasta 10" — $4.800.000
+- "Piezas sueltas · 1 pieza" — $800.000 · "3 piezas" — $2.100.000 · "6 piezas" — $3.900.000 (incluye guion, camarógrafo, asistente y editor)`;
 
 const SYSTEM = `Eres el estratega de contenido de Bushido, una agencia audiovisual de Bogotá, Colombia (bushidoav.com). Tu criterio es cinematográfico, editorial y comercial: no vendes horas de cámara, vendes criterio visual que hace que la gente recuerde y compre. Hablas con seguridad, sin humo, como quien ya vio el patrón mil veces.
 

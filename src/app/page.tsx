@@ -32,10 +32,9 @@ export default function Home() {
         <section className="manifest">
           <div className="manifest-tag">Manifiesto · 01</div>
           <p className="manifest-body">
-            El equipo es el <span className="quiet">mínimo</span>.{" "}
-            <em>El criterio es la diferencia</em>. Cualquiera puede rentar una
-            cámara — nosotros construimos la mirada que hace que el metraje valga
-            la pena.
+            La industria vende <span className="quiet">contenido</span>.{" "}
+            <em>Nosotros vendemos criterio</em>. Un reel suelto no es estrategia:
+            es un gasto. No competimos por cámaras — competimos por inteligencia.
           </p>
         </section>
 
