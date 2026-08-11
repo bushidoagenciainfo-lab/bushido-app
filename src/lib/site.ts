@@ -376,10 +376,15 @@ export const NAV = [
   { href: "/contacto", label: "Contacto" },
 ];
 
-/** El número conectado a la Cloud API: es el que recibe en la bandeja del panel. */
-export const WHATSAPP = "573015706168";
+/**
+ * El WhatsApp que ve el público: el PERSONAL de Maick, porque es el único donde
+ * se puede conversar y hacer seguimiento de verdad.
+ * (El +57 301 570 6168 está en la Cloud API de Meta y no se puede abrir en la
+ * app del celular: sirve solo para los envíos automáticos del informe.)
+ */
+export const WHATSAPP = "573008923390";
 /** El mismo número, formateado para mostrar. */
-export const WHATSAPP_DISPLAY = "+57 301 570 6168";
+export const WHATSAPP_DISPLAY = "+57 300 892 3390";
 export const EMAIL = "servicios@bushidoav.com";
 
 // Redes sociales (footer).

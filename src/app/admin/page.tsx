@@ -6,6 +6,7 @@ import AdminCreadores, { type CreadorLite } from "@/components/admin/AdminCreado
 import AdminNichos from "@/components/admin/AdminNichos";
 import AdminCrew from "@/components/admin/AdminCrew";
 import AdminWhatsApp from "@/components/admin/AdminWhatsApp";
+import AdminPricing from "@/components/admin/AdminPricing";
 import { listConversaciones, type WaConversacion } from "@/lib/wa-inbox";
 import AdminLogout from "@/components/admin/AdminLogout";
 import AdminSection from "@/components/admin/AdminSection";
@@ -144,6 +145,13 @@ export default async function AdminPage() {
         }
       >
         <AdminWhatsApp conversaciones={conversaciones} />
+      </AdminSection>
+
+      <AdminSection
+        title="Calculadora de precios"
+        hint="Costo + margen + valor estratégico + exclusividad"
+      >
+        <AdminPricing />
       </AdminSection>
 
       <AdminSection

@@ -3026,6 +3026,79 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 .al-informe.bad { color: var(--sepp); background: rgba(213,50,46,.07); border: 1px solid rgba(213,50,46,.3); }
 .al-informe a { color: inherit; text-decoration: underline; }
 
+/* ══════════ Calculadora de precios por criterios ══════════ */
+.pricing { display: flex; flex-direction: column; gap: 12px; }
+.pr-cols { display: grid; grid-template-columns: 1.15fr 1fr; gap: 12px; }
+@media (max-width: 860px) { .pr-cols { grid-template-columns: 1fr; } }
+.pr-card { border: 1px solid var(--hairline); border-radius: 11px; background: var(--ink); padding: 18px 20px; }
+.pr-card h4 {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--sepp); margin-bottom: 14px;
+}
+.pr-partidas { display: flex; flex-direction: column; gap: 6px; }
+.pr-fila { display: grid; grid-template-columns: 1fr 108px auto auto; gap: 6px; align-items: center; }
+.pr-fila input {
+  padding: 7px 9px; font-size: 12.5px; font-family: inherit; color: var(--bone);
+  background: var(--ink-2); border: 1px solid var(--hairline); border-radius: 6px; min-width: 0;
+}
+.pr-fila input:focus { outline: none; border-color: var(--sepp); }
+.pr-valor { font-family: var(--mono); text-align: right; }
+.pr-tipo {
+  font-family: var(--mono); font-size: 8.5px; letter-spacing: .06em; cursor: pointer;
+  color: var(--bone-ghost); background: none; border: 1px solid var(--hairline);
+  border-radius: 999px; padding: 4px 8px;
+}
+.pr-tipo.on { color: var(--gold); border-color: rgba(201,162,74,.4); }
+.pr-quitar { background: none; border: none; color: var(--bone-ghost); cursor: pointer; font-size: 15px; padding: 0 4px; }
+.pr-quitar:hover { color: var(--sepp); }
+.pr-agregar {
+  margin-top: 10px; font-family: var(--mono); font-size: 9.5px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--bone-dim); background: none; cursor: pointer;
+  border: 1px dashed var(--hairline); border-radius: 7px; padding: 7px 12px; width: 100%;
+}
+.pr-agregar:hover { color: var(--bone); border-color: var(--bone-ghost); }
+.pr-total {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--hairline);
+}
+.pr-total span { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--bone-ghost); }
+.pr-total strong { font-family: var(--serif); font-size: 22px; color: var(--bone); }
+.pr-sub { margin-top: 6px; font-size: 11.5px; color: var(--bone-ghost); }
+.pr-sub b { color: var(--gold); font-weight: 400; }
+
+.pr-crit { display: flex; flex-direction: column; gap: 5px; margin-bottom: 16px; }
+.pr-crit > span { font-size: 12.5px; color: var(--bone); display: flex; justify-content: space-between; }
+.pr-crit em { font-style: normal; font-family: var(--mono); font-size: 12px; color: var(--sepp); }
+.pr-crit input[type="range"] { width: 100%; accent-color: var(--sepp); }
+.pr-crit small { font-size: 11px; line-height: 1.4; color: var(--bone-ghost); }
+
+.pr-resultado {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px;
+  border: 1px solid rgba(213,50,46,.35); border-radius: 11px;
+  background: rgba(213,50,46,.05); padding: 20px 24px;
+}
+.pr-precio { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.pr-label { font-family: var(--mono); font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--bone-ghost); width: 100%; }
+.pr-precio strong { font-family: var(--serif); font-size: clamp(30px, 4vw, 44px); color: var(--bone); line-height: 1; }
+.pr-mes { font-family: var(--mono); font-size: 11px; color: var(--bone-dim); }
+.pr-desglose { display: flex; gap: 22px; flex-wrap: wrap; }
+.pr-desglose div { display: flex; flex-direction: column; gap: 3px; }
+.pr-desglose span { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--bone-ghost); }
+.pr-desglose b { font-family: var(--mono); font-size: 15px; color: #6FBF8E; font-weight: 400; }
+.pr-desglose b.mal { color: var(--sepp); }
+
+.pr-planes { border: 1px solid var(--hairline); border-radius: 11px; background: var(--ink); padding: 18px 20px; }
+.pr-planes h4 { font-family: var(--mono); font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--bone-dim); margin-bottom: 12px; }
+.pr-plan { display: flex; align-items: center; gap: 14px; padding: 9px 0; border-bottom: 1px solid var(--hairline); }
+.pr-plan:last-of-type { border-bottom: none; }
+.pp-nombre { font-family: var(--serif); font-size: 17px; color: var(--bone); width: 110px; }
+.pp-precio { font-family: var(--mono); font-size: 12.5px; color: var(--bone-dim); width: 110px; }
+.pp-margen { font-family: var(--mono); font-size: 11.5px; margin-left: auto; }
+.pp-margen.bien { color: #6FBF8E; }
+.pp-margen.medio { color: var(--gold); }
+.pp-margen.mal { color: var(--sepp); }
+.pr-nota { margin-top: 12px; font-size: 11.5px; line-height: 1.55; color: var(--bone-ghost); }
+
 /* selector de indicativo del teléfono (antes el +57 era fijo) */
 .prefix-sel {
   flex-shrink: 0; border: none; background: none; cursor: pointer;
