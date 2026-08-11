@@ -156,7 +156,7 @@ const CLASSIFY: Record<string, { cat: string; rango: string }> = {
   "Fotografía editorial": { cat: "Editorial", rango: "$1.200.000 – $3.200.000" },
   "Otro / múltiples": { cat: "General", rango: "cotización a medida" },
   // opciones del pop-up de análisis
-  "Manejo de redes": { cat: "Redes · Mensual", rango: "$2.000.000 – $4.300.000 /mes" },
+  "Manejo de redes": { cat: "Growth System", rango: "$2.500.000 – $5.200.000 /mes" },
   "Un videoclip": { cat: "Música · Videoclip", rango: "$3.000.000 – $5.000.000" },
   "Un comercial / campaña": { cat: "Campaña", rango: "$1.700.000 – $4.200.000" },
   "UGC / creadores": { cat: "Creators · UGC", rango: "$2.200.000 – $5.400.000" },

@@ -179,10 +179,13 @@ export default function TalentForm() {
         <div className="form-row">
           <div className="field">
             <label htmlFor="t-phone">WhatsApp</label>
-            <div className="prefix-wrap">
-              <span className="prefix">+57</span>
-              <input id="t-phone" name="phone" type="tel" inputMode="numeric" placeholder="300 000 0000" />
-            </div>
+            <input
+              id="t-phone"
+              name="phone"
+              type="tel"
+              inputMode="tel"
+              placeholder="+57 300 000 0000"
+            />
           </div>
           <div className="field">
             <label htmlFor="t-role">

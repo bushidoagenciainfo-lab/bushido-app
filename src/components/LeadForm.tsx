@@ -3,13 +3,37 @@
 import { useState } from "react";
 import type { LeadKind } from "@/lib/leads";
 
+/** Indicativos para el selector del teléfono. Colombia primero, luego el resto. */
+const INDICATIVOS = [
+  { pais: "Colombia", cod: "+57", bandera: "🇨🇴" },
+  { pais: "México", cod: "+52", bandera: "🇲🇽" },
+  { pais: "Estados Unidos", cod: "+1", bandera: "🇺🇸" },
+  { pais: "España", cod: "+34", bandera: "🇪🇸" },
+  { pais: "Argentina", cod: "+54", bandera: "🇦🇷" },
+  { pais: "Chile", cod: "+56", bandera: "🇨🇱" },
+  { pais: "Perú", cod: "+51", bandera: "🇵🇪" },
+  { pais: "Ecuador", cod: "+593", bandera: "🇪🇨" },
+  { pais: "Venezuela", cod: "+58", bandera: "🇻🇪" },
+  { pais: "Panamá", cod: "+507", bandera: "🇵🇦" },
+  { pais: "Costa Rica", cod: "+506", bandera: "🇨🇷" },
+  { pais: "Guatemala", cod: "+502", bandera: "🇬🇹" },
+  { pais: "Rep. Dominicana", cod: "+1809", bandera: "🇩🇴" },
+  { pais: "Brasil", cod: "+55", bandera: "🇧🇷" },
+  { pais: "Uruguay", cod: "+598", bandera: "🇺🇾" },
+  { pais: "Paraguay", cod: "+595", bandera: "🇵🇾" },
+  { pais: "Bolivia", cod: "+591", bandera: "🇧🇴" },
+  { pais: "Puerto Rico", cod: "+1787", bandera: "🇵🇷" },
+  { pais: "Italia", cod: "+39", bandera: "🇮🇹" },
+  { pais: "Reino Unido", cod: "+44", bandera: "🇬🇧" },
+] as const;
+
 export interface LeadField {
   name: string;
   label: string;
   type?: string;
   placeholder?: string;
   required?: boolean;
-  prefix?: string; // p.ej. "+57"
+  prefix?: string; // indicativo por defecto del selector de país, p.ej. "+57"
   full?: boolean; // ocupa toda la fila
   as?: "input" | "select" | "textarea";
   options?: string[];
@@ -55,11 +79,15 @@ export default function LeadForm({
       let v = (fd.get(f.name) as string) || "";
       // el campo ya muestra el prefijo (+57): si la persona lo escribe otra vez,
       // lo quitamos aquí para no guardar "+57 +57300..."
+      // El teléfono se guarda SIEMPRE con indicativo de país (el que eligió en
+      // el selector), para que funcione con clientes de fuera de Colombia.
       if (f.prefix && v) {
-        const pfx = f.prefix.replace(/\D/g, "");
-        v = v.replace(/[^\d]/g, "");
-        while (pfx && v.startsWith(pfx + pfx)) v = v.slice(pfx.length);
-        if (pfx && v.startsWith(pfx) && v.length > 10) v = v.slice(pfx.length);
+        const ind = ((fd.get(`${f.name}_ind`) as string) || f.prefix).replace(/\D/g, "");
+        v = v.replace(/\D/g, "");
+        while (ind && v.startsWith(ind + ind)) v = v.slice(ind.length);
+        // si ya lo escribió con indicativo, no lo dupliques
+        if (ind && v.startsWith(ind) && v.length > ind.length + 6) v = v.slice(ind.length);
+        v = ind + v;
       }
       payload[f.name] = v;
     });
@@ -143,7 +171,15 @@ export default function LeadForm({
         <textarea id={`f-${f.name}`} name={f.name} placeholder={f.placeholder} rows={3} />
       ) : f.prefix ? (
         <div className="prefix-wrap">
-          <span className="prefix">{f.prefix}</span>
+          {/* Selector de país: antes el +57 era fijo y la gente de fuera de
+              Colombia no podía dejar su número. */}
+          <select className="prefix-sel" name={`${f.name}_ind`} defaultValue={f.prefix} aria-label="País">
+            {INDICATIVOS.map((p) => (
+              <option key={p.cod + p.pais} value={p.cod}>
+                {p.bandera} {p.cod}
+              </option>
+            ))}
+          </select>
           <input id={`f-${f.name}`} name={f.name} type={f.type || "text"} inputMode="numeric" placeholder={f.placeholder} required={f.required} />
         </div>
       ) : (

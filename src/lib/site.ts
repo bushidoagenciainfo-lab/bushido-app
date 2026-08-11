@@ -149,10 +149,13 @@ export interface ServicePackage {
   featured?: boolean;
 }
 // Familias de servicio: agrupan la oferta para que se lea ordenada.
+// La web se organiza por SOLUCIONES, no por servicios sueltos: primero la
+// inteligencia (el cerebro), después el sistema, la producción y la difusión.
 export const SERVICE_GROUPS = [
-  { key: "growth", label: "Marca y crecimiento", hint: "Estrategia, redes, pauta y branding" },
-  { key: "creators", label: "Creators, UGC e influencers", hint: "Book propio + alianzas con talento grande" },
-  { key: "produccion", label: "Producción audiovisual", hint: "Video, foto y cobertura" },
+  { key: "intelligence", label: "Intelligence", hint: "El cerebro · research, auditoría y método" },
+  { key: "growth", label: "Growth Systems", hint: "No son paquetes de redes: son sistemas de crecimiento" },
+  { key: "produccion", label: "Creative Production", hint: "La ejecución de una estrategia, no piezas sueltas" },
+  { key: "amplification", label: "Amplification", hint: "Creators, influencers y pauta" },
 ] as const;
 export type ServiceGroup = (typeof SERVICE_GROUPS)[number]["key"];
 
@@ -171,15 +174,16 @@ export interface Service {
 
 export const SERVICES: Service[] = [
   {
-    slug: "ugc", num: "01", grupo: "creators", cat: "Creators · Data-driven", title: "UGC con", titleEm: "data",
+    slug: "ugc", num: "01", grupo: "amplification", cat: "Creator Matching", title: "Creator", titleEm: "Matching",
     description:
-      "Contenido de creador que no se elige por tendencia. Tenemos book propio de creadores clasificado por nicho y formato: elegimos al creator y el ángulo con la data de tu categoría, dirigimos la pieza con estándar de producción Bushido y medimos qué funcionó. El precio ya incluye los honorarios del creador.",
+      "No te conseguimos un creador: te decimos cuál. Cruzamos tu marca y tu audiencia con nuestro book clasificado por nicho, formato y audiencia real, y recomendamos los perfiles con mayor probabilidad de conectar. Después dirigimos y producimos la pieza, y medimos qué ángulo funcionó. El precio incluye los honorarios del creador.",
     packages: [
       { name: "Starter · 4 piezas", price: "$2.200.000" },
       { name: "Growth · 8 piezas", price: "$3.900.000", featured: true },
       { name: "Always-on · 12 piezas /mes", price: "Desde $5.400.000" },
     ],
     benefits: [
+      "Te recomendamos los 3 creadores con más probabilidad de conectar, y por qué",
       "Casting desde nuestro book propio: por nicho y buyer persona, no por seguidores",
       "Honorarios del creador incluidos (perfiles del book)",
       "Briefing y ángulos definidos con data (método Kansei)",
@@ -190,7 +194,7 @@ export const SERVICES: Service[] = [
     note: "Ideal para testear mensajes antes de invertir fuerte en pauta. Creadores fuera del book se cotizan aparte.",
   },
   {
-    slug: "influencers", num: "02", grupo: "creators", cat: "Influencer marketing · Alianzas", title: "Influencers y", titleEm: "talento",
+    slug: "influencers", num: "02", grupo: "amplification", cat: "Influencer marketing · Alianzas", title: "Influencers y", titleEm: "talento",
     description:
       "Lo que casi nadie puede ofrecer: acceso real al talento. Trabajamos con creadores, influencers y artistas de primer nivel en el país, y tenemos las relaciones para contratar a los perfiles de mayor alcance y reconocimiento cuando la campaña lo pide. No nos quedamos en el contacto: dirigimos y producimos la pieza para que salga con el estándar de tu marca y no con el de un post improvisado.",
     packages: [
@@ -208,7 +212,7 @@ export const SERVICES: Service[] = [
     note: "Cada campaña se cotiza a la medida: la tarifa depende del perfil y del alcance del creador. Cuéntanos el objetivo y armamos la propuesta con los nombres que encajan.",
   },
   {
-    slug: "pauta", num: "03", grupo: "growth", cat: "Performance", title: "Pauta y", titleEm: "amplificación",
+    slug: "pauta", num: "03", grupo: "amplification", cat: "Performance", title: "Pauta y", titleEm: "distribución",
     description:
       "Tu mejor contenido no sirve si nadie lo ve. Gestionamos Meta, TikTok y Google Ads con la data que ya construimos de tu marca y tu nicho: segmentación, testeo de creativos y optimización semanal.",
     packages: [
@@ -225,9 +229,9 @@ export const SERVICES: Service[] = [
     note: "El fee es la gestión; la inversión publicitaria va aparte y es tuya.",
   },
   {
-    slug: "estrategia", num: "01", grupo: "growth", cat: "Strategy · Kansei", title: "Estrategia", titleEm: "Kansei",
+    slug: "estrategia", num: "01", grupo: "intelligence", cat: "Intelligence · Kansei", title: "Bushido", titleEm: "Intelligence",
     description:
-      "Nuestro método propio para decodificar qué te compran y qué emociones lo mueven. Auditoría profunda de tu marca y tu competencia, buyer personas, pilares de contenido y un roadmap de 90 días listo para ejecutar.",
+      "El cerebro del sistema. Analizamos tu marca, tu competencia y el comportamiento real de tu audiencia — hooks, retención, comentarios, qué está saturado en tu categoría — y de ahí salen patrones e hipótesis. No es un documento bonito: es la evidencia que decide qué vale la pena producir.",
     packages: [
       { name: "Auditoría express", price: "$900.000" },
       { name: "Estrategia 90 días", price: "$2.400.000", featured: true },
@@ -236,13 +240,14 @@ export const SERVICES: Service[] = [
     benefits: [
       "Investigación real de marca, nicho y competencia",
       "Buyer personas con jobs-to-be-done y drivers de compra",
-      "Pilares de contenido y calendario editorial por funnel",
-      "KPIs y tablero de medición para saber si funciona",
+      "Patrones detectados: qué formatos y emociones funcionan en tu categoría",
+      "Hipótesis a probar y roadmap de 90 días",
+      "Tablero con los aprendizajes de tu marca",
     ],
-    note: "El análisis gratis del sitio es la versión corta de este método.",
+    note: "El análisis gratis del sitio es la versión corta de este método. Aquí entra la data de todos los nichos que ya hemos estudiado.",
   },
   {
-    slug: "branding", num: "04", grupo: "growth", cat: "Brand", title: "Branding e", titleEm: "identidad",
+    slug: "branding", num: "08", grupo: "produccion", cat: "Brand", title: "Branding e", titleEm: "identidad",
     description:
       "El universo visual de tu marca: cómo se ve, cómo suena y cómo se siente. Construimos el sistema para que todo tu contenido se vea de la misma familia, no como piezas sueltas.",
     packages: [
@@ -259,26 +264,27 @@ export const SERVICES: Service[] = [
     note: "Si arrancas también con un paquete de redes, el sistema de marca queda aplicado a todas las piezas del primer mes sin costo extra.",
   },
   {
-    slug: "redes", num: "02", grupo: "growth", cat: "Mensual · Insignia", title: "Paquetes de", titleEm: "redes",
+    slug: "redes", num: "01", grupo: "growth", cat: "Sistema mensual", title: "Sistemas de", titleEm: "crecimiento",
     description:
-      "Manejo integral de tus redes: estrategia, producción y campañas. Lo construimos con la data de tu marca y la data que ya hemos creado en tu nicho — no publicamos por publicar.",
+      "No es un paquete de contenido: es un sistema de inteligencia continua. Cada mes investigamos, formulamos una hipótesis, producimos para probarla y medimos qué pasó — y ese aprendizaje entra a tu tablero. No compras 10 reels: compras que cada mes sepamos más de tu negocio.",
     packages: [
-      { name: "Esencial · /mes", price: "$2.000.000" },
-      { name: "Crecimiento · /mes", price: "$3.200.000", featured: true },
-      { name: "Posicionamiento · /mes", price: "$4.300.000" },
+      { name: "Insight · /mes", price: "$2.500.000" },
+      { name: "Evolution · /mes", price: "$3.900.000", featured: true },
+      { name: "Dominance · /mes", price: "$5.200.000" },
     ],
     benefits: [
-      "Reels, fotos, gráficas y stories cada mes",
-      "Gestión de perfiles + campañas Meta Ads",
-      "Estrategia con data de tu marca + nuestra data de nicho",
-      "Sesión estratégica mensual (planes superiores)",
+      "Hasta 10 activos audiovisuales al mes — la estrategia decide el formato, no el paquete",
+      "Auditoría continua + tablero con lo que aprendimos de tu marca",
+      "Un Content Day por mes (dos en Evolution y Dominance)",
+      "Hipótesis, testeo y reporte de qué funcionó y por qué",
+      "Project Manager y equipo dedicado en Dominance",
     ],
-    note: "Mínimo 3 meses. Incluye la gestión de campañas Meta; la inversión publicitaria la pones tú (recomendado desde $800.000/mes). Para pauta multicanal y optimización semanal, mira Pauta y amplificación.",
+    note: "Mínimo 3 meses — un sistema necesita ciclos para aprender. Incluye la gestión de campañas Meta; la inversión publicitaria la pones tú (recomendado desde $800.000/mes).",
   },
   {
     slug: "reels", num: "07", grupo: "produccion", cat: "À la carte", title: "Reels", titleEm: "sueltos",
     description:
-      "Piezas puntuales para una necesidad específica. Si publicas constante, el paquete mensual de redes te rinde mucho más por lo que incluye.",
+      "Piezas puntuales para una necesidad concreta. Te lo decimos claro: un reel suelto no es estrategia, y sin un sistema detrás es difícil que mueva la aguja. Sirve para un lanzamiento puntual o para probarnos — si publicas constante, el sistema mensual rinde mucho más.",
     packages: [
       { name: "1 Reel", price: "$400.000" },
       { name: "Pack 3 Reels", price: "$1.000.000", featured: true },
@@ -323,21 +329,21 @@ export const SERVICES: Service[] = [
     note: "Para empresas que quieren verse a la altura de lo que hacen.",
   },
   {
-    slug: "fotografia", num: "05", grupo: "produccion", cat: "Fotografía", title: "Fotografía", titleEm: "editorial",
+    slug: "fotografia", num: "05", grupo: "produccion", cat: "Content Day", title: "Bushido", titleEm: "Content Day",
     description:
-      "Campaña de moda, producto, retrato de marca y editorial. Es la mitad de lo que hacemos: Adidas, Nike, New Balance, New Era, Red Bull y artistas en escenario salieron de aquí.",
+      "Una jornada diseñada para construir tu biblioteca de contenido, no para llenar un carrete. Antes de la cámara hay un plan: qué piezas necesita tu estrategia este trimestre y en qué orden se graban para aprovechar cada montaje. Sales con material para semanas, no con fotos sueltas.",
     packages: [
-      { name: "Sesión media jornada", price: "$1.200.000" },
-      { name: "Sesión día completo", price: "$2.000.000", featured: true },
+      { name: "Media jornada", price: "$1.200.000" },
+      { name: "Content Day completo", price: "$2.000.000", featured: true },
       { name: "Campaña editorial", price: "Desde $3.200.000" },
     ],
     benefits: [
+      "Plan de rodaje según la estrategia, no según la ocurrencia del día",
+      "Foto y video en la misma jornada: se aprovecha el montaje",
       "Dirección de arte y styling básico",
-      "Selección y retoque de las mejores tomas",
-      "Entrega en alta y en formato para redes",
-      "Locación o estudio, según el concepto",
+      "Biblioteca entregada en alta y en formato para redes",
     ],
-    note: "Se suma a cualquier cobertura o campaña de video por menos que contratarla aparte.",
+    note: "Está incluido en los Sistemas de crecimiento (uno o dos al mes según el plan).",
   },
   {
     slug: "producto", num: "06", grupo: "produccion", cat: "Producto", title: "Video de", titleEm: "producto",

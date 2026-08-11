@@ -39,6 +39,45 @@ export default function Home() {
           </p>
         </section>
 
+        {/* ── El método: la web vende el sistema, no servicios sueltos ── */}
+        <section className="metodo">
+          <div className="metodo-head">
+            <div className="section-num">El sistema</div>
+            <h2>
+              Producir es lo último que <em>hacemos</em>.
+            </h2>
+            <p>
+              La mayoría de agencias vende contenido. Un reel suelto no es
+              estrategia, es un gasto. Lo valioso no es producir videos: es saber
+              cuáles vale la pena producir.
+            </p>
+          </div>
+          <ol className="metodo-pasos">
+            {[
+              ["01", "Analizamos", "Tu marca, tu competencia y cómo se comporta tu audiencia de verdad."],
+              ["02", "Detectamos", "Qué está saturado, qué nadie está haciendo, dónde hay espacio."],
+              ["03", "Construimos hipótesis", "Una apuesta concreta, no una corazonada."],
+              ["04", "Diseñamos la narrativa", "Concepto, guion y formato salen de la evidencia."],
+              ["05", "Producimos", "Aquí entra la cámara. Recién aquí."],
+              ["06", "Medimos", "Retención, guardados, alcance nuevo. Lo que indica compra."],
+              ["07", "Aprendemos", "Qué funcionó y por qué. Eso entra a tu tablero."],
+              ["08", "Volvemos a empezar", "Cada ciclo arranca sabiendo más que el anterior."],
+            ].map(([n, titulo, texto]) => (
+              <li key={n}>
+                <span className="mp-num">{n}</span>
+                <div>
+                  <strong>{titulo}</strong>
+                  <span>{texto}</span>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <p className="metodo-cierre">
+            Por eso cada cliente nuevo hace al sistema más inteligente — y esa
+            inteligencia trabaja para todos los demás.
+          </p>
+        </section>
+
         {/* ── Cotización ── */}
         <section className="brief" id="cotizacion">
           <div className="brief-wrap">

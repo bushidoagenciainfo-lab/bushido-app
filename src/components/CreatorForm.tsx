@@ -101,7 +101,7 @@ export default function CreatorForm() {
           </div>
           <div className="field">
             <label htmlFor="c-tel">WhatsApp</label>
-            <input id="c-tel" name="telefono" type="tel" inputMode="numeric" placeholder="300 000 0000" />
+            <input id="c-tel" name="telefono" type="tel" inputMode="tel" placeholder="+57 300 000 0000" />
           </div>
         </div>
 
