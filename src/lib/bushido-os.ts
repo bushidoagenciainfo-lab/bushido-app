@@ -4,8 +4,22 @@
 // esa data entre nichos. Todo sale por aquí para no repetir la URL ni el
 // secreto en cada ruta.
 
-const URL_ = process.env.BUSHIDO_OS_URL;
-const SECRET = process.env.SITIO_WEB_SECRET;
+// .trim(): al pegar en Vercel es fácil que se cuele un espacio o un salto de
+// línea, y el OS responde 401 sin decir por qué.
+const URL_ = process.env.BUSHIDO_OS_URL?.trim();
+const SECRET = process.env.SITIO_WEB_SECRET?.trim();
+
+/**
+ * Huella del secreto para comparar con el del OS SIN exponerlo:
+ * longitud + primeros y últimos caracteres.
+ */
+export function huellaDelSecreto(): string {
+  const bruto = process.env.SITIO_WEB_SECRET;
+  if (!bruto) return "FALTA";
+  const s = bruto.trim();
+  const sospecha = bruto !== s ? " ⚠️ tenía espacios (ya los quitamos al usarlo)" : "";
+  return `${s.length} caracteres · empieza "${s.slice(0, 4)}…" · termina "…${s.slice(-4)}"${sospecha}`;
+}
 
 export function hasOS(): boolean {
   return Boolean(URL_ && SECRET);

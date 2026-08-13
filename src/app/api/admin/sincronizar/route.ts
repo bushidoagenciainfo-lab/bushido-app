@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { analisisParaOS, inteligenciaNichos, listLeads } from "@/lib/admin";
 import { listCreadores } from "@/lib/creadores";
-import { enviarAlOS, hasOS, urlDelOS } from "@/lib/bushido-os";
+import { enviarAlOS, hasOS, urlDelOS, huellaDelSecreto } from "@/lib/bushido-os";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -99,6 +99,22 @@ export async function POST() {
   const todoOk = Object.values(reporte).every(
     (r) => (r as { ok?: boolean })?.ok !== false
   );
-  // A dónde estamos llamando: si algo falla, es el primer dato que hay que ver.
-  return NextResponse.json({ ok: todoOk, destino: urlDelOS(), reporte });
+  // A dónde llamamos y con qué clave (solo la huella): si algo falla, es lo
+  // primero que hay que comparar contra la configuración del OS.
+  const no_autorizado = Object.values(reporte).some((r) =>
+    /no autorizado|unauthorized|401/i.test(String((r as { error?: string })?.error ?? ""))
+  );
+  return NextResponse.json({
+    ok: todoOk,
+    destino: urlDelOS(),
+    reporte,
+    ...(no_autorizado
+      ? {
+          secreto: huellaDelSecreto(),
+          pista:
+            "El OS rechazó la clave. Compara esta huella con el SITIO_WEB_SECRET del servidor: " +
+            "deben ser idénticos, sin espacios ni comillas.",
+        }
+      : {}),
+  });
 }

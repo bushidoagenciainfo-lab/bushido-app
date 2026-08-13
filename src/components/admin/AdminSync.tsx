@@ -27,6 +27,7 @@ export default function AdminSync() {
   const [reporte, setReporte] = useState<Record<string, Bloque>>({});
   const [error, setError] = useState("");
   const [destino, setDestino] = useState("");
+  const [pista, setPista] = useState("");
 
   async function sincronizar() {
     setEstado("enviando");
@@ -42,6 +43,7 @@ export default function AdminSync() {
       }
       setReporte(d.reporte);
       setDestino(d.destino || "");
+      setPista(d.pista ? `${d.pista}\nHuella de tu clave: ${d.secreto}` : "");
       setEstado(d.ok ? "listo" : "error");
       if (!d.ok) setError("Algunos bloques no llegaron. Mira el detalle.");
     } catch {
@@ -73,6 +75,7 @@ export default function AdminSync() {
           Enviando a <code>{destino}</code>
         </p>
       )}
+      {pista && <p className="sync-pista">{pista}</p>}
 
       {Object.keys(reporte).length > 0 && (
         <div className="sync-reporte">
