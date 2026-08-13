@@ -7,7 +7,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { businessDiscovery, hasInstagram } from "./instagram";
-import { briefingParaPrompt } from "./os-briefing";
+import { briefingDelSector, briefingParaPrompt } from "./os-briefing";
 import { EMOCIONES, NICHOS, type Analisis, type EmocionDetalle, type Emocion, type Nicho } from "./analisis";
 
 export interface AnalizarInput {
@@ -28,6 +28,13 @@ export interface AnalizarInput {
    * más margen o se corta con "Request timed out" teniendo tiempo de sobra.
    */
   timeoutMs?: number;
+  /**
+   * Informe corto para quien todavía no es cliente: se lo lleva algo real
+   * (dos fortalezas, una carencia completa, el dato de su sector) y ve
+   * nombrado lo que no incluye. El contenido se genera igual — lo que cambia
+   * es qué se muestra.
+   */
+  abrebocas?: boolean;
 }
 
 const KEY = process.env.ANTHROPIC_API_KEY;
@@ -42,10 +49,11 @@ export function hasIA(): boolean {
  * nicho — que es exactamente lo que hacía que 3 marcas distintas recibieran
  * prácticamente el mismo informe.
  */
-async function perfilInstagram(redes?: string): Promise<string> {
-  if (!redes || !hasInstagram()) return "";
+async function perfilInstagram(redes?: string): Promise<{ texto: string; pistas: string }> {
+  const vacio = { texto: "", pistas: "" };
+  if (!redes || !hasInstagram()) return vacio;
   const r = await businessDiscovery(redes).catch(() => null);
-  if (!r?.ok || !r.perfil) return "";
+  if (!r?.ok || !r.perfil) return vacio;
   const p = r.perfil;
 
   const posts = (p.media ?? []).map((m, i) => {
@@ -70,7 +78,7 @@ async function perfilInstagram(redes?: string): Promise<string> {
       `\n(Referencia del sector: <1% es flojo, 1-3% normal, >3% fuerte. Úsalo para juzgar, y dilo con nombre propio.)`;
   }
 
-  return [
+  const texto = [
     "DATOS REALES DE SU INSTAGRAM (obtenidos ahora de la API oficial de Meta —",
     "esto NO es suposición: es lo que hay en su perfil. ÚSALO como evidencia central):",
     `Usuario: @${p.username}${p.name ? ` · ${p.name}` : ""}`,
@@ -82,6 +90,15 @@ async function perfilInstagram(redes?: string): Promise<string> {
   ]
     .filter(Boolean)
     .join("\n");
+
+  // Lo que dice de sí misma es la mejor pista para saber a qué sector pertenece:
+  // el nombre de la marca casi nunca lo revela ("Bianco Bake Lab" no dice repostería).
+  const pistas = [p.name, p.biography, ...(p.media ?? []).map((m) => m.caption ?? "")]
+    .filter(Boolean)
+    .join(" ")
+    .slice(0, 1200);
+
+  return { texto, pistas };
 }
 
 // ── Contexto de negocio: paquetes REALES de Bushido para aterrizar la recomendación ──
@@ -143,6 +160,16 @@ El análisis NO es siempre sobre redes sociales. Lo que el cliente eligió defin
 · "Fotografía" → la imagen de marca: qué tan bien se ve el producto/persona hoy, consistencia visual, si el material actual vende o solo documenta, usos (catálogo, e-commerce, prensa, redes).
 En el resumen deja claro desde la primera frase que estás mirando su marca DESDE ese foco. Si el foco no es redes, no llenes el informe de recomendaciones de calendario de publicaciones: habla de lo que pidió.
 
+📊 SI RECIBES DATA DEL SECTOR ("LO QUE YA SABEMOS DE ESTA CATEGORÍA"):
+Es lo único del informe que un competidor no puede improvisar: demuestra que detrás hay un sistema, no un texto bonito. Úsala así:
+1. En el diagnóstico, teje UNO O DOS datos CON LA EVIDENCIA Y EL NÚMERO delante. La forma es siempre la misma: cuántas marcas del sector hemos analizado, cuál es el patrón, y dónde queda ESTA marca frente a él.
+   · Bien: "De las 8 marcas de repostería que hemos analizado, la carencia más repetida es que muestran el producto pero nunca el proceso. Tu cuenta la comparte: en 12 publicaciones no hay una sola del taller."
+   · Bien (contraste): "…y tú eres de las pocas que no: tus últimos 4 posts sí muestran el proceso. Esa es tu ventaja y no la estás capitalizando."
+   · Mal: "El sector suele tener problemas de contenido." (sin número, sin evidencia, sin comparación → bórralo)
+2. El CIERRE-GANCHO es UNA transferencia: una palanca que funciona en OTRO sector y que casi nadie usa en el suyo. Nombra la OPORTUNIDAD, nunca la ejecución. Se cierra diciendo que cómo aplicarla a su marca es parte de lo que trabajamos con clientes. No des el paso a paso: si después de leerlo el cliente puede ejecutarlo solo, lo escribiste mal.
+3. ⚠️ SI LA MUESTRA ES CORTA (te lo avisa el bloque): NO escribas "el sector hace X" ni "las marcas de tu sector". Escribe "entre lo que hemos analizado…" o "en las marcas de tu sector que hemos mirado hasta ahora…". Nunca presentes un patrón de pocas marcas como una verdad del mercado: si el cliente lo comprueba y no le cuadra, perdimos la venta y la credibilidad.
+4. Si NO recibes data del sector, no menciones al sector ni inventes cifras: escribe el diagnóstico solo con la evidencia de su cuenta.
+
 QUÉ DEBES PRODUCIR:
 - diagnóstico: fortalezas, carencias (accionables) y oportunidades sin explotar, TODAS leídas desde el foco de arriba.
 - buyerPersona con 3 jobs-to-be-done (qué "trabajo" contrata el cliente al comprar).
@@ -163,17 +190,58 @@ ${PAQUETES}
 
 Si no conoces la marca con certeza, infiere desde el nicho de forma honesta y prudente; es un borrador que un humano de Bushido revisa antes de enviar.`;
 
+// Bloques que SOLO existen cuando el cerebro conoce el sector. Se añaden al
+// esquema en tiempo de ejecución: si no hay data, el campo no existe y el
+// modelo no puede inventarse una afirmación sobre "las marcas de tu sector".
+const CAMPOS_SECTOR = {
+  datoSector: {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      hallazgo: {
+        type: "string",
+        description:
+          "Una frase con la evidencia y el número: 'De las N marcas de <sector> que hemos analizado, la carencia más repetida es X'.",
+      },
+      veredicto: {
+        type: "string",
+        description:
+          "Dónde queda ESTA marca frente a ese patrón: si lo comparte o si es de las pocas que no. Con evidencia de su perfil.",
+      },
+    },
+    required: ["hallazgo", "veredicto"],
+  },
+  cierreGancho: {
+    type: "string",
+    description:
+      "UNA transferencia como cierre: qué palanca funciona en OTRO sector y casi nadie usa en el suyo, y qué abriría para su marca. Nombra la oportunidad, NO la ejecución. Cierra con que aplicarla es parte de lo que se trabaja con clientes.",
+  },
+} as const;
+
 // Esquema de salida estructurada (structured outputs). El modelo produce solo
 // el diagnóstico; marca/redes/web/fecha/estado los ponemos nosotros.
-const SCHEMA = {
+const SCHEMA_BASE = {
   type: "object",
   additionalProperties: false,
   properties: {
     nicho: { type: "string", description: "Nicho + sector en texto libre, ej: 'Repostería artesanal · gastronomía'" },
     categoria: { type: "string", enum: [...NICHOS], description: "La categoría de la lista que MEJOR agrupa esta marca (para la data). Si ninguna encaja, 'Otro'." },
     resumen: { type: "string", description: "2-3 frases: el diagnóstico central, sin rodeos" },
-    fortalezas: { type: "array", items: { type: "string" }, description: "3 a 4 fortalezas reales" },
-    carencias: { type: "array", items: { type: "string" }, description: "3 a 4 carencias accionables" },
+    // ORDENADAS: la versión corta del informe solo muestra las 2 primeras
+    // fortalezas y LA primera carencia. Si el orden es arbitrario, el prospecto
+    // recibe lo menos interesante que teníamos.
+    fortalezas: {
+      type: "array",
+      items: { type: "string" },
+      description:
+        "3 a 4 fortalezas reales, DE MAYOR A MENOR. Las dos primeras son las que más lo van a sorprender: con número o evidencia textual de su perfil.",
+    },
+    carencias: {
+      type: "array",
+      items: { type: "string" },
+      description:
+        "3 a 4 carencias accionables, DE MAYOR A MENOR. La PRIMERA se entrega completa y sola a los que aún no son clientes: tiene que valer por sí misma — qué está pasando, con qué evidencia, y qué haría distinto. Que se pueda actuar sobre ella sin nosotros.",
+    },
     oportunidades: { type: "array", items: { type: "string" }, description: "3 oportunidades sin explotar" },
     buyerPersona: {
       type: "object",
@@ -261,6 +329,16 @@ const SCHEMA = {
   ],
 } as const;
 
+/** El esquema del turno: con los campos de sector solo si hay data que los sostenga. */
+function esquema(conSector: boolean) {
+  if (!conSector) return SCHEMA_BASE;
+  return {
+    ...SCHEMA_BASE,
+    properties: { ...SCHEMA_BASE.properties, ...CAMPOS_SECTOR },
+    required: [...SCHEMA_BASE.required, "datoSector", "cierreGancho"],
+  };
+}
+
 interface ModelOut {
   nicho: string;
   categoria: Nicho;
@@ -275,6 +353,8 @@ interface ModelOut {
   metricas: Analisis["metricas"];
   propuesta: string;
   paquete: Analisis["paquete"];
+  datoSector?: Analisis["datoSector"];
+  cierreGancho?: string;
 }
 
 // Tope de tiempo para la investigación web. Vercel corta la función (60s en
@@ -333,12 +413,16 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
   // PASO 1b: el perfil REAL de Instagram (rápido, ~300ms). Esto es lo que
   // separa un análisis específico de uno genérico: sin datos, el modelo solo
   // puede decir obviedades del nicho.
-  // PASO 1c: lo que el cerebro ya sabe de esa categoría. Aquí es donde el
-  // sistema deja de empezar de cero en cada marca.
-  const [perfil, briefing] = await Promise.all([
-    perfilInstagram(input.redes),
-    briefingParaPrompt([input.marca, input.contexto, input.web].filter(Boolean).join(" ")),
-  ]);
+  const perfil = await perfilInstagram(input.redes);
+
+  // PASO 1c: lo que el cerebro ya sabe de ese sector. Va DESPUÉS de Instagram
+  // (no en paralelo) a propósito: la biografía y los textos de sus publicaciones
+  // son lo que permite acertarle a la categoría, y sin categoría correcta el
+  // cerebro no devuelve nada.
+  const sector = await briefingDelSector(
+    [input.marca, input.contexto, input.web, perfil.pistas].filter(Boolean).join(" ")
+  );
+  const briefing = briefingParaPrompt(sector);
 
   // PASO 2: estructurar el análisis usando esos hechos
   const userMsg = [
@@ -350,7 +434,7 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
     `>>> FOCO DEL ANÁLISIS (lo que el cliente eligió): ${input.contexto || "(no especificó → enfoque general de redes)"}`,
     `Todo el informe debe leerse desde ese foco, no solo desde redes sociales.`,
     "",
-    perfil,
+    perfil.texto,
     "",
     briefing,
     "",
@@ -371,7 +455,7 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
       model: "claude-opus-4-8",
       max_tokens: 16000,
       thinking: { type: "adaptive" },
-      output_config: { format: { type: "json_schema", schema: SCHEMA }, effort: "medium" },
+      output_config: { format: { type: "json_schema", schema: esquema(Boolean(sector)) }, effort: "medium" },
       system: SYSTEM,
       messages: [{ role: "user", content: userMsg }],
     },
@@ -407,6 +491,14 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
     metricas: data.metricas,
     propuesta: data.propuesta,
     paquete: data.paquete,
+    datoSector: data.datoSector,
+    cierreGancho: data.cierreGancho,
+    // Qué sabíamos del sector al escribir esto: sirve para citar la muestra
+    // en el informe y para saber si el dato se puede afirmar o solo insinuar.
+    sector: sector
+      ? { categoria: sector.categoria, marcas: sector.marcas, suficiente: sector.suficiente }
+      : undefined,
     estado: "analizado",
+    modo: input.abrebocas ? "abrebocas" : "completo",
   };
 }

@@ -3506,6 +3506,52 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 .wa-borrador:disabled, .wa-enviar:disabled { opacity: .45; cursor: default; }
 .wa-error { font-family: var(--mono); font-size: 11px; line-height: 1.5; color: var(--sepp); }
 
+/* ══════════ INFORME ABREBOCAS · la versión que ve quien aún no es cliente ══════════ */
+.ab-lista { display: flex; flex-direction: column; gap: 12px; }
+.ab-lista li {
+  font-size: 15.5px; line-height: 1.65; color: var(--bone-dim);
+  padding-left: 18px; position: relative;
+}
+.ab-fuerte li::before {
+  content: ""; position: absolute; left: 0; top: 10px;
+  width: 7px; height: 7px; border-radius: 50%; background: #6FBF8E;
+}
+.ab-carencia {
+  font-size: 16px; line-height: 1.7; color: var(--bone);
+  border-left: 2px solid var(--sepp); padding: 4px 0 4px 18px;
+}
+.ab-sector {
+  border: 1px solid rgba(201,162,74,.28); border-radius: 11px;
+  background: linear-gradient(180deg, rgba(201,162,74,.06), transparent);
+  padding: 20px 22px; display: flex; flex-direction: column; gap: 10px;
+}
+.ab-muestra {
+  align-self: flex-start; font-family: var(--mono); font-size: 9px;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--gold);
+  border: 1px solid rgba(201,162,74,.35); border-radius: 999px; padding: 4px 11px;
+}
+.ab-hallazgo { font-family: var(--serif); font-size: 19px; line-height: 1.5; color: var(--bone); }
+.ab-veredicto { font-size: 15px; line-height: 1.7; color: var(--bone-dim); }
+.ab-gancho {
+  font-size: 16px; line-height: 1.75; color: var(--bone-dim);
+  border-left: 2px solid var(--gold); padding: 4px 0 4px 18px;
+}
+.ab-gancho strong, .ab-hallazgo strong { color: var(--bone); font-weight: 400; }
+.ab-intro { font-size: 14.5px; line-height: 1.65; color: var(--bone-ghost); margin-bottom: 16px; }
+.ab-falta { border: 1px solid var(--hairline); border-radius: 9px; overflow: hidden; }
+.ab-falta-row { padding: 14px 18px; display: flex; flex-direction: column; gap: 3px; }
+.ab-falta-row + .ab-falta-row { border-top: 1px solid var(--hairline); }
+.ab-falta-row strong { font-size: 15px; color: var(--bone); font-weight: 400; font-family: var(--serif); }
+.ab-falta-row span { font-size: 13px; color: var(--bone-ghost); line-height: 1.55; }
+/* El CTA del abrebocas lleva un párrafo: título y texto van juntos a un lado
+   del botón, no como tercera columna (ahí el botón caía a otra fila). */
+.rep-cta .rc-texto { flex: 1 1 300px; display: flex; flex-direction: column; gap: 8px; }
+.rep-cta .rc-sub { font-size: 14.5px; line-height: 1.65; color: var(--bone-dim); max-width: 460px; }
+@media (max-width: 640px) {
+  .ab-hallazgo { font-size: 17px; }
+  .ab-carencia, .ab-gancho { font-size: 15px; padding-left: 14px; }
+}
+
 /* ── Qué puedes ofrecer por nicho ── */
 .cob { border: 1px solid var(--hairline); border-radius: 11px; background: var(--ink); padding: 18px 20px; margin-bottom: 14px; }
 .cob h4 {

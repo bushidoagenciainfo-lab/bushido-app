@@ -1,10 +1,14 @@
 // Consulta al cerebro QUÉ SABEMOS YA de una categoría, antes de escribir un
 // diagnóstico nuevo. Es lo que convierte cada análisis en aprendizaje
 // acumulado en vez de empezar de cero cada vez.
+//
+// Devuelve data ESTRUCTURADA (no solo texto para el prompt) porque el informe
+// también la muestra: es la pieza que demuestra que hay un sistema detrás.
 
 import { leerDelOS } from "./bushido-os";
+import { normalizarCategoria } from "./analisis";
 
-interface Briefing {
+interface RespuestaOS {
   ok: boolean;
   conocida: boolean;
   categoria?: string;
@@ -14,10 +18,24 @@ interface Briefing {
   emociones_del_sector?: string[];
   canales_desatendidos?: string[];
   oportunidades_repetidas?: string[];
-  transferencias?: Array<{ palanca?: string; lectura?: string }>;
+  transferencias?: Array<{ palanca?: string; lectura?: string; sector?: string }>;
   advertencia?: string;
   mensaje?: string;
   categorias_conocidas?: string[];
+}
+
+/** Lo que sabemos del sector, ya limpio y listo para usar. */
+export interface BriefingSector {
+  categoria: string;
+  marcas: number;
+  /** false → la muestra es corta: no se puede afirmar "el sector hace X". */
+  suficiente: boolean;
+  carencias: string[];
+  emociones: string[];
+  canales: string[];
+  oportunidades: string[];
+  transferencias: Array<{ palanca?: string; lectura?: string; sector?: string }>;
+  advertencia?: string;
 }
 
 /** "Gastronomía / restaurante" → "gastronomia-restaurante" */
@@ -30,65 +48,92 @@ function aSlug(v: string): string {
     .replace(/^-|-$/g, "");
 }
 
-/**
- * Busca el briefing de la categoría más probable a partir de las pistas que
- * tenemos del cliente (marca, qué pidió, su biografía).
- *
- * Hace como mucho dos llamadas: la directa y, si no la reconoce, un intento
- * contra la lista de categorías que el OS sí conoce.
- */
-export async function briefingParaPrompt(pistas: string): Promise<string> {
-  if (!pistas.trim()) return "";
-
-  const primera = await leerDelOS<Briefing>(
-    `/api/sitio/briefing?categoria=${encodeURIComponent(aSlug(pistas.slice(0, 60)))}`
+async function pedir(categoria: string) {
+  return leerDelOS<RespuestaOS>(
+    `/api/sitio/briefing?categoria=${encodeURIComponent(aSlug(categoria))}`
   );
+}
+
+/**
+ * Trae lo que el cerebro sabe del sector de esta marca.
+ *
+ * La categoría se deduce con `normalizarCategoria` sobre TODAS las pistas
+ * disponibles (nombre, lo que pidió, su biografía de Instagram, sus textos).
+ * Antes se mandaba el texto crudo convertido a slug y casi nunca coincidía:
+ * "Panadería Luz" no es ninguna categoría, "Repostería" sí.
+ */
+export async function briefingDelSector(pistas: string): Promise<BriefingSector | null> {
+  if (!pistas.trim()) return null;
+
+  const categoria = normalizarCategoria(pistas);
+  // "Otro" no es un sector: no hay nada que saber de él.
+  const primera = await pedir(categoria === "Otro" ? pistas.slice(0, 60) : categoria);
+
   // Si el OS rechazó (llave mal, caído…), el análisis sigue sin su briefing:
   // vale más un diagnóstico sin data de sector que ninguno.
   if (!primera.ok) {
     console.warn(`[briefing] sin data del sector: ${primera.detalle || primera.error}`);
-    return "";
+    return null;
   }
-  let b = primera.data;
+  let r = primera.data;
 
-  // Segundo intento: ¿alguna categoría conocida aparece en las pistas?
-  if (!b.conocida && b.categorias_conocidas?.length) {
+  // Segundo intento: ¿alguna categoría que el OS sí conoce aparece en las pistas?
+  if (!r.conocida && r.categorias_conocidas?.length) {
     const texto = aSlug(pistas);
-    const match = b.categorias_conocidas.find((c) => {
+    const match = r.categorias_conocidas.find((c) => {
       const s = aSlug(c);
       return texto.includes(s) || s.split("-").some((p) => p.length > 4 && texto.includes(p));
     });
     if (match) {
-      const segunda = await leerDelOS<Briefing>(
-        `/api/sitio/briefing?categoria=${encodeURIComponent(match)}`
-      );
-      if (segunda.ok) b = segunda.data;
+      const segunda = await pedir(match);
+      if (segunda.ok) r = segunda.data;
     }
   }
 
-  if (!b.ok || !b.conocida) return "";
+  if (!r.ok || !r.conocida) return null;
 
-  const lista = (titulo: string, items?: string[]) =>
-    items?.length ? `${titulo}: ${items.join(" · ")}` : "";
+  return {
+    categoria: r.categoria || categoria,
+    marcas: r.marcas_analizadas ?? 0,
+    // Ante la duda, tratamos la muestra como corta: es más barato ser prudente
+    // que afirmarle a un prospecto un patrón que no sostenemos.
+    suficiente: r.suficiente === true,
+    carencias: r.carencias_tipicas ?? [],
+    emociones: r.emociones_del_sector ?? [],
+    canales: r.canales_desatendidos ?? [],
+    oportunidades: r.oportunidades_repetidas ?? [],
+    transferencias: (r.transferencias ?? []).filter((t) => t.lectura || t.palanca),
+    advertencia: r.advertencia,
+  };
+}
 
-  const bloques = [
-    `LO QUE YA SABEMOS DE ESTA CATEGORÍA (${b.categoria}, ${b.marcas_analizadas} marcas analizadas por Bushido).`,
+/** Formatea el briefing como bloque de evidencia para el prompt. */
+export function briefingParaPrompt(b: BriefingSector | null): string {
+  if (!b) return "";
+
+  const lista = (titulo: string, items: string[]) =>
+    items.length ? `${titulo}: ${items.join(" · ")}` : "";
+
+  return [
+    `LO QUE YA SABEMOS DE ESTA CATEGORÍA (${b.categoria}, ${b.marcas} marcas analizadas por Bushido).`,
     "Es data propia acumulada: úsala para ir más profundo y para comparar a esta marca con su sector,",
     "NO para repetirla tal cual. Si algo de esta marca contradice el patrón, eso es lo interesante — dilo.",
     "",
-    lista("Carencias que se repiten en el sector", b.carencias_tipicas),
-    lista("Emociones que mueven la compra aquí", b.emociones_del_sector),
-    lista("Canales que casi nadie atiende", b.canales_desatendidos),
-    lista("Oportunidades que aparecen una y otra vez", b.oportunidades_repetidas),
-    b.transferencias?.length
-      ? "Palancas que funcionan en otros sectores y aquí nadie usa: " +
-        b.transferencias.map((t) => t.lectura || t.palanca).filter(Boolean).join(" · ")
+    lista("Carencias que se repiten en el sector", b.carencias),
+    lista("Emociones que mueven la compra aquí", b.emociones),
+    lista("Canales que casi nadie atiende", b.canales),
+    lista("Oportunidades que aparecen una y otra vez", b.oportunidades),
+    b.transferencias.length
+      ? "Palancas que funcionan en OTROS sectores y aquí casi nadie usa: " +
+        b.transferencias
+          .map((t) => [t.sector ? `(${t.sector})` : "", t.lectura || t.palanca].filter(Boolean).join(" "))
+          .join(" · ")
       : "",
     b.advertencia ? `⚠️ ${b.advertencia}` : "",
-    b.suficiente === false
-      ? "⚠️ La muestra del sector todavía es corta: NO presentes estos patrones como verdades del mercado."
+    !b.suficiente
+      ? "⚠️ MUESTRA CORTA: no escribas «el sector hace X». Escribe «entre lo que hemos analizado…»."
       : "",
-  ].filter(Boolean);
-
-  return bloques.join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 }

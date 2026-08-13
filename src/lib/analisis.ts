@@ -131,6 +131,23 @@ export interface PaqueteRecomendado {
   incentivo?: string; // bono por arrancar ya, personalizado a una carencia (NO descuento)
 }
 
+/**
+ * El dato de sector: lo que sabemos por haber analizado otras marcas de su
+ * categoría. Es la pieza de autoridad del informe — sin el número delante no
+ * demuestra nada, así que siempre va con la evidencia.
+ */
+export interface DatoSector {
+  hallazgo: string; // "De las 8 marcas de repostería que hemos analizado, la carencia más repetida es X"
+  veredicto: string; // dónde queda ESTA marca frente a ese patrón
+}
+
+/** Qué sabíamos del sector al generar el informe (para citar la muestra). */
+export interface MuestraSector {
+  categoria: string;
+  marcas: number;
+  suficiente: boolean; // false → hay que decir "entre lo que hemos analizado", no "el sector"
+}
+
 export interface Analisis {
   // — cliente —
   marca: string;
@@ -153,11 +170,21 @@ export interface Analisis {
   // — presencia digital + métricas —
   canales?: Canal[];
   metricas?: Metrica[];
+  // — lo que sabemos de su sector (solo si el cerebro conocía la categoría) —
+  datoSector?: DatoSector;
+  cierreGancho?: string; // la transferencia: oportunidad nombrada, ejecución no
+  sector?: MuestraSector;
   // — propuesta —
   propuesta: string;
   paquete: PaqueteRecomendado;
   // — pipeline —
   estado?: "nuevo" | "analizado" | "enviado" | "seguimiento" | "cerrado";
+  /**
+   * "abrebocas" = el informe gratis que pide un desconocido por el pop-up:
+   * 2 fortalezas, UNA carencia completa, el dato de sector y qué NO incluye.
+   * "completo" = todo (clientes y panel). Por defecto completo.
+   */
+  modo?: "abrebocas" | "completo";
 }
 
 // Análisis de ejemplo (cliente real: Bianco Bake Lab) — para previsualizar la plantilla.
@@ -170,15 +197,17 @@ export const DEMO_ANALISIS: Analisis = {
   fecha: "2026",
   resumen:
     "Producto con alma y estética envidiable, pero la comunicación no está capitalizando el deseo ni la ocasión de compra. Hay una mina de contenido emocional sin explotar.",
+  // Ordenadas de mayor a menor: la versión corta muestra las 2 primeras
+  // fortalezas y la primera carencia, así que son las que más pesan.
   fortalezas: [
-    "Producto fotogénico y de calidad evidente",
-    "Identidad visual cálida y coherente",
-    "Comunidad pequeña pero fiel que comenta",
+    "Con 2.600 seguidores promedias 41 interacciones por publicación (1,6%): la gente que ya te sigue responde. El problema no es tu contenido, es que no está llegando a nadie nuevo.",
+    "Tus fotos de producto sobre fondo claro tienen un nivel que la mayoría de tu competencia en Bogotá no tiene. Eso es lo que sostiene un precio tres veces mayor al de una panadería de barrio.",
+    "Tienes 6 comentarios que dicen alguna variación de «esto es un regalo perfecto» — te lo están diciendo tus clientas y no lo has convertido en producto.",
   ],
   carencias: [
-    "Reels sin hook — se ve rico pero no detiene el scroll",
-    "No comunica ocasión de compra (regalo, antojo, celebración)",
-    "Poca constancia: publica en ráfagas, no en ritmo",
+    "Tu bio promete «envíos a toda Colombia» y ninguna de tus últimas 12 publicaciones lo menciona. Quien te descubre desde fuera de Bogotá asume que no le llega y se va sin preguntar. Un post fijado con cobertura, tiempos y cómo pedir resuelve eso esta semana.",
+    "Vendes torta, no ocasión. Ninguna publicación nombra el cumpleaños, el aniversario ni el «me lo merezco» — que es cuando la gente decide comprar repostería cara.",
+    "Publicas en ráfagas de tres días y luego desapareces dos semanas. Tu cuenta no compite contra otra repostería: compite contra el olvido.",
   ],
   oportunidades: [
     "El 'antojo' y el 'date un gusto' son emociones sin dueño en el nicho",
@@ -231,5 +260,14 @@ export const DEMO_ANALISIS: Analisis = {
     incentivo:
       "Si arrancas este mes, te montamos tu Google Business + primeras reseñas sin costo — justo la carencia que hoy te deja invisible en búsquedas.",
   },
+  datoSector: {
+    hallazgo:
+      "De las 8 marcas de repostería que hemos analizado, la carencia más repetida es la misma: muestran el producto terminado y nunca el proceso.",
+    veredicto:
+      "Tu cuenta la comparte. En tus últimas 12 publicaciones no hay una sola del taller — y es justo lo que justifica cobrar tres veces lo que cobra una panadería de barrio.",
+  },
+  cierreGancho:
+    "En estética y en fitness lleva dos años funcionando algo que en repostería casi nadie usa: el antes y después con la persona que compra, no con el producto. La torta no es el resultado — la cara de quien la recibe sí. Cómo se aplica eso a tu marca, con qué formato y en qué momento del mes, es parte de lo que trabajamos con clientes.",
+  sector: { categoria: "Repostería", marcas: 8, suficiente: true },
   estado: "analizado",
 };

@@ -8,11 +8,19 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
-export default function InformeDemoPage() {
+/** `?corto=1` muestra el abrebocas: lo que ve alguien que aún no es cliente. */
+export default async function InformeDemoPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ corto?: string }>;
+}) {
+  const { corto } = await searchParams;
+  const a = corto ? { ...DEMO_ANALISIS, modo: "abrebocas" as const } : DEMO_ANALISIS;
+
   return (
     <>
       <main>
-        <ReportView a={DEMO_ANALISIS} />
+        <ReportView a={a} />
       </main>
       <Footer />
     </>

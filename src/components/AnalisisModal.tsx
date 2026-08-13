@@ -116,7 +116,7 @@ export default function AnalisisModal() {
             }
             submitLabel="Quiero mi análisis"
             successTitle="¡Recibido!"
-            successText="Estamos preparando tu diagnóstico — te llega a tu correo y WhatsApp en menos de 24 horas."
+            successText="Tu informe llega al correo en unos minutos. No es un texto genérico: cruzamos tu cuenta con nuestra base de análisis de marcas de tu sector."
             legal
             fields={[
               { name: "name", label: "Nombre", required: true, placeholder: "Tu nombre" },

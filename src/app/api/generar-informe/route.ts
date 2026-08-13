@@ -59,6 +59,8 @@ export async function POST(request: Request) {
         tiktok: d.tiktok ?? undefined,
         web: d.web ?? undefined,
         contexto: d.contexto ?? undefined,
+        // Viene del pop-up: quien lo pide todavía no es cliente.
+        abrebocas: true,
       });
       if (!analisis) {
         console.error("[informe] generarAnalisis devolvió null");
