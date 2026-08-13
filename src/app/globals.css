@@ -3506,6 +3506,12 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 .wa-borrador:disabled, .wa-enviar:disabled { opacity: .45; cursor: default; }
 .wa-error { font-family: var(--mono); font-size: 11px; line-height: 1.5; color: var(--sepp); }
 
+.informe-nota {
+  max-width: 900px; margin: 0 auto; padding: 0 var(--pad-x) 40px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .06em;
+  color: var(--bone-ghost); line-height: 1.7;
+}
+
 /* ══════════ INFORME ABREBOCAS · la versión que ve quien aún no es cliente ══════════ */
 .ab-lista { display: flex; flex-direction: column; gap: 12px; }
 .ab-lista li {

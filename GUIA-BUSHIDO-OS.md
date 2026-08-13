@@ -95,3 +95,40 @@ Hoy el sitio **envía** pero no **lee** del OS. Cuando el cerebro tenga
 conclusiones que valga la pena mostrar —patrones entre nichos, qué formato está
 funcionando este mes, qué creador recomienda para una marca— el siguiente paso
 es un `GET` del OS que el panel consuma.
+
+---
+
+## Migración pendiente en Supabase (informe abrebocas)
+
+El informe que pide un desconocido por el pop-up ahora es un **abrebocas**: dos
+fortalezas, una carencia completa y el dato de su sector. Eso necesita cuatro
+columnas nuevas en la tabla `analisis`. **Mientras no las crees, el sitio sigue
+funcionando** —el informe se guarda igual— pero *sin* el dato de sector y sin
+recordar que era la versión corta, así que el prospecto vería el informe
+completo.
+
+Corre esto una vez en Supabase → **SQL Editor**:
+
+```sql
+alter table analisis
+  add column if not exists dato_sector    jsonb,
+  add column if not exists cierre_gancho  text,
+  add column if not exists sector         jsonb,
+  add column if not exists modo           text default 'completo';
+```
+
+Los informes que ya existen quedan como `completo`, que es lo que son.
+
+**Cómo saber si falta:** en los logs de Vercel aparece
+`[analisis] faltan columnas nuevas en Supabase`.
+
+### Ver el informe completo de un lead
+
+El enlace `/informe/<id>` es uno solo y muestra dos cosas distintas:
+
+- **El prospecto** ve el abrebocas.
+- **Tú**, con la sesión de `/admin` abierta en ese navegador, ves el informe
+  completo en ese mismo enlace, con un aviso al pie recordándote la diferencia.
+
+Es el enlace que abres en la llamada de venta. No hay una URL secreta que se
+pueda filtrar: lo que manda es tu sesión.

@@ -54,6 +54,20 @@ function toRow(a: Analisis, leadId?: string) {
   };
 }
 
+/**
+ * Columnas añadidas después (dato de sector + versión corta). Van aparte porque
+ * puede que la tabla de Supabase todavía no las tenga: si el insert las rechaza,
+ * guardamos sin ellas antes que perder el informe entero.
+ */
+function extras(a: Analisis) {
+  return {
+    dato_sector: a.datoSector ?? null,
+    cierre_gancho: a.cierreGancho ?? null,
+    sector: a.sector ?? null,
+    modo: a.modo ?? "completo",
+  };
+}
+
 // mapea una fila de la tabla de vuelta al `Analisis` que consume ReportView
 function fromRow(r: Record<string, unknown>): Analisis {
   return {
@@ -80,6 +94,11 @@ function fromRow(r: Record<string, unknown>): Analisis {
     propuesta: (r.propuesta as string) ?? "",
     paquete: (r.paquete as Analisis["paquete"]) ?? { nombre: "", precio: "", porque: "" },
     estado: (r.estado as Analisis["estado"]) ?? "analizado",
+    datoSector: (r.dato_sector as Analisis["datoSector"]) ?? undefined,
+    cierreGancho: (r.cierre_gancho as string) ?? undefined,
+    sector: (r.sector as Analisis["sector"]) ?? undefined,
+    // Los informes viejos no tienen `modo`: son completos, como se generaron.
+    modo: (r.modo as Analisis["modo"]) ?? "completo",
   };
 }
 
@@ -99,8 +118,25 @@ async function localDir(): Promise<string | null> {
 /** Guarda el análisis y devuelve su id (para el link /informe/[id]). */
 export async function storeAnalisis(a: Analisis, leadId?: string): Promise<string> {
   if (hasDb()) {
-    const { data, error } = await db().from("analisis").insert(toRow(a, leadId)).select("id").single();
+    const base = toRow(a, leadId);
+    let { data, error } = await db()
+      .from("analisis")
+      .insert({ ...base, ...extras(a) })
+      .select("id")
+      .single();
+
+    // Si la tabla aún no tiene las columnas nuevas, Supabase responde PGRST204
+    // ("column not found"). Reintentamos sin ellas: mejor un informe sin el
+    // dato de sector que ningún informe.
+    if (error && (error.code === "PGRST204" || /column .* does not exist/i.test(error.message))) {
+      console.warn(
+        `[analisis] faltan columnas nuevas en Supabase (${error.message}). ` +
+          `Guardo sin el dato de sector — corre la migración de GUIA-BUSHIDO-OS.md.`
+      );
+      ({ data, error } = await db().from("analisis").insert(base).select("id").single());
+    }
     if (error) throw new Error(`Supabase insert (analisis) falló: ${error.message}`);
+    if (!data) throw new Error("Supabase insert (analisis) no devolvió id.");
     return data.id as string;
   }
   // fallback local
@@ -114,7 +150,7 @@ export async function storeAnalisis(a: Analisis, leadId?: string): Promise<strin
     } catch {
       all = {};
     }
-    all[id] = { ...toRow(a, leadId), id, created_at: new Date().toISOString() };
+    all[id] = { ...toRow(a, leadId), ...extras(a), id, created_at: new Date().toISOString() };
     await fs.writeFile(file, JSON.stringify(all, null, 2), "utf8");
   }
   return id;
