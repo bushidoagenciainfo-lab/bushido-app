@@ -212,6 +212,84 @@ function EditorFicha({
   );
 }
 
+/**
+ * Qué puedes OFRECER hoy, por nicho.
+ *
+ * El book como lista no sirve para vender. Esto responde la pregunta que
+ * importa cuando entra un cliente: "en su nicho, ¿a quién tengo, con cuánta
+ * audiencia y para qué formatos?" — y por dónde no puedo comprometerme.
+ */
+function CoberturaBook({ creadores }: { creadores: CreadorLite[] }) {
+  const cobertura = useMemo(() => {
+    const porNicho = new Map<
+      string,
+      { creadores: CreadorLite[]; alcance: number; formatos: Set<string> }
+    >();
+    for (const c of creadores) {
+      for (const n of c.nichos ?? []) {
+        const e = porNicho.get(n) ?? { creadores: [], alcance: 0, formatos: new Set<string>() };
+        e.creadores.push(c);
+        e.alcance += c.seguidores ?? 0;
+        for (const f of c.formatos ?? []) e.formatos.add(f);
+        porNicho.set(n, e);
+      }
+    }
+    return [...porNicho.entries()]
+      .map(([nicho, e]) => ({
+        nicho,
+        cuantos: e.creadores.length,
+        alcance: e.alcance,
+        formatos: [...e.formatos],
+        // con menos de 3 no hay de dónde escoger para un casting
+        solido: e.creadores.length >= 3,
+      }))
+      .sort((a, b) => b.cuantos - a.cuantos);
+  }, [creadores]);
+
+  const sinNicho = creadores.filter((c) => !c.nichos?.length).length;
+  if (!cobertura.length) return null;
+
+  return (
+    <div className="cob">
+      <h4>Qué puedes ofrecer por nicho</h4>
+      <p className="cob-intro">
+        Cuando entre un cliente de estos sectores, esto es lo que tienes para armarle una
+        campaña. En verde, los nichos donde hay de dónde escoger.
+      </p>
+      <div className="cob-grid">
+        {cobertura.map((c) => (
+          <div className={"cob-nicho" + (c.solido ? " ok" : "")} key={c.nicho}>
+            <div className="cob-head">
+              <strong>{c.nicho}</strong>
+              <span className="cob-n">
+                {c.cuantos} creador{c.cuantos === 1 ? "" : "es"}
+              </span>
+            </div>
+            {c.alcance > 0 && (
+              <span className="cob-alcance">{fmtSeguidores(c.alcance)} de alcance sumado</span>
+            )}
+            {c.formatos.length > 0 && (
+              <div className="cob-formatos">
+                {c.formatos.slice(0, 4).map((f) => (
+                  <span key={f}>{f}</span>
+                ))}
+                {c.formatos.length > 4 && <span>+{c.formatos.length - 4}</span>}
+              </div>
+            )}
+            {!c.solido && <span className="cob-aviso">Poca banca: no prometas casting aquí</span>}
+          </div>
+        ))}
+      </div>
+      {sinNicho > 0 && (
+        <p className="cob-pendiente">
+          {sinNicho} creador{sinNicho === 1 ? "" : "es"} sin nicho asignado — no aparecen en
+          ninguna búsqueda hasta que los clasifiques.
+        </p>
+      )}
+    </div>
+  );
+}
+
 /** Book de creadores en el panel: filtra por ciudad, nicho y formato para armar castings. */
 export default function AdminCreadores({ creadores }: { creadores: CreadorLite[] }) {
   const [rows, setRows] = useState(creadores);
@@ -358,6 +436,8 @@ export default function AdminCreadores({ creadores }: { creadores: CreadorLite[]
           )}
         </div>
       </div>
+
+      <CoberturaBook creadores={rows} />
 
       <div className="book-filtros">
         <input

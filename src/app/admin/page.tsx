@@ -9,6 +9,7 @@ import AdminWhatsApp from "@/components/admin/AdminWhatsApp";
 import AdminPricing from "@/components/admin/AdminPricing";
 import AdminSync from "@/components/admin/AdminSync";
 import AdminCerebro from "@/components/admin/AdminCerebro";
+import AdminSeguimiento from "@/components/admin/AdminSeguimiento";
 import { listConversaciones, type WaConversacion } from "@/lib/wa-inbox";
 import AdminLogout from "@/components/admin/AdminLogout";
 import AdminSection from "@/components/admin/AdminSection";
@@ -135,6 +136,14 @@ export default async function AdminPage() {
           </div>
         </section>
       )}
+
+      <AdminSection
+        title="A quién escribirle hoy"
+        defaultOpen
+        hint="Leads que llevan demasiado tiempo sin respuesta"
+      >
+        <AdminSeguimiento leads={leads} />
+      </AdminSection>
 
       <AdminSection
         title="WhatsApp"
