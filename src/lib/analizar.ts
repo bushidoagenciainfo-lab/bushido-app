@@ -7,6 +7,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { businessDiscovery, hasInstagram } from "./instagram";
+import { briefingParaPrompt } from "./os-briefing";
 import { EMOCIONES, NICHOS, type Analisis, type EmocionDetalle, type Emocion, type Nicho } from "./analisis";
 
 export interface AnalizarInput {
@@ -332,7 +333,12 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
   // PASO 1b: el perfil REAL de Instagram (rápido, ~300ms). Esto es lo que
   // separa un análisis específico de uno genérico: sin datos, el modelo solo
   // puede decir obviedades del nicho.
-  const perfil = await perfilInstagram(input.redes);
+  // PASO 1c: lo que el cerebro ya sabe de esa categoría. Aquí es donde el
+  // sistema deja de empezar de cero en cada marca.
+  const [perfil, briefing] = await Promise.all([
+    perfilInstagram(input.redes),
+    briefingParaPrompt([input.marca, input.contexto, input.web].filter(Boolean).join(" ")),
+  ]);
 
   // PASO 2: estructurar el análisis usando esos hechos
   const userMsg = [
@@ -345,6 +351,8 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
     `Todo el informe debe leerse desde ese foco, no solo desde redes sociales.`,
     "",
     perfil,
+    "",
+    briefing,
     "",
     brief
       ? `INVESTIGACIÓN WEB (hechos reales — BÁSATE en esto, no inventes más allá de lo aquí verificado):\n${brief}`

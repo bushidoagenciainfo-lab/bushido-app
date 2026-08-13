@@ -18,6 +18,28 @@ export interface RespuestaOS {
   data?: unknown;
 }
 
+/** Lee algo del OS (GET). Nunca lanza; devuelve null si no se pudo. */
+export async function leerDelOS<T = unknown>(
+  ruta: string,
+  timeoutMs = 8000
+): Promise<T | null> {
+  if (!URL_ || !SECRET) return null;
+  try {
+    const res = await fetch(`${URL_.replace(/\/$/, "")}${ruta}`, {
+      headers: { "x-bushido-sitio": SECRET },
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+    if (!res.ok) {
+      console.error(`[OS] GET ${ruta} respondió ${res.status}`);
+      return null;
+    }
+    return (await res.json()) as T;
+  } catch (e) {
+    console.error(`[OS] GET ${ruta} falló:`, e instanceof Error ? e.message : e);
+    return null;
+  }
+}
+
 /**
  * Envía algo al OS. Nunca lanza: si el cerebro está caído, el sitio sigue
  * funcionando y la data ya quedó guardada en Supabase.

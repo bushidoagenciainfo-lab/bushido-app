@@ -3037,6 +3037,89 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 }
 .row.featured .row-incluye li { color: var(--bone-dim); border-color: rgba(213,50,46,.3); }
 
+/* ══════════ Lo que aprendió el cerebro ══════════ */
+.cerebro { display: flex; flex-direction: column; gap: 16px; }
+.cb-intro { font-size: 13px; line-height: 1.6; color: var(--bone-dim); max-width: 640px; }
+.cb-resumen { display: flex; flex-wrap: wrap; gap: 22px; padding-bottom: 4px; }
+.cb-resumen div { display: flex; flex-direction: column; gap: 2px; }
+.cb-resumen strong { font-family: var(--serif); font-size: 26px; color: var(--bone); line-height: 1; }
+.cb-resumen span { font-family: var(--mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--bone-ghost); }
+.cb-bloque { border: 1px solid var(--hairline); border-radius: 11px; background: var(--ink); padding: 18px 20px; }
+.cb-bloque.destacado { border-color: rgba(201,162,74,.35); background: rgba(201,162,74,.04); }
+.cb-bloque h4 {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--sepp); margin-bottom: 14px;
+}
+.cb-bloque.destacado h4 { color: var(--gold); }
+.cb-transfer { padding: 11px 0; border-bottom: 1px solid var(--hairline); }
+.cb-transfer:last-child { border-bottom: none; }
+.cb-transfer strong { font-family: var(--serif); font-size: 17px; color: var(--bone); }
+.cb-transfer p { font-size: 12.5px; line-height: 1.55; color: var(--bone-dim); margin-top: 5px; }
+.cb-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+.cb-tags .tag {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .06em;
+  border-radius: 999px; padding: 4px 9px; border: 1px solid var(--hairline); color: var(--bone-ghost);
+}
+.cb-tags .tag.ok { color: #6FBF8E; border-color: rgba(111,191,142,.35); }
+.cb-tags .tag.falta { color: var(--gold); border-color: rgba(201,162,74,.35); }
+.cb-demanda { padding: 10px 0; border-bottom: 1px solid var(--hairline); }
+.cb-demanda:last-child { border-bottom: none; }
+.cb-dem-head { display: flex; justify-content: space-between; align-items: baseline; }
+.cb-dem-head strong { font-size: 14px; color: var(--bone); }
+.cb-dem-head span { font-family: var(--mono); font-size: 10px; color: var(--bone-ghost); }
+.cb-demanda p { font-size: 12.5px; line-height: 1.55; color: var(--bone-dim); margin-top: 4px; }
+.cb-cat { border: 1px solid var(--hairline); border-radius: 9px; margin-bottom: 7px; overflow: hidden; }
+.cb-cat.corta { opacity: .78; }
+.cb-cat-head {
+  width: 100%; display: flex; align-items: center; gap: 12px; cursor: pointer;
+  padding: 12px 14px; background: none; border: none; text-align: left;
+}
+.cb-cat-head:hover { background: rgba(237,231,218,.03); }
+.cb-cat-nombre { font-size: 14px; color: var(--bone); text-transform: capitalize; }
+.cb-cat-n { font-family: var(--mono); font-size: 10px; color: var(--bone-ghost); }
+.cb-corta {
+  font-family: var(--mono); font-size: 8.5px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--gold); border: 1px solid rgba(201,162,74,.35); border-radius: 999px; padding: 2px 7px;
+}
+.cb-toggle { margin-left: auto; color: var(--bone-dim); font-size: 15px; }
+.cb-cat-body { padding: 4px 14px 16px; border-top: 1px solid var(--hairline); }
+.cb-lectura { font-size: 13px; line-height: 1.6; color: var(--bone); margin: 12px 0; }
+.cb-aviso {
+  font-size: 11.5px; line-height: 1.5; color: var(--gold);
+  border-left: 2px solid var(--gold); padding-left: 10px; margin-bottom: 12px;
+}
+.cb-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+.cb-cols h5 {
+  font-family: var(--mono); font-size: 8.5px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--bone-ghost); margin-bottom: 8px;
+}
+.cb-datos { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.cb-datos li { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.cb-datos li.flojo { opacity: .5; }
+.cb-valor { font-size: 12px; color: var(--bone); }
+.cb-veces { font-family: var(--mono); font-size: 9.5px; color: var(--bone-ghost); flex-shrink: 0; }
+.cb-veces em { font-style: normal; }
+.cb-vacio { font-size: 12px; color: var(--bone-ghost); }
+
+/* Creator Matching dentro del lead */
+.al-gen-match { border-color: rgba(201,162,74,.5) !important; color: var(--gold) !important; }
+.al-gen-match:hover:not(:disabled) { background: rgba(201,162,74,.12) !important; }
+.al-match {
+  width: 100%; margin-top: 10px; border: 1px solid rgba(201,162,74,.3);
+  border-radius: 9px; background: rgba(201,162,74,.04); padding: 13px 15px;
+}
+.am-lectura { font-size: 12.5px; line-height: 1.55; color: var(--bone-dim); margin-bottom: 10px; }
+.am-fila { padding: 9px 0; border-top: 1px solid var(--hairline); }
+.am-fila:first-of-type { border-top: none; }
+.am-fila strong { font-size: 13.5px; color: var(--bone); }
+.am-encaje {
+  font-family: var(--mono); font-size: 9px; color: var(--gold);
+  border: 1px solid rgba(201,162,74,.4); border-radius: 999px; padding: 2px 8px; margin-left: 8px;
+}
+.am-fila p { font-size: 12px; line-height: 1.5; color: var(--bone-dim); margin-top: 5px; }
+.am-como { color: var(--bone-ghost); }
+.am-riesgo { color: var(--sepp); }
+
 /* ══════════ Sincronización con Bushido OS ══════════ */
 .sync { display: flex; flex-direction: column; gap: 14px; }
 .sync-intro { font-size: 13px; line-height: 1.6; color: var(--bone-dim); max-width: 620px; }
@@ -3055,6 +3138,11 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 }
 .sync-fila.bien { border-color: rgba(111,191,142,.3); }
 .sync-fila.mal { border-color: rgba(213,50,46,.35); }
+.sync-fila.aviso { border-color: rgba(201,162,74,.4); }
+.sync-fila.aviso .sf-dato { color: var(--gold); }
+.sf-descartados {
+  display: block; font-style: normal; font-size: 9.5px; color: var(--gold); margin-top: 3px;
+}
 .sf-nombre { font-size: 13px; color: var(--bone); }
 .sf-dato { font-family: var(--mono); font-size: 10.5px; color: var(--bone-ghost); text-align: right; }
 .sync-fila.bien .sf-dato { color: #6FBF8E; }

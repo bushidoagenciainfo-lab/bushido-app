@@ -6,6 +6,12 @@ interface Bloque {
   enviados?: number;
   ok?: boolean;
   error?: string;
+  /** Lo que respondió el OS: guardados, descartados, aviso… */
+  data?: {
+    guardados?: number;
+    descartados?: number;
+    aviso?: string;
+  };
 }
 
 const NOMBRES: Record<string, string> = {
@@ -63,14 +69,32 @@ export default function AdminSync() {
 
       {Object.keys(reporte).length > 0 && (
         <div className="sync-reporte">
-          {Object.entries(reporte).map(([clave, b]) => (
-            <div className={"sync-fila" + (b.ok === false ? " mal" : " bien")} key={clave}>
-              <span className="sf-nombre">{NOMBRES[clave] ?? clave}</span>
-              <span className="sf-dato">
-                {b.ok === false ? b.error || "falló" : `${b.enviados ?? 0} enviados`}
-              </span>
-            </div>
-          ))}
+          {Object.entries(reporte).map(([clave, b]) => {
+            const d = b.data;
+            const descartados = d?.descartados ?? 0;
+            return (
+              <div
+                className={
+                  "sync-fila" + (b.ok === false ? " mal" : descartados > 0 ? " aviso" : " bien")
+                }
+                key={clave}
+              >
+                <span className="sf-nombre">{NOMBRES[clave] ?? clave}</span>
+                <span className="sf-dato">
+                  {b.ok === false
+                    ? b.error || "falló"
+                    : `${d?.guardados ?? b.enviados ?? 0} guardados`}
+                  {/* Si algo no entró hay que verlo AHORA, no dentro de un mes */}
+                  {descartados > 0 && (
+                    <em className="sf-descartados">
+                      {descartados} descartado{descartados === 1 ? "" : "s"}
+                      {d?.aviso ? ` · ${d.aviso}` : " · les faltaba id o el campo obligatorio"}
+                    </em>
+                  )}
+                </span>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

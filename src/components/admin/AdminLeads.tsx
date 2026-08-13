@@ -10,6 +10,20 @@ function fecha(iso?: string) {
     " " + d.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
 }
 
+/** Respuesta de POST /api/sitio/matching (Creator Matching del cerebro). */
+interface MatchResultado {
+  lectura?: string;
+  error?: string;
+  matches?: Array<{
+    creador?: { nombre?: string; instagram?: string; seguidores?: number };
+    encaje?: string;
+    por_que?: string;
+    como_usarlo?: string;
+    riesgo?: string;
+    confianza?: string;
+  }>;
+}
+
 /** Resultado del informe automático, guardado en lead.meta.informe. */
 function infoInforme(l: LeadRow): { ok: boolean; url?: string; error?: string } | null {
   const meta = l.meta as Record<string, unknown> | undefined;
@@ -24,6 +38,36 @@ export default function AdminLeads({ leads }: { leads: LeadRow[] }) {
   const [result, setResult] = useState<
     Record<string, { url?: string; error?: string; envio?: string }>
   >({});
+  const [match, setMatch] = useState<Record<string, MatchResultado>>({});
+
+  /** Le pregunta al cerebro qué creadores del book encajan con esta marca. */
+  async function buscarCreadores(lead: LeadRow) {
+    setBusy(lead.id);
+    setMatch((m) => ({ ...m, [lead.id]: { lectura: "Consultando el book…" } }));
+    try {
+      const res = await fetch("/api/admin/os", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          marca: lead.company || lead.name,
+          categoria: (lead.meta as Record<string, unknown> | undefined)?.categoria,
+          ciudad: undefined,
+        }),
+      });
+      const d = await res.json();
+      setMatch((m) => ({
+        ...m,
+        [lead.id]:
+          res.ok && d.ok
+            ? (d.data as MatchResultado)
+            : { error: d.error || "El cerebro no respondió." },
+      }));
+    } catch {
+      setMatch((m) => ({ ...m, [lead.id]: { error: "Error de red." } }));
+    } finally {
+      setBusy(null);
+    }
+  }
 
   async function cambiarEstado(id: string, status: string) {
     setRows((rs) => rs.map((r) => (r.id === id ? { ...r, status } : r)));
@@ -167,6 +211,37 @@ export default function AdminLeads({ leads }: { leads: LeadRow[] }) {
               )}
               {res?.envio && <span className="al-envio">{res.envio}</span>}
               {res?.error && <span className="al-err">{res.error}</span>}
+
+              {/* Creator Matching: qué creadores del book encajan con esta marca */}
+              <button
+                type="button"
+                className="al-gen al-gen-match"
+                onClick={() => buscarCreadores(l)}
+                disabled={busy === l.id}
+                title="Le pregunta al cerebro qué creadores del book encajan"
+              >
+                ✦ Creadores que encajan
+              </button>
+              {match[l.id] && (
+                <div className="al-match">
+                  {match[l.id].error ? (
+                    <span className="al-err">{match[l.id].error}</span>
+                  ) : (
+                    <>
+                      {match[l.id].lectura && <p className="am-lectura">{match[l.id].lectura}</p>}
+                      {match[l.id].matches?.map((m, k) => (
+                        <div className="am-fila" key={k}>
+                          <strong>{m.creador?.nombre ?? "—"}</strong>
+                          <span className="am-encaje">{m.encaje}</span>
+                          <p>{m.por_que}</p>
+                          {m.como_usarlo && <p className="am-como">{m.como_usarlo}</p>}
+                          {m.riesgo && <p className="am-riesgo">⚠ {m.riesgo}</p>}
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         );
