@@ -3037,6 +3037,78 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 }
 .row.featured .row-incluye li { color: var(--bone-dim); border-color: rgba(213,50,46,.3); }
 
+/* ══════════ Brief de onboarding (/brief) ══════════ */
+.brief-page { max-width: 880px; margin: 0 auto; }
+.brief-aviso {
+  display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap;
+  border-left: 2px solid var(--sepp); background: rgba(213,50,46,.05);
+  border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 54px;
+}
+.ba-tag {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--sepp); flex-shrink: 0; padding-top: 2px;
+}
+.brief-aviso p { font-size: 14px; line-height: 1.6; color: var(--bone-dim); flex: 1; min-width: 240px; }
+
+.brief-form { display: flex; flex-direction: column; gap: 56px; }
+.bf-sec-head { margin-bottom: 26px; }
+.bf-num {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .2em; color: var(--sepp);
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.bf-num i { font-style: normal; color: var(--bone-ghost); }
+.bf-sec-head h2 {
+  font-family: var(--serif); font-size: clamp(26px, 3.4vw, 40px); font-weight: 400;
+  letter-spacing: -.01em; color: var(--bone); margin-top: 8px; line-height: 1.05;
+}
+.bf-sec-desc {
+  margin-top: 10px; font-style: italic; font-size: 14.5px; line-height: 1.55;
+  color: var(--bone-dim); max-width: 620px;
+}
+.bf-campos { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 700px) { .bf-campos { grid-template-columns: 1fr; } }
+.bf-campo { display: flex; flex-direction: column; gap: 7px; }
+.bf-campo.ancho { grid-column: 1 / -1; }
+.bf-campo label {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--bone-dim); line-height: 1.5;
+}
+.bf-req { color: var(--sepp); }
+.bf-campo input, .bf-campo textarea, .bf-campo select {
+  width: 100%; padding: 13px 15px; font-size: 14.5px; font-family: inherit; line-height: 1.55;
+  color: var(--bone); background: var(--ink-2);
+  border: 1px solid var(--hairline); border-radius: 9px; resize: vertical;
+  transition: border-color .2s var(--e-out);
+}
+.bf-campo textarea { min-height: 104px; }
+.bf-campo input:focus, .bf-campo textarea:focus, .bf-campo select:focus {
+  outline: none; border-color: var(--sepp);
+}
+.bf-campo select { cursor: pointer; }
+.bf-campo select option { background: var(--ink-2); }
+.bf-hint { font-size: 12px; line-height: 1.5; color: var(--bone-ghost); }
+
+.bf-error {
+  display: flex; flex-direction: column; gap: 6px;
+  border: 1px solid rgba(213,50,46,.4); background: rgba(213,50,46,.06);
+  border-radius: 10px; padding: 16px 20px;
+}
+.bf-error strong { color: var(--sepp); font-size: 14px; font-weight: 400; }
+.bf-error span { font-size: 12.5px; line-height: 1.55; color: var(--bone-dim); }
+.bf-acciones { display: flex; flex-wrap: wrap; gap: 12px; padding-bottom: 20px; }
+
+.brief-ok { text-align: center; padding: 90px 20px; max-width: 520px; margin: 0 auto; }
+.bo-check {
+  width: 62px; height: 62px; margin: 0 auto 26px; display: grid; place-items: center;
+  border-radius: 50%; background: var(--sepp); color: var(--bone);
+}
+.bo-check svg { width: 28px; height: 28px; }
+.brief-ok h2 {
+  font-family: var(--serif); font-size: clamp(32px, 4.4vw, 52px); font-weight: 400;
+  color: var(--bone); margin-bottom: 14px;
+}
+.brief-ok p { font-size: 15.5px; line-height: 1.6; color: var(--bone-dim); }
+
 /* ══════════ Calculadora de precios por criterios ══════════ */
 .pricing { display: flex; flex-direction: column; gap: 12px; }
 .pr-cols { display: grid; grid-template-columns: 1.15fr 1fr; gap: 12px; }

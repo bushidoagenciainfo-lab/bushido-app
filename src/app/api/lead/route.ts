@@ -26,6 +26,49 @@ function baseUrl(req: Request): string {
   return new URL(req.url).origin;
 }
 
+/**
+ * Manda el lead a Bushido OS para que quede como PROSPECTO.
+ *
+ * Por qué aquí: el lead ya trae todo lo que el sistema necesita para empezar
+ * (negocio y su cuenta de Instagram). Si no se envía en este momento, alguien
+ * tiene que reescribirlo a mano después — y eso es justo lo que hace que un
+ * sistema se deje de usar.
+ *
+ * Nunca lanza: si Bushido OS está caído o mal configurado, el lead ya se
+ * guardó y se avisó por WhatsApp. Perder el prospecto es molesto; romper la
+ * captación de leads sería grave.
+ */
+async function enviarAProspectos(lead: LeadInput): Promise<void> {
+  const url = process.env.BUSHIDO_OS_URL;
+  const secret = process.env.SITIO_WEB_SECRET;
+  if (!url || !secret) {
+    console.warn("[prospectos] falta BUSHIDO_OS_URL o SITIO_WEB_SECRET");
+    return;
+  }
+  // Sin nombre de negocio ni red no hay nada que analizar del otro lado.
+  const nombre = lead.company || lead.name;
+  if (!nombre || (!lead.social && !lead.tiktok)) return;
+
+  try {
+    const res = await fetch(`${url.replace(/\/$/, "")}/api/prospectos/entrada`, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-bushido-sitio": secret },
+      body: JSON.stringify({
+        nombre_negocio: nombre,
+        ig_handle: lead.social,
+        tiktok_handle: lead.tiktok,
+        contacto: [lead.email, lead.phone].filter(Boolean).join(" · "),
+        objetivo: lead.project,
+        brief: lead.message,
+      }),
+      signal: AbortSignal.timeout(10000),
+    });
+    console.log(`[prospectos] enviado (${res.status})`);
+  } catch (e) {
+    console.error("[prospectos] no se pudo enviar:", e);
+  }
+}
+
 const schema = z.object({
   kind: z.enum(["analisis", "contacto", "talento", "descarga"]),
   name: z.string().trim().max(120).optional(),
@@ -123,6 +166,12 @@ export async function POST(request: Request) {
       `${lead.social || ""}`;
     await alertaBushidoWhatsApp(resumen);
     await alertaTelegram(resumen);
+
+    // 1b) el prospecto entra a Bushido OS. Solo los que pueden ser clientes:
+    // "talento" son creadores que se postulan y "descarga" es solo un correo.
+    if (lead.kind === "analisis" || lead.kind === "contacto") {
+      await enviarAProspectos(lead);
+    }
 
     // 2) análisis: se delega a /api/generar-informe (su propio presupuesto de
     //    tiempo: la búsqueda web sola tarda ~35s y aquí no cabía).
