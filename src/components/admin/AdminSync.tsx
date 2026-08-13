@@ -26,6 +26,7 @@ export default function AdminSync() {
   const [estado, setEstado] = useState<"idle" | "enviando" | "listo" | "error">("idle");
   const [reporte, setReporte] = useState<Record<string, Bloque>>({});
   const [error, setError] = useState("");
+  const [destino, setDestino] = useState("");
 
   async function sincronizar() {
     setEstado("enviando");
@@ -40,6 +41,7 @@ export default function AdminSync() {
         return;
       }
       setReporte(d.reporte);
+      setDestino(d.destino || "");
       setEstado(d.ok ? "listo" : "error");
       if (!d.ok) setError("Algunos bloques no llegaron. Mira el detalle.");
     } catch {
@@ -66,6 +68,11 @@ export default function AdminSync() {
       </button>
 
       {error && <p className="sync-error">{error}</p>}
+      {destino && (
+        <p className="sync-destino">
+          Enviando a <code>{destino}</code>
+        </p>
+      )}
 
       {Object.keys(reporte).length > 0 && (
         <div className="sync-reporte">

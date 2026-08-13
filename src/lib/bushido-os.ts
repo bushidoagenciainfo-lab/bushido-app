@@ -11,6 +11,11 @@ export function hasOS(): boolean {
   return Boolean(URL_ && SECRET);
 }
 
+/** A dónde está apuntando (sin el secreto), para el diagnóstico del panel. */
+export function urlDelOS(): string {
+  return URL_ || "(sin configurar)";
+}
+
 export interface RespuestaOS {
   ok: boolean;
   status?: number;
@@ -62,6 +67,19 @@ export async function enviarAlOS(
       signal: AbortSignal.timeout(timeoutMs),
     });
     const texto = await res.text().catch(() => "");
+
+    // Si vuelve HTML, la URL no apunta al OS (típico: el 404 de otra web).
+    // Sin esto el panel mostraba un volcado de HTML ilegible.
+    if (/^\s*<(!doctype|html)/i.test(texto)) {
+      return {
+        ok: false,
+        status: res.status,
+        error:
+          `BUSHIDO_OS_URL no apunta a Bushido OS: ${ruta} devolvió una página web, no datos. ` +
+          `Revisa el valor en Vercel (debe ser la dirección del servidor, no la del sitio).`,
+      };
+    }
+
     if (!res.ok) {
       console.error(`[OS] ${ruta} respondió ${res.status}: ${texto.slice(0, 300)}`);
       return { ok: false, status: res.status, error: texto.slice(0, 300) || `HTTP ${res.status}` };

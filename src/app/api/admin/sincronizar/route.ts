@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { analisisParaOS, inteligenciaNichos, listLeads } from "@/lib/admin";
 import { listCreadores } from "@/lib/creadores";
-import { enviarAlOS, hasOS } from "@/lib/bushido-os";
+import { enviarAlOS, hasOS, urlDelOS } from "@/lib/bushido-os";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -99,5 +99,6 @@ export async function POST() {
   const todoOk = Object.values(reporte).every(
     (r) => (r as { ok?: boolean })?.ok !== false
   );
-  return NextResponse.json({ ok: todoOk, reporte });
+  // A dónde estamos llamando: si algo falla, es el primer dato que hay que ver.
+  return NextResponse.json({ ok: todoOk, destino: urlDelOS(), reporte });
 }
