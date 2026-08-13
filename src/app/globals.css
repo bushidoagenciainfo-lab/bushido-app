@@ -3157,6 +3157,45 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 .sync-fila.bien .sf-dato { color: #6FBF8E; }
 .sync-fila.mal .sf-dato { color: var(--sepp); }
 
+/* ── Normalizar categorías ── */
+.norm { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--hairline); }
+.norm h4 {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 9px;
+}
+.norm-intro { font-size: 12.5px; line-height: 1.6; color: var(--bone-dim); max-width: 640px; margin-bottom: 12px; }
+.norm-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.sync-btn.ghost { background: none; color: var(--bone-dim); border: 1px solid var(--hairline); }
+.sync-btn.ghost:hover { color: var(--bone); border-color: var(--bone-ghost); background: none; }
+.norm-resumen { margin-top: 13px; font-size: 13px; line-height: 1.6; color: var(--bone-dim); }
+.norm-resumen strong { color: var(--bone); font-weight: 400; }
+.norm-resumen b { color: #6FBF8E; font-weight: 400; }
+.norm-reparto { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 11px; }
+.norm-cat {
+  font-family: var(--mono); font-size: 9.5px; color: var(--bone-ghost);
+  border: 1px solid var(--hairline); border-radius: 999px; padding: 4px 10px;
+}
+.norm-cat b { color: var(--bone-dim); font-weight: 400; margin-left: 3px; }
+/* verde = ya tiene las 3 marcas que hacen falta para que sea patrón */
+.norm-cat.ok { color: #6FBF8E; border-color: rgba(111,191,142,.35); }
+.norm-cat.ok b { color: #6FBF8E; }
+.norm-detalle { margin-top: 12px; }
+.norm-detalle summary {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--bone-ghost); cursor: pointer; padding: 6px 0;
+}
+.norm-detalle summary:hover { color: var(--gold); }
+.norm-detalle ul { list-style: none; display: flex; flex-direction: column; gap: 7px; margin-top: 8px; }
+.norm-detalle li { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; }
+.norm-detalle li strong { color: var(--bone); font-weight: 400; min-width: 150px; }
+.norm-detalle li span { color: var(--bone-ghost); }
+.norm-detalle li em { font-style: normal; color: var(--gold); }
+.norm-ok { margin-top: 11px; font-size: 12.5px; color: #6FBF8E; }
+.norm-siguiente {
+  margin-top: 12px; font-size: 12.5px; line-height: 1.55; color: var(--gold);
+  border-left: 2px solid var(--gold); padding-left: 11px;
+}
+
 /* ══════════ Brief de onboarding (/brief) ══════════ */
 .brief-page { max-width: 880px; margin: 0 auto; }
 .brief-aviso {

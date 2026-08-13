@@ -7,6 +7,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { LEAD_STATUSES, type LeadRow } from "./admin-types";
+import { normalizarCategoria } from "./analisis";
 
 export { LEAD_STATUSES };
 export type { LeadRow };
@@ -206,6 +207,20 @@ function contar(valores: string[]) {
 type CanalRow = { canal?: string; estado?: string };
 
 /**
+ * Colapsa las categorías escritas distinto a la lista cerrada. Se hace SIEMPRE
+ * antes de agrupar o de mandar al cerebro: si "Fotografía" y "Fotografía
+ * profesional · audiovisual" viajan separadas, ningún patrón llega a 3.
+ */
+function normalizarLote(
+  filas: Array<Record<string, unknown>>
+): Array<Record<string, unknown>> {
+  return filas.map((f) => ({
+    ...f,
+    categoria: normalizarCategoria(f.categoria as string, f.nicho as string),
+  }));
+}
+
+/**
  * Los análisis completos, para mandárselos al cerebro (Bushido OS) y que los
  * cruce con lo que ya sabe de otros nichos.
  */
@@ -220,9 +235,11 @@ export async function analisisParaOS(limite = 500): Promise<Array<Record<string,
       .order("created_at", { ascending: false })
       .limit(limite);
     if (error) throw new Error(error.message);
-    return (data ?? []) as unknown as Array<Record<string, unknown>>;
+    return normalizarLote((data ?? []) as unknown as Array<Record<string, unknown>>);
   }
-  return (await readLocal<Record<string, unknown>>("analisis.json")).slice(0, limite);
+  return normalizarLote(
+    (await readLocal<Record<string, unknown>>("analisis.json")).slice(0, limite)
+  );
 }
 
 /** Agrupa TODOS los análisis por categoría de nicho. */
@@ -239,9 +256,11 @@ export async function inteligenciaNichos(): Promise<NichoIntel[]> {
     filas = await readLocal("analisis.json");
   }
 
+  // Agrupamos por la categoría NORMALIZADA, no por el texto tal cual: antes
+  // usábamos `nicho` cuando faltaba `categoria` y eso partía los grupos.
   const grupos: Record<string, Array<Record<string, unknown>>> = {};
   for (const f of filas) {
-    const cat = (f.categoria as string) || (f.nicho as string) || "Sin clasificar";
+    const cat = normalizarCategoria(f.categoria as string, f.nicho as string);
     (grupos[cat] ??= []).push(f);
   }
 

@@ -109,6 +109,125 @@ export default function AdminSync() {
           })}
         </div>
       )}
+
+      <Normalizar />
+    </div>
+  );
+}
+
+interface Reparto {
+  categoria: string;
+  marcas: number;
+  hacePatron: boolean;
+}
+interface Cambio {
+  marca: string;
+  de: string;
+  a: string;
+}
+
+/**
+ * Colapsa las categorías duplicadas. Primero enseña qué cambiaría; solo
+ * después toca la base. Sin esto, "Fotografía" y "Fotografía profesional"
+ * cuentan como sectores distintos y ningún patrón llega a 3 marcas.
+ */
+function Normalizar() {
+  const [estado, setEstado] = useState<"idle" | "viendo" | "listo" | "error">("idle");
+  const [datos, setDatos] = useState<{
+    analisis?: number;
+    categorias_antes?: number;
+    categorias_despues?: number;
+    con_patron?: number;
+    aplicado?: boolean;
+    cambios?: Cambio[];
+    reparto?: Reparto[];
+    error?: string;
+  }>({});
+
+  async function pedir(aplicar: boolean) {
+    setEstado("viendo");
+    try {
+      const r = await fetch("/api/admin/normalizar-categorias", {
+        method: aplicar ? "POST" : "GET",
+      });
+      const d = await r.json();
+      setDatos(d);
+      setEstado(d.ok ? "listo" : "error");
+    } catch {
+      setDatos({ error: "Error de red." });
+      setEstado("error");
+    }
+  }
+
+  return (
+    <div className="norm">
+      <h4>Categorías de los análisis</h4>
+      <p className="norm-intro">
+        El cerebro agrupa por texto exacto. Si la misma categoría está escrita de dos
+        formas, la evidencia se parte en dos y ningún patrón llega a las 3 marcas que
+        hacen falta. Esto las colapsa a la lista cerrada.
+      </p>
+
+      <div className="norm-btns">
+        <button type="button" className="sync-btn ghost" onClick={() => pedir(false)}>
+          Ver qué cambiaría
+        </button>
+        {estado === "listo" && !datos.aplicado && (datos.cambios?.length ?? 0) > 0 && (
+          <button type="button" className="sync-btn" onClick={() => pedir(true)}>
+            Aplicar {datos.cambios?.length} cambios
+          </button>
+        )}
+      </div>
+
+      {estado === "viendo" && <p className="admin-empty">Revisando…</p>}
+      {estado === "error" && <p className="sync-error">{datos.error}</p>}
+
+      {estado === "listo" && (
+        <>
+          <p className="norm-resumen">
+            {datos.analisis} análisis · <strong>{datos.categorias_antes}</strong> categorías
+            distintas → <strong>{datos.categorias_despues}</strong> tras colapsar ·{" "}
+            <b>{datos.con_patron}</b> ya con 3 o más marcas
+            {datos.aplicado && " · guardado ✓"}
+          </p>
+
+          {datos.reparto?.length ? (
+            <div className="norm-reparto">
+              {datos.reparto.map((c) => (
+                <span key={c.categoria} className={"norm-cat" + (c.hacePatron ? " ok" : "")}>
+                  {c.categoria} <b>{c.marcas}</b>
+                </span>
+              ))}
+            </div>
+          ) : null}
+
+          {datos.cambios?.length ? (
+            <details className="norm-detalle">
+              <summary>
+                {datos.aplicado ? "Se cambiaron" : "Cambiarían"} {datos.cambios.length}
+              </summary>
+              <ul>
+                {datos.cambios.map((c, i) => (
+                  <li key={i}>
+                    <strong>{c.marca}</strong>
+                    <span>
+                      {c.de} → <em>{c.a}</em>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          ) : (
+            <p className="norm-ok">Todas las categorías ya están normalizadas.</p>
+          )}
+
+          {datos.aplicado && (
+            <p className="norm-siguiente">
+              Ahora vuelve a sincronizar para que el cerebro las reciba unificadas.
+            </p>
+          )}
+        </>
+      )}
     </div>
   );
 }

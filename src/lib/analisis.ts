@@ -41,6 +41,53 @@ export const NICHOS = [
 ] as const;
 export type Nicho = (typeof NICHOS)[number];
 
+/**
+ * Lleva cualquier texto de nicho a UNA de las categorías cerradas.
+ *
+ * Sin esto, "Fotografía" y "Fotografía profesional · servicios creativos"
+ * son dos grupos distintos: dos grupos de 3 marcas no forman patrón, uno de 6
+ * sí. La categoría manda sobre el nicho descriptivo, que sigue siendo libre.
+ */
+const REGLAS: Array<{ cat: Nicho; claves: string[] }> = [
+  { cat: "Repostería", claves: ["reposter", "pasteler", "panader", "cake", "postre", "dulce", "brownie", "galleta"] },
+  { cat: "Gastronomía / restaurante", claves: ["gastronom", "restaurante", "comida", "cocina", "food", "bar ", "cafeter", "cafe", "pizzer", "hamburgues", "catering", "heladeria"] },
+  { cat: "Música / artista", claves: ["music", "artista", "cantante", "banda", "dj", "sello", "disquera", "reggaeton", "concierto"] },
+  // Hotelería va ANTES que Moda: "hotel boutique" no es una tienda de ropa.
+  { cat: "Hotelería / turismo", claves: ["hotel", "turism", "hosped", "hostal", "viaje", "glamping", "finca "] },
+  { cat: "Moda / ropa", claves: ["moda", "ropa", "textil", "indument", "streetwear", "calzado", "zapat", "joyer", "accesorio"] },
+  { cat: "Belleza / estética", claves: ["belleza", "estetic", "peluquer", "barber", "spa", "uñas", "cosmetic", "skincare", "maquillaje"] },
+  { cat: "Fitness / salud", claves: ["fitness", "gimnasio", "gym", "salud", "nutric", "entrenador", "crossfit", "yoga", "medic", "odontolog", "psicolog"] },
+  { cat: "Fotografía", claves: ["fotograf", "foto ", "audiovisual", "video", "producci", "cinemat", "content creator"] },
+  { cat: "Inmobiliaria", claves: ["inmobili", "bienes raices", "finca raiz", "propiedad", "arriendo", "construct"] },
+  { cat: "Automotriz", claves: ["automotr", "carro", "vehicul", "taller mecanic", "moto", "concesionar", "llanta"] },
+  { cat: "Educación / cursos", claves: ["educac", "curso", "academia", "colegio", "universidad", "formacion", "capacitac", "instituto"] },
+  { cat: "Tecnología / software", claves: ["tecnolog", "software", "app ", "saas", "desarrollo web", "sistemas", "digital agency", "startup"] },
+  { cat: "Retail / producto", claves: ["retail", "tienda", "ecommerce", "e-commerce", "producto", "venta de", "distribuidor", "mayorista", "supermercado"] },
+  { cat: "Eventos", claves: ["evento", "boda", "matrimonio", "fiesta", "celebrac", "wedding", "logistica de evento"] },
+  { cat: "Servicios profesionales", claves: ["abogad", "juridic", "contab", "consultor", "asesor", "financier", "seguro", "arquitect", "ingenier"] },
+];
+
+export function normalizarCategoria(...textos: Array<string | null | undefined>): Nicho {
+  const t = textos
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+  if (!t.trim()) return "Otro";
+
+  // Si ya viene una categoría válida escrita igual, respétala.
+  const exacta = NICHOS.find(
+    (n) => n.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === t.trim()
+  );
+  if (exacta) return exacta;
+
+  for (const r of REGLAS) {
+    if (r.claves.some((k) => t.includes(k))) return r.cat;
+  }
+  return "Otro";
+}
+
 // Cada emoción con el ARGUMENTO de por qué mueve la compra en esta marca
 export interface EmocionDetalle {
   emocion: Emocion;
