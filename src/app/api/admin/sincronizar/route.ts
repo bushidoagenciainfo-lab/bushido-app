@@ -44,6 +44,7 @@ export async function POST() {
       })),
     });
     reporte.creadores = { enviados: creadores.length, ...r };
+    if (!r.ok) console.error("[sync] creadores:", r.motivo, r.detalle);
   } catch (e) {
     reporte.creadores = { ok: false, error: e instanceof Error ? e.message : "error" };
   }
@@ -101,19 +102,31 @@ export async function POST() {
   );
   // A dónde llamamos y con qué clave (solo la huella): si algo falla, es lo
   // primero que hay que comparar contra la configuración del OS.
-  const no_autorizado = Object.values(reporte).some((r) =>
-    /no autorizado|unauthorized|401/i.test(String((r as { error?: string })?.error ?? ""))
-  );
+  // El OS explica en `detalle` qué arreglar y dónde: eso manda sobre
+  // cualquier pista que podamos inventar aquí.
+  const bloques = Object.values(reporte) as Array<{
+    ok?: boolean;
+    error?: string;
+    motivo?: string;
+    detalle?: string;
+  }>;
+  const fallo = bloques.find((b) => b.ok === false);
+  const rechazo = bloques.find((b) => b.motivo || /no autorizado|401/i.test(b.error ?? ""));
+
   return NextResponse.json({
     ok: todoOk,
     destino: urlDelOS(),
     reporte,
-    ...(no_autorizado
+    ...(fallo
       ? {
-          secreto: huellaDelSecreto(),
+          motivo: rechazo?.motivo,
+          // si el OS dio instrucción, esa; si no, la huella para comparar a mano
           pista:
-            "El OS rechazó la clave. Compara esta huella con el SITIO_WEB_SECRET del servidor: " +
-            "deben ser idénticos, sin espacios ni comillas.",
+            fallo.detalle ||
+            rechazo?.detalle ||
+            (rechazo
+              ? `El OS rechazó la clave. Compara esta huella con su SITIO_WEB_SECRET: ${huellaDelSecreto()}`
+              : undefined),
         }
       : {}),
   });

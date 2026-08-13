@@ -7,6 +7,8 @@ interface Bloque {
   ok?: boolean;
   error?: string;
   /** Lo que respondió el OS: guardados, descartados, aviso… */
+  motivo?: string;
+  detalle?: string;
   data?: {
     guardados?: number;
     descartados?: number;
@@ -43,7 +45,7 @@ export default function AdminSync() {
       }
       setReporte(d.reporte);
       setDestino(d.destino || "");
-      setPista(d.pista ? `${d.pista}\nHuella de tu clave: ${d.secreto}` : "");
+      setPista(d.pista || "");
       setEstado(d.ok ? "listo" : "error");
       if (!d.ok) setError("Algunos bloques no llegaron. Mira el detalle.");
     } catch {

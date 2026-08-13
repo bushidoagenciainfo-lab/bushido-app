@@ -59,6 +59,7 @@ export default function AdminCerebro() {
   const [datos, setDatos] = useState<Inteligencia | null>(null);
   const [estado, setEstado] = useState<"idle" | "cargando" | "listo" | "error">("idle");
   const [error, setError] = useState("");
+  const [detalle, setDetalle] = useState("");
   const [abierta, setAbierta] = useState<string | null>(null);
 
   async function cargar() {
@@ -69,6 +70,8 @@ export default function AdminCerebro() {
       const d = await r.json();
       if (!r.ok || !d.ok) {
         setError(d.error || "No se pudo consultar.");
+        // el OS explica qué arreglar y dónde — eso es lo que hay que mostrar
+        setDetalle(d.detalle || "");
         setEstado("error");
         return;
       }
@@ -101,6 +104,7 @@ export default function AdminCerebro() {
     return (
       <div className="cerebro">
         <p className="sync-error">{error}</p>
+        {detalle && <p className="sync-pista">{detalle}</p>}
         <button type="button" className="sync-btn" onClick={cargar}>
           Reintentar
         </button>

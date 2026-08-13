@@ -26,14 +26,16 @@ export async function GET(request: Request) {
       ? `/api/sitio/briefing?categoria=${encodeURIComponent(p.get("categoria") || "")}`
       : "/api/sitio/inteligencia";
 
-  const data = await leerDelOS(ruta, 20000);
-  if (!data) {
+  const r = await leerDelOS(ruta, 20000);
+  if (!r.ok) {
+    // Pasamos el motivo y el detalle tal como los mandó el OS: ahí está la
+    // instrucción de qué arreglar.
     return NextResponse.json(
-      { ok: false, error: "El cerebro no respondió. ¿Está arriba Bushido OS?" },
-      { status: 502 }
+      { ok: false, error: r.error, motivo: r.motivo, detalle: r.detalle },
+      { status: r.status === 401 ? 401 : 502 }
     );
   }
-  return NextResponse.json({ ok: true, data });
+  return NextResponse.json({ ok: true, data: r.data });
 }
 
 /** POST → Creator Matching: qué creadores del book encajan con una marca. */
@@ -54,8 +56,13 @@ export async function POST(request: Request) {
   const r = await enviarAlOS("/api/sitio/matching", body, 45000);
   if (!r.ok) {
     return NextResponse.json(
-      { ok: false, error: r.error || "El cerebro no pudo hacer el matching." },
-      { status: 502 }
+      {
+        ok: false,
+        error: r.error || "El cerebro no pudo hacer el matching.",
+        motivo: r.motivo,
+        detalle: r.detalle,
+      },
+      { status: r.status === 401 ? 401 : 502 }
     );
   }
   return NextResponse.json({ ok: true, data: r.data });

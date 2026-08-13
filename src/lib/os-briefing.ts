@@ -40,25 +40,33 @@ function aSlug(v: string): string {
 export async function briefingParaPrompt(pistas: string): Promise<string> {
   if (!pistas.trim()) return "";
 
-  let b = await leerDelOS<Briefing>(
+  const primera = await leerDelOS<Briefing>(
     `/api/sitio/briefing?categoria=${encodeURIComponent(aSlug(pistas.slice(0, 60)))}`
   );
+  // Si el OS rechazó (llave mal, caído…), el análisis sigue sin su briefing:
+  // vale más un diagnóstico sin data de sector que ninguno.
+  if (!primera.ok) {
+    console.warn(`[briefing] sin data del sector: ${primera.detalle || primera.error}`);
+    return "";
+  }
+  let b = primera.data;
 
   // Segundo intento: ¿alguna categoría conocida aparece en las pistas?
-  if (b && !b.conocida && b.categorias_conocidas?.length) {
+  if (!b.conocida && b.categorias_conocidas?.length) {
     const texto = aSlug(pistas);
     const match = b.categorias_conocidas.find((c) => {
       const s = aSlug(c);
       return texto.includes(s) || s.split("-").some((p) => p.length > 4 && texto.includes(p));
     });
     if (match) {
-      b = await leerDelOS<Briefing>(
+      const segunda = await leerDelOS<Briefing>(
         `/api/sitio/briefing?categoria=${encodeURIComponent(match)}`
       );
+      if (segunda.ok) b = segunda.data;
     }
   }
 
-  if (!b?.ok || !b.conocida) return "";
+  if (!b.ok || !b.conocida) return "";
 
   const lista = (titulo: string, items?: string[]) =>
     items?.length ? `${titulo}: ${items.join(" · ")}` : "";
