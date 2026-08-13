@@ -5,6 +5,7 @@ import { notifyLead } from "@/lib/leads";
 import { alertaBushidoWhatsApp } from "@/lib/whatsapp";
 import { alertaTelegram } from "@/lib/telegram";
 import { forwardToServer } from "@/lib/forward";
+import { enviarAlOS } from "@/lib/bushido-os";
 
 export const runtime = "nodejs";
 
@@ -52,6 +53,8 @@ export async function POST(request: Request) {
 
   after(async () => {
     forwardToServer("lead", { tipo: "creador", ...c }).catch(() => {});
+    // al cerebro: el book alimenta el Creator Matching por nicho
+    enviarAlOS("/api/sync", { tipo: "creadores", total: 1, items: [c] }).catch(() => {});
     const resumen =
       `🎬 Nuevo creador UGC\n${c.nombre}${c.ciudad ? " · " + c.ciudad : ""}\n` +
       `${(c.nichos ?? []).join(", ")}\n${c.instagram || ""} ${c.tiktok || ""}`;

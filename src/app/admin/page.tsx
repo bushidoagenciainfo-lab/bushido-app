@@ -7,6 +7,7 @@ import AdminNichos from "@/components/admin/AdminNichos";
 import AdminCrew from "@/components/admin/AdminCrew";
 import AdminWhatsApp from "@/components/admin/AdminWhatsApp";
 import AdminPricing from "@/components/admin/AdminPricing";
+import AdminSync from "@/components/admin/AdminSync";
 import { listConversaciones, type WaConversacion } from "@/lib/wa-inbox";
 import AdminLogout from "@/components/admin/AdminLogout";
 import AdminSection from "@/components/admin/AdminSection";
@@ -145,6 +146,10 @@ export default async function AdminPage() {
         }
       >
         <AdminWhatsApp conversaciones={conversaciones} />
+      </AdminSection>
+
+      <AdminSection title="Bushido OS" hint="Mandarle la data al cerebro">
+        <AdminSync />
       </AdminSection>
 
       <AdminSection

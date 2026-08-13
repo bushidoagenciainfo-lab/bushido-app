@@ -3037,6 +3037,29 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 }
 .row.featured .row-incluye li { color: var(--bone-dim); border-color: rgba(213,50,46,.3); }
 
+/* ══════════ Sincronización con Bushido OS ══════════ */
+.sync { display: flex; flex-direction: column; gap: 14px; }
+.sync-intro { font-size: 13px; line-height: 1.6; color: var(--bone-dim); max-width: 620px; }
+.sync-btn {
+  align-self: flex-start; cursor: pointer;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--ink); background: var(--bone); border: none; border-radius: 999px; padding: 11px 20px;
+}
+.sync-btn:hover:not(:disabled) { background: var(--sepp); color: var(--bone); }
+.sync-btn:disabled { opacity: .55; cursor: default; }
+.sync-error { font-family: var(--mono); font-size: 11.5px; color: var(--sepp); }
+.sync-reporte { display: flex; flex-direction: column; gap: 6px; }
+.sync-fila {
+  display: flex; justify-content: space-between; align-items: center; gap: 14px;
+  padding: 11px 14px; border-radius: 8px; border: 1px solid var(--hairline); background: var(--ink);
+}
+.sync-fila.bien { border-color: rgba(111,191,142,.3); }
+.sync-fila.mal { border-color: rgba(213,50,46,.35); }
+.sf-nombre { font-size: 13px; color: var(--bone); }
+.sf-dato { font-family: var(--mono); font-size: 10.5px; color: var(--bone-ghost); text-align: right; }
+.sync-fila.bien .sf-dato { color: #6FBF8E; }
+.sync-fila.mal .sf-dato { color: var(--sepp); }
+
 /* ══════════ Brief de onboarding (/brief) ══════════ */
 .brief-page { max-width: 880px; margin: 0 auto; }
 .brief-aviso {

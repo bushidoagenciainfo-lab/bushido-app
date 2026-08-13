@@ -3,6 +3,7 @@ import { z } from "zod";
 import { generarAnalisis, hasIA } from "@/lib/analizar";
 import { storeAnalisis, informeUrl, emailInformeListo } from "@/lib/analisis-store";
 import { marcarInforme } from "@/lib/leads";
+import { enviarAlOS } from "@/lib/bushido-os";
 import { sendClientWhatsApp } from "@/lib/whatsapp";
 import { forwardToServer } from "@/lib/forward";
 
@@ -67,6 +68,12 @@ export async function POST(request: Request) {
       const id = await storeAnalisis(analisis, d.leadId ?? undefined);
       const url = informeUrl(id);
       forwardToServer("analisis", { leadId: d.leadId, ...analisis }).catch(() => {});
+      // al cerebro, para que lo cruce con los demás nichos (no bloquea)
+      enviarAlOS("/api/sync", {
+        tipo: "analisis",
+        total: 1,
+        items: [{ id, lead_id: d.leadId, ...analisis }],
+      }).catch(() => {});
 
       if (d.email) {
         await emailInformeListo({

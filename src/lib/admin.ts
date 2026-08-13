@@ -205,6 +205,26 @@ function contar(valores: string[]) {
 
 type CanalRow = { canal?: string; estado?: string };
 
+/**
+ * Los análisis completos, para mandárselos al cerebro (Bushido OS) y que los
+ * cruce con lo que ya sabe de otros nichos.
+ */
+export async function analisisParaOS(limite = 500): Promise<Array<Record<string, unknown>>> {
+  const COLS =
+    "id, created_at, marca, nicho, categoria, resumen, fortalezas, carencias, " +
+    "oportunidades, buyer_persona, emociones, emociones_detalle, canales, metricas, propuesta, paquete, estado";
+  if (hasDb()) {
+    const { data, error } = await db()
+      .from("analisis")
+      .select(COLS)
+      .order("created_at", { ascending: false })
+      .limit(limite);
+    if (error) throw new Error(error.message);
+    return (data ?? []) as unknown as Array<Record<string, unknown>>;
+  }
+  return (await readLocal<Record<string, unknown>>("analisis.json")).slice(0, limite);
+}
+
 /** Agrupa TODOS los análisis por categoría de nicho. */
 export async function inteligenciaNichos(): Promise<NichoIntel[]> {
   const COLS =
