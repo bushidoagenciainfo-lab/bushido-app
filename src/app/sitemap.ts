@@ -12,6 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/equipos", priority: 0.7 },
     { path: "/descargables", priority: 0.6 },
     { path: "/contacto", priority: 0.8 },
+    { path: "/terminos", priority: 0.2 },
     { path: "/politica-datos", priority: 0.2 },
   ];
   return rutas.map((r) => ({

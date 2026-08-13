@@ -33,6 +33,10 @@ export default function Footer() {
 
       <div className="foot-right">
         © 2026 Bushido · <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
+        <span className="foot-legal">
+          <Link href="/terminos">Términos de servicio</Link>
+          <Link href="/politica-datos">Política de datos</Link>
+        </span>
       </div>
     </footer>
   );
