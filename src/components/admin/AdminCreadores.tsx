@@ -110,10 +110,12 @@ function EditorFicha({
   creador,
   onGuardar,
   onCancelar,
+  etiquetaCancelar = "Cancelar",
 }: {
   creador: CreadorLite;
   onGuardar: (campos: Partial<CreadorLite>) => void;
   onCancelar: () => void;
+  etiquetaCancelar?: string;
 }) {
   const [nichos, setNichos] = useState<string[]>(creador.nichos ?? []);
   const [formatos, setFormatos] = useState<string[]>(creador.formatos ?? []);
@@ -123,19 +125,30 @@ function EditorFicha({
   const toggle = (arr: string[], set: (v: string[]) => void, v: string) =>
     set(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
 
-  const ig = creador.instagram?.replace(/^@/, "");
+  // Solo sirve como enlace si es un usuario, no un nombre suelto ("Marlon Cáceres").
+  const usuario = (v?: string | null) => {
+    const u = (v ?? "").trim().replace(/^@/, "");
+    return u && !/\s/.test(u) ? u : null;
+  };
+  const ig = usuario(creador.instagram);
+  const tk = usuario(creador.tiktok);
 
   return (
     <div className="bc-editor">
-      {ig && (
-        <a
-          className="bce-abrir"
-          href={`https://instagram.com/${ig}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Abrir @{ig} para ver sus seguidores ↗
-        </a>
+      {/* Sin ver su contenido no puedes clasificarlo: los enlaces van primero */}
+      {(ig || tk) && (
+        <div className="bce-abrirs">
+          {ig && (
+            <a className="bce-abrir" href={`https://instagram.com/${ig}`} target="_blank" rel="noopener noreferrer">
+              Ver @{ig} en Instagram ↗
+            </a>
+          )}
+          {tk && (
+            <a className="bce-abrir" href={`https://tiktok.com/@${tk}`} target="_blank" rel="noopener noreferrer">
+              Ver @{tk} en TikTok ↗
+            </a>
+          )}
+        </div>
       )}
 
       <label className="bce-label">Nicho</label>
@@ -205,9 +218,87 @@ function EditorFicha({
           Guardar
         </button>
         <button type="button" className="bce-cancelar" onClick={onCancelar}>
-          Cancelar
+          {etiquetaCancelar}
         </button>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Clasificar en fila, uno tras otro.
+ *
+ * Buscar cada pendiente en la lista, abrir su ficha y volver a empezar es lo
+ * que hace que la tarea se abandone a la mitad. Aquí el book desaparece y
+ * queda una sola ficha: al guardar salta sola a la siguiente.
+ */
+function ModoClasificar({
+  pendientes,
+  onGuardar,
+  onSalir,
+}: {
+  pendientes: CreadorLite[];
+  onGuardar: (id: string, campos: Partial<CreadorLite>) => void;
+  onSalir: () => void;
+}) {
+  // Congelada al entrar: si se recalculara, guardar una ficha reordenaría la
+  // lista bajo los pies y el índice saltaría a otra persona.
+  const [lista] = useState(pendientes);
+  const [i, setI] = useState(0);
+  const [saltados, setSaltados] = useState(0);
+  const actual = lista[i];
+
+  if (!actual) {
+    return (
+      <div className="clas">
+        <div className="clas-fin">
+          <strong>Listo.</strong>
+          <p>
+            {saltados > 0
+              ? `Quedaron ${saltados} saltados — vuelve a entrar cuando puedas revisarlos.`
+              : "No queda ninguno pendiente por clasificar."}
+          </p>
+          <button type="button" className="clas-salir" onClick={onSalir}>
+            Volver al book
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const avanzar = () => setI((n) => n + 1);
+
+  return (
+    <div className="clas">
+      <div className="clas-head">
+        <div>
+          <span className="clas-paso">
+            {i + 1} de {lista.length}
+          </span>
+          <strong className="clas-nombre">{actual.nombre}</strong>
+          {actual.ciudad && <span className="clas-ciudad">{actual.ciudad}</span>}
+        </div>
+        <button type="button" className="clas-salir" onClick={onSalir}>
+          Salir
+        </button>
+      </div>
+      <div className="clas-barra">
+        <span style={{ width: `${(i / lista.length) * 100}%` }} />
+      </div>
+
+      <EditorFicha
+        key={actual.id}
+        creador={actual}
+        etiquetaCancelar="Saltar este →"
+        onGuardar={(campos) => {
+          onGuardar(actual.id, campos);
+          avanzar();
+        }}
+        onCancelar={() => {
+          setSaltados((s) => s + 1);
+          avanzar();
+        }}
+      />
     </div>
   );
 }
@@ -299,6 +390,7 @@ export default function AdminCreadores({ creadores }: { creadores: CreadorLite[]
   const [q, setQ] = useState("");
   const [soloIncompletas, setSoloIncompletas] = useState(false);
   const [editando, setEditando] = useState<string | null>(null);
+  const [clasificando, setClasificando] = useState(false);
   const [sync, setSync] = useState<{ estado: "idle" | "loading" | "done" | "error"; msg: string }>({
     estado: "idle",
     msg: "",
@@ -382,8 +474,27 @@ export default function AdminCreadores({ creadores }: { creadores: CreadorLite[]
     }).catch(() => {});
   }
 
+  // Los que no sirven para un casting, con los que ni siquiera tienen nicho al frente.
+  const pendientes = useMemo(
+    () =>
+      rows
+        .filter((c) => !completa(c))
+        .sort((a, b) => Number(Boolean(a.nichos?.length)) - Number(Boolean(b.nichos?.length))),
+    [rows]
+  );
+
   if (!creadores.length) {
     return <ImportarBase />;
+  }
+
+  if (clasificando) {
+    return (
+      <ModoClasificar
+        pendientes={pendientes}
+        onGuardar={guardar}
+        onSalir={() => setClasificando(false)}
+      />
+    );
   }
 
   return (
@@ -416,6 +527,13 @@ export default function AdminCreadores({ creadores }: { creadores: CreadorLite[]
             </button>
           )}
         </div>
+
+        {/* Instagram no alcanza: las cuentas personales y TikTok hay que verlas a ojo */}
+        {pendientes.length > 0 && (
+          <button type="button" className="bs-clasificar" onClick={() => setClasificando(true)}>
+            Clasificar {pendientes.length} pendientes, una por una →
+          </button>
+        )}
 
         {/* Autocompletar desde Instagram: seguidores reales + nicho deducido */}
         <div className="bs-sync">

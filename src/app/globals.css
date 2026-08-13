@@ -3585,10 +3585,37 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
   display: flex; flex-direction: column; gap: 8px;
   border: 1px solid rgba(213,50,46,.35); border-radius: 9px; padding: 12px; background: rgba(10,10,11,.6);
 }
+.bce-abrirs { display: flex; flex-wrap: wrap; gap: 14px; }
 .bce-abrir {
   font-family: var(--mono); font-size: 9.5px; letter-spacing: .06em; color: var(--sepp);
   border-bottom: 1px solid rgba(213,50,46,.4); align-self: flex-start; padding-bottom: 2px;
 }
+
+/* ── Clasificar en fila: una ficha a la vez ── */
+.bs-clasificar {
+  display: block; width: 100%; margin-top: 12px; cursor: pointer;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--ink); background: var(--bone); border: none; border-radius: 999px; padding: 10px 16px;
+  transition: background .2s var(--e-out);
+}
+.bs-clasificar:hover { background: var(--gold); }
+.clas { display: flex; flex-direction: column; gap: 12px; }
+.clas-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.clas-head > div { display: flex; flex-direction: column; gap: 3px; }
+.clas-paso { font-family: var(--mono); font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); }
+.clas-nombre { font-family: var(--serif); font-size: 21px; font-weight: 400; color: var(--bone); line-height: 1.2; }
+.clas-ciudad { font-family: var(--mono); font-size: 9.5px; color: var(--bone-ghost); }
+.clas-salir {
+  flex-shrink: 0; cursor: pointer; background: none; border: 1px solid var(--hairline); border-radius: 999px;
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--bone-dim); padding: 5px 12px;
+}
+.clas-salir:hover { color: var(--bone); border-color: var(--bone-ghost); }
+.clas-barra { height: 3px; border-radius: 999px; background: var(--hairline); overflow: hidden; }
+.clas-barra span { display: block; height: 100%; background: var(--gold); transition: width .3s var(--e-out); }
+.clas-fin { text-align: center; padding: 34px 16px; }
+.clas-fin strong { display: block; font-family: var(--serif); font-size: 24px; font-weight: 400; color: var(--bone); margin-bottom: 7px; }
+.clas-fin p { font-size: 13px; color: var(--bone-dim); margin-bottom: 16px; }
 .bce-label { font-family: var(--mono); font-size: 8.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--bone-ghost); }
 .bce-chips { display: flex; flex-wrap: wrap; gap: 4px; }
 .bce-chip {
