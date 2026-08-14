@@ -171,18 +171,18 @@ export default function AdminSeguimiento({ leads }: { leads: LeadRow[] }) {
             <div className="seg-acciones">
               <button
                 type="button"
-                className="seg-btn ia"
+                className="seg-btn seg-ia"
                 onClick={() => redactar(p)}
                 disabled={redactando === l.id}
               >
                 {redactando === l.id ? "…" : "✦ Afinar con su análisis"}
               </button>
-              <button type="button" className="seg-btn wa" onClick={() => abrirWhatsApp(p)}>
+              <button type="button" className="seg-btn seg-wa" onClick={() => abrirWhatsApp(p)}>
                 Escribir por WhatsApp →
               </button>
               <button
                 type="button"
-                className="seg-btn hecho"
+                className="seg-btn seg-hecho"
                 onClick={() => marcar(l.id, l.status === "nuevo" ? "contactado" : "propuesta")}
                 title="Reinicia el contador de este lead"
               >

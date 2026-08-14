@@ -3067,18 +3067,19 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
   border-radius: 8px; resize: vertical;
 }
 .seg-texto:focus { outline: none; border-color: var(--sepp); }
-.seg-acciones { display: flex; align-items: center; gap: 7px; }
+/* modificadores con prefijo seg-: `.wa` a secas choca con la bandeja de WhatsApp */
+.seg-acciones { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; }
 .seg-btn {
   font-family: var(--mono); font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase;
   border-radius: 7px; padding: 8px 13px; cursor: pointer; border: 1px solid var(--hairline);
   background: none; color: var(--bone-dim); white-space: nowrap; flex-shrink: 0;
 }
 .seg-btn:hover:not(:disabled) { color: var(--bone); border-color: var(--bone-ghost); }
-.seg-btn.ia { color: var(--gold); border-color: rgba(201,162,74,.4); }
-.seg-btn.ia:hover:not(:disabled) { background: rgba(201,162,74,.12); color: var(--gold); }
-.seg-btn.wa { background: #6FBF8E; color: var(--ink); border-color: #6FBF8E; margin-left: auto; }
-.seg-btn.wa:hover { background: var(--bone); border-color: var(--bone); }
-.seg-btn.hecho { color: var(--bone-ghost); }
+.seg-btn.seg-ia { color: var(--gold); border-color: rgba(201,162,74,.4); }
+.seg-btn.seg-ia:hover:not(:disabled) { background: rgba(201,162,74,.12); color: var(--gold); }
+.seg-btn.seg-wa { background: #6FBF8E; color: var(--ink); border-color: #6FBF8E; margin-left: auto; }
+.seg-btn.seg-wa:hover { background: var(--bone); border-color: var(--bone); }
+.seg-btn.seg-hecho { color: var(--bone-ghost); }
 .seg-btn:disabled { opacity: .5; cursor: default; }
 
 /* ══════════ Lo que aprendió el cerebro ══════════ */
