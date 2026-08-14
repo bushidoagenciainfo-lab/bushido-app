@@ -200,14 +200,14 @@ export const DEMO_ANALISIS: Analisis = {
   // Ordenadas de mayor a menor: la versión corta muestra las 2 primeras
   // fortalezas y la primera carencia, así que son las que más pesan.
   fortalezas: [
-    "Con 2.600 seguidores promedias 41 interacciones por publicación (1,6%): la gente que ya te sigue responde. El problema no es tu contenido, es que no está llegando a nadie nuevo.",
-    "Tus fotos de producto sobre fondo claro tienen un nivel que la mayoría de tu competencia en Bogotá no tiene. Eso es lo que sostiene un precio tres veces mayor al de una panadería de barrio.",
-    "Tienes 6 comentarios que dicen alguna variación de «esto es un regalo perfecto» — te lo están diciendo tus clientas y no lo has convertido en producto.",
+    "Tus fotos de producto tienen un nivel que la mayoría de tu competencia no tiene. Eso es exactamente lo que sostiene un precio por encima del de una panadería de barrio: la foto justifica la cifra antes de que el cliente pregunte.",
+    "Operas en dos plazas, Cúcuta y Bogotá, con una sola marca y una sola voz. Es una ventaja poco común en repostería artesanal y hoy no aparece por ningún lado en tu contenido.",
+    "Tu comunidad es pequeña pero responde: comenta y pregunta precios. Quien ya te sigue está listo para comprar — el cuello de botella está antes, en llegar a alguien nuevo.",
   ],
   carencias: [
-    "Tu bio promete «envíos a toda Colombia» y ninguna de tus últimas 12 publicaciones lo menciona. Quien te descubre desde fuera de Bogotá asume que no le llega y se va sin preguntar. Un post fijado con cobertura, tiempos y cómo pedir resuelve eso esta semana.",
-    "Vendes torta, no ocasión. Ninguna publicación nombra el cumpleaños, el aniversario ni el «me lo merezco» — que es cuando la gente decide comprar repostería cara.",
-    "Publicas en ráfagas de tres días y luego desapareces dos semanas. Tu cuenta no compite contra otra repostería: compite contra el olvido.",
+    "Tu bio limita los pedidos a Cúcuta y Bogotá y ninguna publicación lo dice. El que te descubre desde otra ciudad se ilusiona, escribe y se lleva un «no llegamos allá»; y el que sí está en tus dos ciudades no tiene claro que puede pedirte. Un post fijado con cobertura, tiempos y cómo pedir resuelve las dos cosas esta semana.",
+    "Vendes torta, no ocasión. El contenido no nombra el cumpleaños, el aniversario ni el «me lo merezco» — que es justo cuando alguien decide pagar por repostería cara.",
+    "Publicas en ráfagas y luego desapareces. Tu cuenta no compite contra otra repostería: compite contra el olvido.",
   ],
   oportunidades: [
     "El 'antojo' y el 'date un gusto' son emociones sin dueño en el nicho",
@@ -217,7 +217,7 @@ export const DEMO_ANALISIS: Analisis = {
   buyerPersona: {
     nombre: "La que se da el gusto bonito",
     descripcion:
-      "Mujer 25–45 en Bogotá, ingreso medio-alto, valora lo artesanal por encima de lo industrial. Compra para celebrar, regalar o premiarse, y le importa que se vea tan bien como sabe.",
+      "Mujer 25–45 en Cúcuta y Bogotá, ingreso medio-alto, valora lo artesanal por encima de lo industrial. Compra para celebrar, regalar o premiarse, y le importa que se vea tan bien como sabe.",
     jtbd: [
       "Darse un gusto sin culpa",
       "Quedar bien con un detalle en una reunión",
@@ -241,30 +241,30 @@ export const DEMO_ANALISIS: Analisis = {
   canales: [
     { canal: "Instagram", estado: "irregular", nota: "Es el canal principal pero publica en ráfagas y los reels no retienen.", recomendacion: "Sistema de contenido con ritmo fijo: reels de antojo + BTS + campañas por ocasión." },
     { canal: "Sitio web", estado: "ausente", nota: "No hay web: toda la conversión depende del DM, que se pierde y no escala.", recomendacion: "Landing de pedidos + catálogo (menú, ocasiones, cómo encargar). Servicio Bushido." },
-    { canal: "Google / reseñas", estado: "ausente", nota: "Sin ficha de Google Business ni reseñas: invisible para quien busca 'postres artesanales Bogotá'.", recomendacion: "Abrir Google Business + estrategia de reseñas. Prueba social que convierte." },
+    { canal: "Google / reseñas", estado: "ausente", nota: "Sin ficha de Google Business ni reseñas: invisible para quien busca 'postres artesanales' en tus dos ciudades, que es justo donde sí puedes despachar.", recomendacion: "Abrir Google Business en Cúcuta y Bogotá + estrategia de reseñas. Prueba social que convierte." },
     { canal: "TikTok", estado: "activo", nota: "Ya tienes presencia y el nicho gastronómico rinde fuerte en formato corto y crudo — es el canal con más alcance orgánico por explotar.", recomendacion: "Reutilizar los reels de proceso con el tono más crudo de TikTok: corte lento, sonido real, cero locución." },
   ],
   metricas: [
-    { nombre: "Retención de reels (primeros 3s)", queMirar: "% que no hace scroll en los primeros segundos.", porQue: "Mide si el hook funciona — el mayor problema hoy es que se ve rico pero no detiene." },
+    { nombre: "Retención de reels (primeros 3s)", queMirar: "% que sigue viendo pasados los primeros segundos.", porQue: "Te dice si el problema es el contenido o la distribución: si retiene y no crece, no es el video, es el alcance." },
     { nombre: "Guardados y compartidos", queMirar: "Guardados por reel y envíos por DM.", porQue: "En gastronomía el guardado ('lo quiero pedir') predice ventas mejor que los likes." },
     { nombre: "Alcance de no-seguidores", queMirar: "% del alcance que viene de cuentas que no te siguen.", porQue: "Indica si el contenido está trayendo gente nueva o solo hablándole a los de siempre." },
   ],
   propuesta:
     "Un sistema de contenido mensual con ritmo fijo: reels de antojo con hooks fuertes, BTS del proceso para confianza, y campañas por ocasión (regalo, celebración). Todo guiado por la data de tu marca y la data que hemos creado en gastronomía.",
   paquete: {
-    nombre: "Paquete de redes · Crecimiento",
-    precio: "$3.200.000 / mes",
-    precioDesde: "$2.000.000 / mes",
+    nombre: "Sistema de crecimiento · Evolution",
+    precio: "$3.900.000 / mes",
+    precioDesde: "$2.500.000 / mes",
     porque:
-      "Necesitas volumen y constancia (10 reels + fotos + gestión + campañas), no piezas sueltas. Es el que mueve la aguja en tu etapa.",
+      "Necesitas un sistema con ritmo, no piezas sueltas: la estrategia decide qué se produce cada mes y se corrige con lo que la data va mostrando. Es lo que mueve la aguja en tu etapa.",
     incentivo:
-      "Si arrancas este mes, te montamos tu Google Business + primeras reseñas sin costo — justo la carencia que hoy te deja invisible en búsquedas.",
+      "Si arrancas este mes te montamos el Google Business de Cúcuta y Bogotá con las primeras reseñas — justo la carencia que hoy te deja invisible en búsquedas.",
   },
   datoSector: {
     hallazgo:
       "De las 8 marcas de repostería que hemos analizado, la carencia más repetida es la misma: muestran el producto terminado y nunca el proceso.",
     veredicto:
-      "Tu cuenta la comparte. En tus últimas 12 publicaciones no hay una sola del taller — y es justo lo que justifica cobrar tres veces lo que cobra una panadería de barrio.",
+      "Tu cuenta la comparte: se ve el resultado, no el taller. Y es justo el proceso lo que justifica tu precio frente al de una panadería de barrio.",
   },
   cierreGancho:
     "En estética y en fitness lleva dos años funcionando algo que en repostería casi nadie usa: el antes y después con la persona que compra, no con el producto. La torta no es el resultado — la cara de quien la recibe sí. Cómo se aplica eso a tu marca, con qué formato y en qué momento del mes, es parte de lo que trabajamos con clientes.",
