@@ -121,8 +121,8 @@ export default function AnalisisModal() {
             fields={[
               { name: "name", label: "Nombre", required: true, placeholder: "Tu nombre" },
               { name: "company", label: "Empresa / marca", required: true, placeholder: "Nombre de tu marca" },
-              { name: "email", label: "Email", type: "email", required: true, placeholder: "tu@correo.com" },
-              { name: "phone", label: "WhatsApp", type: "tel", required: true, prefix: "+57", placeholder: "300 000 0000" },
+              { name: "email", label: "Email", type: "email", required: true, full: true, placeholder: "tu@correo.com" },
+              { name: "phone", label: "WhatsApp", type: "tel", required: true, full: true, prefix: "+57", placeholder: "300 000 0000" },
               { name: "social", label: "Instagram", required: true, full: true, placeholder: "@tumarca (o el link)" },
               { name: "tiktok", label: "TikTok", full: true, optionalHint: "si tienes", placeholder: "@tumarca en TikTok" },
               { name: "web", label: "Sitio web", full: true, optionalHint: "si tienes", placeholder: "www.tumarca.com" },

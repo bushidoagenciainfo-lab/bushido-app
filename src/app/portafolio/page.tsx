@@ -15,12 +15,13 @@ export default function PortafolioPage() {
             <div>
               <div className="view-header-eyebrow">01 · Portafolio</div>
               <h1>
-                Esto ya <em>pasó</em>.
+                Esto ya se <em>hizo</em>.
               </h1>
             </div>
             <p>
-              Escenarios de talla mundial, campañas para Adidas y Nike, y contenido
-              que la gente compartió sola. Abre cualquier proyecto y míralo completo.
+              Producción audiovisual con criterio cinematográfico para marcas y
+              artistas. Cada proyecto tiene su dirección, su estrategia y su
+              resultado. Abre cualquiera y míralo completo.
             </p>
           </div>
         </div>

@@ -39,8 +39,8 @@ export interface BriefingSector {
 }
 
 /** "Gastronomía / restaurante" → "gastronomia-restaurante" */
-function aSlug(v: string): string {
-  return v
+function aSlug(v: unknown): string {
+  return String(v ?? "")
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -80,7 +80,9 @@ export async function briefingDelSector(pistas: string): Promise<BriefingSector 
   // Segundo intento: ¿alguna categoría que el OS sí conoce aparece en las pistas?
   if (!r.conocida && r.categorias_conocidas?.length) {
     const texto = aSlug(pistas);
-    const match = r.categorias_conocidas.find((c) => {
+    const match = r.categorias_conocidas
+      .filter((c): c is string => typeof c === "string" && c.length > 0)
+      .find((c) => {
       const s = aSlug(c);
       return texto.includes(s) || s.split("-").some((p) => p.length > 4 && texto.includes(p));
     });

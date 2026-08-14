@@ -3067,11 +3067,11 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
   border-radius: 8px; resize: vertical;
 }
 .seg-texto:focus { outline: none; border-color: var(--sepp); }
-.seg-acciones { display: flex; flex-wrap: wrap; gap: 7px; }
+.seg-acciones { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; }
 .seg-btn {
   font-family: var(--mono); font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase;
   border-radius: 7px; padding: 8px 13px; cursor: pointer; border: 1px solid var(--hairline);
-  background: none; color: var(--bone-dim);
+  background: none; color: var(--bone-dim); white-space: nowrap;
 }
 .seg-btn:hover:not(:disabled) { color: var(--bone); border-color: var(--bone-ghost); }
 .seg-btn.ia { color: var(--gold); border-color: rgba(201,162,74,.4); }
@@ -3388,21 +3388,23 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 /* selector de indicativo del teléfono (antes el +57 era fijo) */
 /* Ancho fijo y texto recortado: el nombre del país solo se ve al desplegar. */
 /* flex 0 0 = ancho fijo aunque el texto de la opción sea largo */
-.prefix-sel {
-  flex: 0 0 76px; width: 76px; min-width: 0; max-width: 76px;
-  border: none; background: none; cursor: pointer;
+.field .prefix-sel {
+  flex: 0 0 84px; width: 84px; min-width: 0; max-width: 84px;
+  border: none; background: var(--ink-2); cursor: pointer;
   font-family: var(--mono); font-size: 13px; color: var(--bone-dim);
-  padding: 0 4px 0 14px;
+  padding: 8px 6px 8px 12px;
   appearance: none; -webkit-appearance: none;
   text-overflow: ellipsis; white-space: nowrap; overflow: hidden;
+  border-right: 1px solid var(--hairline);
+  background-image: none; border-radius: 0;
 }
 .prefix-wrap > input { flex: 1 1 auto; min-width: 0; }
-.prefix-sel:focus { outline: none; color: var(--bone); }
-.prefix-sel option { background: var(--ink-2); color: var(--bone); }
+.field .prefix-sel:focus { outline: none; color: var(--bone); }
+.field .prefix-sel option { background: var(--ink-2); color: var(--bone); }
 /* flechita propia, para no depender de la del sistema */
 .prefix-wrap { position: relative; }
 .prefix-wrap::before {
-  content: '⌄'; position: absolute; left: 58px; top: 50%; transform: translateY(-70%);
+  content: '⌄'; position: absolute; left: 64px; top: 50%; transform: translateY(-70%);
   font-size: 12px; color: var(--bone-ghost); pointer-events: none;
 }
 
