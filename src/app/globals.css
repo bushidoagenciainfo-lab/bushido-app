@@ -3067,7 +3067,9 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
   border-radius: 8px; resize: vertical;
 }
 .seg-texto:focus { outline: none; border-color: var(--sepp); }
-.seg-acciones { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; }
+.seg-acciones {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 7px; align-items: center;
+}
 .seg-btn {
   font-family: var(--mono); font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase;
   border-radius: 7px; padding: 8px 13px; cursor: pointer; border: 1px solid var(--hairline);
@@ -3076,9 +3078,12 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 .seg-btn:hover:not(:disabled) { color: var(--bone); border-color: var(--bone-ghost); }
 .seg-btn.ia { color: var(--gold); border-color: rgba(201,162,74,.4); }
 .seg-btn.ia:hover:not(:disabled) { background: rgba(201,162,74,.12); color: var(--gold); }
-.seg-btn.wa { background: #6FBF8E; color: var(--ink); border-color: #6FBF8E; margin-left: auto; }
+.seg-btn.wa {
+  background: #6FBF8E; color: var(--ink); border-color: #6FBF8E;
+  justify-self: end; padding: 8px 18px;
+}
 .seg-btn.wa:hover { background: var(--bone); border-color: var(--bone); }
-.seg-btn.hecho { color: var(--bone-ghost); }
+.seg-btn.hecho { color: var(--bone-ghost); justify-self: end; }
 .seg-btn:disabled { opacity: .5; cursor: default; }
 
 /* ══════════ Lo que aprendió el cerebro ══════════ */
@@ -3385,28 +3390,21 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 .pp-margen.mal { color: var(--sepp); }
 .pr-nota { margin-top: 12px; font-size: 11.5px; line-height: 1.55; color: var(--bone-ghost); }
 
-/* selector de indicativo del teléfono (antes el +57 era fijo) */
-/* Ancho fijo y texto recortado: el nombre del país solo se ve al desplegar. */
-/* flex 0 0 = ancho fijo aunque el texto de la opción sea largo */
-.field .prefix-sel {
-  flex: 0 0 84px; width: 84px; min-width: 0; max-width: 84px;
-  border: none; background: var(--ink-2); cursor: pointer;
-  font-family: var(--mono); font-size: 13px; color: var(--bone-dim);
-  padding: 8px 6px 8px 12px;
-  appearance: none; -webkit-appearance: none;
-  text-overflow: ellipsis; white-space: nowrap; overflow: hidden;
+/* selector de indicativo: código visible + select invisible encima */
+.prefix-display {
+  position: relative; display: flex; align-items: center; gap: 4px;
+  padding: 0 10px 0 14px; background: var(--ink-2);
   border-right: 1px solid var(--hairline);
-  background-image: none; border-radius: 0;
+  font-family: var(--mono); font-size: 13px; color: var(--bone-dim);
+  cursor: pointer; white-space: nowrap;
 }
+.prefix-chev { width: 8px; height: 8px; flex-shrink: 0; opacity: .5; }
+.prefix-over {
+  position: absolute; inset: 0; width: 100%; opacity: 0; cursor: pointer;
+  font-size: 16px;
+}
+.prefix-over option { background: var(--ink-2); color: var(--bone); }
 .prefix-wrap > input { flex: 1 1 auto; min-width: 0; }
-.field .prefix-sel:focus { outline: none; color: var(--bone); }
-.field .prefix-sel option { background: var(--ink-2); color: var(--bone); }
-/* flechita propia, para no depender de la del sistema */
-.prefix-wrap { position: relative; }
-.prefix-wrap::before {
-  content: '⌄'; position: absolute; left: 64px; top: 50%; transform: translateY(-70%);
-  font-size: 12px; color: var(--bone-ghost); pointer-events: none;
-}
 
 /* ══════════ El método (home): la web vende el sistema ══════════ */
 .metodo-head { max-width: 760px; margin-bottom: 46px; }

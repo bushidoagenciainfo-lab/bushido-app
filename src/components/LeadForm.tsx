@@ -67,6 +67,7 @@ export default function LeadForm({
 }: Props) {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
+  const [prefixCodes, setPrefixCodes] = useState<Record<string, string>>({});
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -171,15 +172,23 @@ export default function LeadForm({
         <textarea id={`f-${f.name}`} name={f.name} placeholder={f.placeholder} rows={3} />
       ) : f.prefix ? (
         <div className="prefix-wrap">
-          {/* Selector de país: antes el +57 era fijo y la gente de fuera de
-              Colombia no podía dejar su número. */}
-          <select className="prefix-sel" name={`${f.name}_ind`} defaultValue={f.prefix} aria-label="País">
-            {INDICATIVOS.map((p) => (
-              <option key={p.cod + p.pais} value={p.cod}>
-                {p.cod} · {p.pais}
-              </option>
-            ))}
-          </select>
+          <div className="prefix-display">
+            <span>{prefixCodes[f.name] || f.prefix}</span>
+            <svg className="prefix-chev" viewBox="0 0 10 6" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M1 1l4 4 4-4"/></svg>
+            <select
+              className="prefix-over"
+              name={`${f.name}_ind`}
+              value={prefixCodes[f.name] || f.prefix}
+              onChange={(e) => setPrefixCodes((c) => ({ ...c, [f.name]: e.target.value }))}
+              aria-label="País"
+            >
+              {INDICATIVOS.map((p) => (
+                <option key={p.cod + p.pais} value={p.cod}>
+                  {p.cod} · {p.pais}
+                </option>
+              ))}
+            </select>
+          </div>
           <input id={`f-${f.name}`} name={f.name} type={f.type || "text"} inputMode="numeric" placeholder={f.placeholder} required={f.required} />
         </div>
       ) : (
