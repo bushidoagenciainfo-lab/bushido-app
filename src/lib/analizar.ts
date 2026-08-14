@@ -434,7 +434,21 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
     `>>> FOCO DEL ANÁLISIS (lo que el cliente eligió): ${input.contexto || "(no especificó → enfoque general de redes)"}`,
     `Todo el informe debe leerse desde ese foco, no solo desde redes sociales.`,
     "",
-    perfil.texto,
+    // Sin datos reales el prompt le exige evidencia concreta al modelo y no le
+    // da ninguna: esa combinación es la que produce cifras inventadas. Aquí se
+    // le dice explícitamente qué NO puede afirmar.
+    perfil.texto ||
+      [
+        "⚠️ NO TENEMOS DATOS DE SU CUENTA. La API de Instagram no devolvió nada para esta marca",
+        "(suele pasar con cuentas personales, que no son profesionales). REGLAS OBLIGATORIAS:",
+        "· NO cites su biografía, ni sus publicaciones, ni lo que dicen sus textos: no los has visto.",
+        "· NO inventes seguidores, likes, interacción, número de publicaciones ni porcentajes. Ninguna cifra.",
+        "· NO afirmes qué publica, cada cuánto, ni qué le falta a su feed. No lo sabes.",
+        "· SÍ puedes trabajar con lo que el cliente escribió, con su nicho y con la data del sector.",
+        "· Y DILO: en el resumen deja claro, en una frase, que este diagnóstico se hizo sin acceso a",
+        "  las métricas de su cuenta y que con acceso el análisis va mucho más profundo. Ser honesto",
+        "  aquí vende más que fingir que viste algo: si le describes un perfil que no es el suyo, se da cuenta.",
+      ].join("\n"),
     "",
     briefing,
     "",
@@ -500,5 +514,8 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
       : undefined,
     estado: "analizado",
     modo: input.abrebocas ? "abrebocas" : "completo",
+    // Si es false, el informe se escribió sin ver su cuenta: revísalo antes de
+    // mandarlo. Es el aviso que evita mandarle a alguien un perfil que no es.
+    conDatosReales: Boolean(perfil.texto),
   };
 }

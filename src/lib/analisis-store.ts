@@ -65,6 +65,7 @@ function extras(a: Analisis) {
     cierre_gancho: a.cierreGancho ?? null,
     sector: a.sector ?? null,
     modo: a.modo ?? "completo",
+    con_datos_reales: a.conDatosReales ?? null,
   };
 }
 
@@ -99,6 +100,8 @@ function fromRow(r: Record<string, unknown>): Analisis {
     sector: (r.sector as Analisis["sector"]) ?? undefined,
     // Los informes viejos no tienen `modo`: son completos, como se generaron.
     modo: (r.modo as Analisis["modo"]) ?? "completo",
+    conDatosReales:
+      typeof r.con_datos_reales === "boolean" ? r.con_datos_reales : undefined,
   };
 }
 

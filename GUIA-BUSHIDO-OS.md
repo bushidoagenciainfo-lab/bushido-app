@@ -109,12 +109,31 @@ completo.
 
 Corre esto una vez en Supabase → **SQL Editor**:
 
+**Primero comprueba cómo se llama la tabla y en qué proyecto está.** Si el SQL
+te responde `relation "analisis" does not exist`, es una de dos: estás en otro
+proyecto de Supabase, o la tabla tiene otro nombre. Esto te lo dice:
+
+```sql
+select table_schema, table_name
+from information_schema.tables
+where table_schema not in ('pg_catalog', 'information_schema')
+order by table_schema, table_name;
+```
+
+Busca en la lista la tabla de análisis. Si aparece con otro nombre o en otro
+esquema, usa ese en el `alter table` de abajo. Si no aparece ninguna, estás en
+el proyecto equivocado: compara la URL del proyecto con `SUPABASE_URL` en
+Vercel → Settings → Environment Variables.
+
+Con el nombre confirmado:
+
 ```sql
 alter table analisis
-  add column if not exists dato_sector    jsonb,
-  add column if not exists cierre_gancho  text,
-  add column if not exists sector         jsonb,
-  add column if not exists modo           text default 'completo';
+  add column if not exists dato_sector      jsonb,
+  add column if not exists cierre_gancho    text,
+  add column if not exists sector           jsonb,
+  add column if not exists modo             text default 'completo',
+  add column if not exists con_datos_reales boolean;
 ```
 
 Los informes que ya existen quedan como `completo`, que es lo que son.

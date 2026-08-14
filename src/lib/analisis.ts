@@ -174,6 +174,12 @@ export interface Analisis {
   datoSector?: DatoSector;
   cierreGancho?: string; // la transferencia: oportunidad nombrada, ejecución no
   sector?: MuestraSector;
+  /**
+   * ¿Se pudo leer su cuenta de Instagram al escribirlo? Si es false el informe
+   * salió sin métricas ni textos reales — hay que revisarlo antes de enviarlo.
+   * Los informes viejos no lo traen: por eso es opcional, no false por defecto.
+   */
+  conDatosReales?: boolean;
   // — propuesta —
   propuesta: string;
   paquete: PaqueteRecomendado;

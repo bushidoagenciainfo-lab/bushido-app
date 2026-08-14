@@ -33,11 +33,23 @@ export default async function InformePage({
     <>
       <main>
         <ReportView a={soyBushido ? { ...analisis, modo: "completo" } : analisis} />
-        {soyBushido && analisis.modo === "abrebocas" && (
-          <p className="informe-nota">
-            Estás viendo el informe completo porque tienes la sesión del panel
-            abierta. El cliente ve la versión corta en este mismo enlace.
-          </p>
+        {soyBushido && (
+          <div className="informe-nota">
+            {analisis.conDatosReales === false && (
+              <p className="informe-alerta">
+                ⚠️ Este informe se escribió <strong>sin poder leer su cuenta</strong>{" "}
+                (Instagram no devolvió datos — suele ser una cuenta personal, no
+                profesional). No cita métricas ni publicaciones reales. Revísalo
+                antes de mandarlo.
+              </p>
+            )}
+            {analisis.modo === "abrebocas" && (
+              <p>
+                Estás viendo el informe completo porque tienes la sesión del panel
+                abierta. El cliente ve la versión corta en este mismo enlace.
+              </p>
+            )}
+          </div>
         )}
       </main>
       <Footer />
