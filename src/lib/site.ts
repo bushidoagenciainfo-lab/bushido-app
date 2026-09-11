@@ -229,7 +229,7 @@ export const SERVICES: Service[] = [
       "Optimización semanal + reporte con CPA, ROAS y aprendizajes",
       "Remarketing y embudo completo en planes superiores",
     ],
-    note: "El fee es la gestión; la inversión publicitaria va aparte y es tuya.",
+    note: "El fee es la gestión; la inversión publicitaria va aparte y es tuya. El cobro mensual es el mayor entre la tarifa del plan y el 15% de la inversión: gestionar $50.000.000 de pauta no cuesta lo mismo que gestionar $2.000.000.",
   },
   {
     slug: "estrategia", num: "01", grupo: "intelligence", cat: "Intelligence · Kansei", title: "Bushido", titleEm: "Intelligence",
@@ -331,9 +331,14 @@ export const SERVICES: Service[] = [
     description:
       "Piezas puntuales para una necesidad concreta. Te lo decimos claro: un reel suelto no es estrategia, y sin un sistema detrás es difícil que mueva la aguja. Sirve para un lanzamiento puntual o para probarnos — si publicas constante, el sistema mensual rinde mucho más.",
     packages: [
+      // Sin descuento por volumen: la pieza suelta es el trabajo de PEOR
+      // margen (setup completo, cero recurrencia) y abaratarla por cantidad
+      // premiaba justo lo que menos conviene. A $800k plano, 6 piezas ($4,8M)
+      // cuestan mas que Evolution ($3,9M), que trae bastante mas — que es
+      // exactamente lo que la nota de abajo ya argumentaba.
       { name: "1 pieza", price: "$800.000" },
-      { name: "3 piezas", price: "$2.100.000", featured: true },
-      { name: "6 piezas", price: "$3.900.000" },
+      { name: "3 piezas", price: "$2.400.000", featured: true },
+      { name: "6 piezas", price: "$4.800.000" },
     ],
     benefits: [
       "Concepto y guion antes de grabar",
@@ -341,7 +346,7 @@ export const SERVICES: Service[] = [
       "Hasta 60s por pieza, lista para publicar",
       "Dirección creativa en cada corte",
     ],
-    note: "Una pieza suelta cuesta lo que cuesta porque lleva equipo detrás. Si vas a publicar cada mes, el sistema rinde el doble por el mismo dinero.",
+    note: "No hay descuento por cantidad: cada pieza suelta arranca de cero y lleva el mismo equipo detrás. Si vas a publicar cada mes, el sistema mensual te da más por menos — 6 piezas sueltas cuestan más que el plan Evolution completo.",
   },
   {
     slug: "eventos", num: "04", grupo: "produccion", cat: "Eventos", title: "Cobertura de", titleEm: "eventos",
@@ -353,7 +358,7 @@ export const SERVICES: Service[] = [
       { name: "+ Entrega mismo día", price: "+$400.000" },
     ],
     benefits: ["Fotos + 1–2 Reels", "Viáticos en Bogotá incluidos", "Entrega express opcional"],
-    note: "Ideal para prensa, giras y activaciones de marca.",
+    note: "Ideal para prensa, giras y activaciones de marca. Reservas tu fecha con el 30%; el saldo contra entrega.",
   },
   {
     slug: "comercial", num: "02", grupo: "produccion", cat: "Campaña", title: "Mini", titleEm: "comercial",
@@ -364,7 +369,7 @@ export const SERVICES: Service[] = [
       { name: "Pack lanzamiento", price: "$5.900.000", featured: true },
     ],
     benefits: ["Narrativa de hasta 90s", "Pack lanzamiento: 1 comercial + 3 cortes para redes", "Dirección de arte"],
-    note: "Cuando el lanzamiento merece una pieza con historia.",
+    note: "Cuando el lanzamiento merece una pieza con historia. Reservas tu fecha con el 30%; el saldo contra entrega.",
   },
   {
     slug: "corporativo", num: "03", grupo: "produccion", cat: "Empresa", title: "Video", titleEm: "corporativo",
@@ -375,7 +380,7 @@ export const SERVICES: Service[] = [
       { name: "Paquete empresarial", price: "Desde $8.000.000" },
     ],
     benefits: ["Incluye gráficas", "2 rondas de revisión", "Guion y entrevistas dirigidas"],
-    note: "Para empresas que quieren verse a la altura de lo que hacen.",
+    note: "Para empresas que quieren verse a la altura de lo que hacen. Reservas tu fecha con el 30%; el saldo contra entrega.",
   },
   {
     slug: "fotografia", num: "05", grupo: "produccion", cat: "Content Day", title: "Bushido", titleEm: "Content Day",
@@ -414,7 +419,7 @@ export const SERVICES: Service[] = [
       { name: "Premium", price: "Cotización por proyecto" },
     ],
     benefits: ["Dirección + producción", "Corrección de color", "Concepto y locaciones"],
-    note: "Nuestro ADN: el sujeto y el giro inesperado.",
+    note: "Nuestro ADN: el sujeto y el giro inesperado. Reservas tu fecha con el 30%; el saldo contra entrega.",
   },
 ];
 
