@@ -302,6 +302,21 @@ export const SERVICES: Service[] = [
           "Somos tu departamento creativo",
         ],
       },
+      {
+        // El techo. Los tres planes de arriba se diferencian por cantidad de
+        // activos, y eso topa: para cobrar más hay que producir más. Este NO
+        // se mide en piezas sino en alcance de negocio, que es lo que de
+        // verdad escala con una marca grande. Sin cifra pública a propósito:
+        // el precio sale del alcance, y una cifra en la web sería un techo.
+        name: "Partner · /mes",
+        price: "Cotización",
+        incluye: [
+          "Varias líneas de producto, marcas o mercados",
+          "Equipo dedicado y exclusividad en tu categoría",
+          "Más hipótesis por ciclo: el aprendizaje va más rápido",
+          "Integrados con tu equipo interno de marketing",
+        ],
+      },
     ],
     benefits: [
       "La estrategia decide el formato de cada activo, no una lista fija",
