@@ -103,7 +103,10 @@ async function perfilInstagram(redes?: string): Promise<{ texto: string; pistas:
 
 // ── Contexto de negocio: paquetes REALES de Bushido para aterrizar la recomendación ──
 const PAQUETES = `Growth Systems (sistemas de crecimiento, NO paquetes de contenido — el cliente compra inteligencia continua, no una cantidad de reels):
-- "Sistema de crecimiento · Insight" — $2.500.000 / mes · "Evolution" — $3.900.000 / mes · "Dominance" — $5.200.000 / mes (mínimo 3 meses; hasta 10 activos audiovisuales que decide la estrategia; la inversión en pauta la pone el cliente)
+- "Sistema de crecimiento · Insight" — $2.500.000 / mes: 12 publicaciones al mes (lunes, miércoles y viernes) = 4 reels, 4 carruseles y 4 fotos de 1 jornada de rodaje; una hipótesis y reporte mensual; 1 ronda de revisión; NO incluye pauta.
+- "Sistema de crecimiento · Evolution" — $3.900.000 / mes: 16 publicaciones al mes (lunes a jueves) = 6 reels, 5 carruseles y 5 fotos de 2 jornadas; stories 2 veces por semana; gestión de pauta en Meta y testeo A/B; reporte quincenal; 2 rondas de revisión.
+- "Sistema de crecimiento · Dominance" — $5.900.000 / mes: 20 publicaciones al mes (lunes a viernes) = 8 reels, 1 storytelling, 6 carruseles y 5 fotos de 2 jornadas; stories 3 veces por semana; pauta en Meta y TikTok; 1 pieza con creador del book; Project Manager dedicado; reporte semanal; 3 rondas de revisión.
+- Los tres: mínimo 3 meses; la inversión en pauta la pone el cliente. NUNCA prometas más publicaciones ni formatos de los que trae cada plan: la diferencia entre planes es lo que el cliente paga.
 - "Estrategia Kansei · Auditoría express" — $900.000 · "Estrategia 90 días" — $2.400.000 · "Con acompañamiento" — desde $3.500.000
 - "Pauta y amplificación · Fee gestión" — $1.200.000 / mes · "Performance" — $1.900.000 / mes · "Full-funnel" — desde $2.800.000 / mes (fee de gestión; la inversión va aparte)
 - "Branding · Identidad esencial" — $1.800.000 · "Sistema de marca" — $3.400.000 · "Rebrand completo" — desde $5.500.000
@@ -184,8 +187,8 @@ QUÉ DEBES PRODUCIR:
 - metricas: 3 métricas que la marca debería vigilar SEGÚN EL FOCO (no siempre son métricas de redes: para videoclip mira retención y fuentes de tráfico en YouTube; para comercial, CPA/ROAS y tasa de conversión; para fotografía, conversión del catálogo/ficha de producto; para UGC, qué ángulo convierte). NO inventes números ni porcentajes concretos: describe QUÉ medir y por qué importa.
 - propuesta: el sistema/servicio propuesto, conectando la data de la marca con la data de nicho de Bushido.
 - paquete: recomienda el servicio de Bushido que MEJOR resuelve LO QUE EL CLIENTE BUSCA (mira el campo "Qué busca / contexto"). NO recomiendes el paquete de redes por defecto: si pidió un comercial → "Empresarial" o "Mini comercial / campaña"; si un videoclip → el de Videoclip; si cobertura de evento → cotización de evento; si manejo de redes o no especifica → paquete de redes. Nombre y precio EXACTOS de la lista. Además:
-  · precioDesde: el precio de ENTRADA de esa familia de paquetes (ej. si recomiendas "Crecimiento", el "desde" es el del "Esencial" $2.000.000/mes). Es el ancla que ve el cliente.
-  · incentivo: un bono por ARRANCAR ESTE MES que resuelva una CARENCIA concreta del diagnóstico o de la presencia digital (ej. montar Google Business + reseñas, sesión de estrategia+guiones del primer mes, reels extra, foto editorial). NUNCA un descuento en el precio: Bushido agrega valor, no rebaja. Frase corta y personalizada.
+  · precioDesde: el precio de ENTRADA de esa familia de paquetes (ej. si recomiendas "Evolution", el "desde" es el de "Insight" $2.500.000/mes). Es el ancla que ve el cliente.
+  · incentivo: un bono por ARRANCAR ESTE MES que resuelva una CARENCIA concreta del diagnóstico o de la presencia digital (ej. montar Google Business + reseñas, sesión de estrategia y guiones del primer mes, foto editorial de marca). NUNCA un descuento en el precio y NUNCA publicaciones o reels extra por encima del plan: Bushido agrega valor, no rebaja ni infla el volumen. Frase corta y personalizada.
 ${PAQUETES}
 
 Si no conoces la marca con certeza, infiere desde el nicho de forma honesta y prudente; es un borrador que un humano de Bushido revisa antes de enviar.`;

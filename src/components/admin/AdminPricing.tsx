@@ -58,7 +58,7 @@ export default function AdminPricing() {
   const PLANES = [
     { nombre: "Insight", precio: 2_500_000 },
     { nombre: "Evolution", precio: 3_900_000 },
-    { nombre: "Dominance", precio: 5_200_000 },
+    { nombre: "Dominance", precio: 5_900_000 },
   ];
 
   return (

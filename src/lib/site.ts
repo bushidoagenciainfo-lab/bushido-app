@@ -270,15 +270,23 @@ export const SERVICES: Service[] = [
     slug: "redes", num: "01", grupo: "growth", cat: "Sistema mensual", title: "Sistemas de", titleEm: "crecimiento",
     description:
       "No es un paquete de contenido: es un sistema de inteligencia continua. Cada mes investigamos, formulamos una hipótesis, producimos para probarla y medimos qué pasó — y ese aprendizaje entra a tu tablero. No compras 10 reels: compras que cada mes sepamos más de tu negocio.",
+    // Se cuentan PUBLICACIONES (lo que el cliente ve en su calendario), no
+    // reels: 3 por semana no son 3 reels, salen de una jornada mezclando
+    // formatos pesados y livianos. Antes el básico se entregaba casi como el
+    // plan alto y no se notaba la diferencia. Ahora la escalera sube por
+    // frecuencia (3 → 4 → 5 por semana) y, sobre todo, por lo que no es
+    // volumen — stories, pauta, estrategia y equipo —, que es lo que no se
+    // come el margen. Esta misma estructura vive en analizar.ts (PAQUETES):
+    // si cambia aquí, cambia allá, o el informe le promete otra cosa al cliente.
     packages: [
       {
         name: "Insight · /mes",
         price: "$2.500.000",
         incluye: [
-          "Hasta 5 activos al mes",
-          "1 jornada de rodaje",
-          "Auditoría y tablero de aprendizajes",
-          "Una hipótesis por ciclo",
+          "12 publicaciones al mes · lunes, miércoles y viernes",
+          "4 reels, 4 carruseles y 4 fotos de 1 jornada de rodaje",
+          "Una hipótesis al mes y reporte mensual",
+          "1 ronda de revisión",
         ],
       },
       {
@@ -286,28 +294,31 @@ export const SERVICES: Service[] = [
         price: "$3.900.000",
         featured: true,
         incluye: [
-          "Hasta 8 activos al mes",
-          "2 jornadas + pieza de storytelling",
-          "Diseño gráfico y fotografía",
-          "Testeo A/B de ángulos y reporte mensual",
+          "16 publicaciones al mes · lunes a jueves",
+          "6 reels, 5 carruseles y 5 fotos de 2 jornadas de rodaje",
+          "Stories 2 veces por semana",
+          "Gestión de pauta en Meta y testeo A/B de ángulos",
+          "Reporte quincenal · 2 rondas de revisión",
         ],
       },
       {
         name: "Dominance · /mes",
-        price: "$5.200.000",
+        price: "$5.900.000",
         incluye: [
-          "Hasta 12 activos al mes",
-          "Project Manager y equipo dedicado",
-          "Creator Matching incluido",
-          "Somos tu departamento creativo",
+          "20 publicaciones al mes · lunes a viernes",
+          "8 reels, 1 storytelling, 6 carruseles y 5 fotos de 2 jornadas",
+          "Stories 3 veces por semana",
+          "Pauta en Meta y TikTok · 1 pieza con creador del book",
+          "Project Manager dedicado · reporte semanal",
+          "3 rondas de revisión",
         ],
       },
       {
-        // El techo. Los tres planes de arriba se diferencian por cantidad de
-        // activos, y eso topa: para cobrar más hay que producir más. Este NO
-        // se mide en piezas sino en alcance de negocio, que es lo que de
-        // verdad escala con una marca grande. Sin cifra pública a propósito:
-        // el precio sale del alcance, y una cifra en la web sería un techo.
+        // El techo. Los tres planes de arriba tienen un calendario fijo y un
+        // volumen que topa: más allá, para cobrar más habría que producir
+        // más. Este NO se mide en publicaciones sino en alcance de negocio,
+        // que es lo que de verdad escala con una marca grande. Sin cifra
+        // pública a propósito: una cifra en la web sería un techo.
         name: "Partner · /mes",
         price: "Cotización",
         incluye: [
@@ -319,12 +330,12 @@ export const SERVICES: Service[] = [
       },
     ],
     benefits: [
-      "La estrategia decide el formato de cada activo, no una lista fija",
+      "Calendario fijo cada semana; la estrategia decide qué va en cada publicación",
       "Auditoría continua y tablero con lo que vamos aprendiendo de tu marca",
       "Una hipótesis por ciclo: producimos para probarla, no por llenar el calendario",
       "Reporte de qué funcionó y por qué — eso define el mes siguiente",
     ],
-    note: "Mínimo 3 meses — un sistema necesita ciclos para aprender. Incluye la gestión de campañas Meta; la inversión publicitaria la pones tú (recomendado desde $800.000/mes).",
+    note: "Mínimo 3 meses — un sistema necesita ciclos para aprender. Evolution y Dominance incluyen la gestión de pauta; en Insight se suma aparte con el servicio de Pauta. La inversión publicitaria la pones tú (recomendado desde $800.000/mes).",
   },
   {
     slug: "reels", num: "07", grupo: "produccion", cat: "À la carte", title: "Reels", titleEm: "sueltos",
