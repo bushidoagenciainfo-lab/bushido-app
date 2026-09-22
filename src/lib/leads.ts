@@ -55,19 +55,38 @@ const KIND_LABEL: Record<LeadKind, string> = {
  * Sin esto, cuando un análisis no salía había que bucear en los logs de Vercel:
  * ahora el panel lo muestra al lado del lead.
  */
-export async function marcarInforme(
-  leadId: string,
-  info: { ok: boolean; url?: string; error?: string }
-): Promise<void> {
+export interface InfoInforme {
+  ok: boolean;
+  url?: string;
+  error?: string;
+  /** true mientras se genera: si se queda así, la función se cortó a la fuerza. */
+  pendiente?: boolean;
+  /** Si le llegó al cliente, y por dónde. Sin esto el panel decía "enviado" siempre. */
+  enviado?: { correo?: string; whatsapp?: string };
+  origen?: "automatico" | "panel";
+}
+
+export async function marcarInforme(leadId: string, info: InfoInforme): Promise<void> {
   if (!hasDb()) return;
   try {
     const supabase = createClient(SUPABASE_URL as string, SUPABASE_SERVICE_ROLE_KEY as string, {
       auth: { persistSession: false },
     });
     const { data } = await supabase.from("leads").select("meta").eq("id", leadId).single();
+    const previo = (data?.meta as Record<string, unknown> | null)?.informe as
+      | (InfoInforme & { errorAnterior?: string })
+      | undefined;
+    // Si antes falló y ahora sale desde el panel, el motivo original se guarda:
+    // era lo único que decía por qué el automático no llegó.
+    const errorAnterior =
+      previo?.errorAnterior ?? (previo && !previo.ok && !previo.pendiente ? previo.error : undefined);
     const meta = {
       ...((data?.meta as Record<string, unknown>) ?? {}),
-      informe: { ...info, fecha: new Date().toISOString() },
+      informe: {
+        ...info,
+        ...(errorAnterior && !info.pendiente ? { errorAnterior } : {}),
+        fecha: new Date().toISOString(),
+      },
     };
     await supabase.from("leads").update({ meta }).eq("id", leadId);
   } catch (e) {
@@ -160,6 +179,8 @@ const CLASSIFY: Record<string, { cat: string; rango: string }> = {
   "Un videoclip": { cat: "Música · Videoclip", rango: "$3.900.000 – $6.500.000" },
   "Un comercial / campaña": { cat: "Campaña", rango: "$2.600.000 – $5.900.000" },
   "UGC / creadores": { cat: "Creator Matching", rango: "$2.200.000 – $5.400.000" },
+  "Creadores / UGC para mi marca": { cat: "Creator Matching", rango: "$2.200.000 – $5.400.000" },
+  "Soy creador o freelance": { cat: "Gremio / talento", rango: "no es un cliente de producción" },
   Fotografía: { cat: "Content Day", rango: "$1.800.000 – $4.800.000" },
   "Aún no sé": { cat: "General", rango: "cotización a medida" },
 };

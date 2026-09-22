@@ -37,7 +37,10 @@ function Abrebocas({ a }: { a: Analisis }) {
   return (
     <div className="rep-body">
       <section className="rep-section">
-        <div className="rs-num">01 · Lo que ya estás haciendo bien</div>
+        {/* Sin ver su cuenta no se puede saber qué hace bien: se habla de lo que tiene a favor. */}
+        <div className="rs-num">
+          01 · {a.conDatosReales === false ? "Lo que tienes a favor" : "Lo que ya estás haciendo bien"}
+        </div>
         <ul className="ab-lista ab-fuerte">
           {fortalezas.map((f) => (
             <li key={f}>{f}</li>

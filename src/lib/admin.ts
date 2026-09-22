@@ -223,22 +223,30 @@ function normalizarLote(
 /**
  * Los análisis completos, para mandárselos al cerebro (Bushido OS) y que los
  * cruce con lo que ya sabe de otros nichos.
+ *
+ * SOLO los que se escribieron viendo la cuenta real (con_datos_reales = true).
+ * Un informe inferido desde el nicho que entra al cerebro vuelve después como
+ * "de las N marcas de tu sector que hemos analizado…" y se cita como evidencia:
+ * el sistema se estaría citando a sí mismo.
  */
 export async function analisisParaOS(limite = 500): Promise<Array<Record<string, unknown>>> {
   const COLS =
     "id, created_at, marca, nicho, categoria, resumen, fortalezas, carencias, " +
-    "oportunidades, buyer_persona, emociones, emociones_detalle, canales, metricas, propuesta, paquete, estado";
+    "oportunidades, buyer_persona, emociones, emociones_detalle, canales, metricas, propuesta, paquete, estado, con_datos_reales";
   if (hasDb()) {
     const { data, error } = await db()
       .from("analisis")
       .select(COLS)
+      .eq("con_datos_reales", true)
       .order("created_at", { ascending: false })
       .limit(limite);
     if (error) throw new Error(error.message);
     return normalizarLote((data ?? []) as unknown as Array<Record<string, unknown>>);
   }
   return normalizarLote(
-    (await readLocal<Record<string, unknown>>("analisis.json")).slice(0, limite)
+    (await readLocal<Record<string, unknown>>("analisis.json"))
+      .filter((f) => f.con_datos_reales === true)
+      .slice(0, limite)
   );
 }
 

@@ -6,9 +6,22 @@
 // pipeline sigue funcionando, solo no se genera el informe automático).
 
 import Anthropic from "@anthropic-ai/sdk";
-import { businessDiscovery, hasInstagram } from "./instagram";
+import { businessDiscovery, hasInstagram, limpiarUsuario, pareceWebNoInstagram, type IgResultado } from "./instagram";
+import { leerWeb } from "./web";
 import { briefingDelSector, briefingParaPrompt } from "./os-briefing";
-import { EMOCIONES, NICHOS, type Analisis, type EmocionDetalle, type Emocion, type Nicho } from "./analisis";
+import {
+  EMOCIONES,
+  ETAPAS,
+  NICHOS,
+  PERFILES,
+  type Analisis,
+  type EmocionDetalle,
+  type Emocion,
+  type EtapaMarca,
+  type FuentesInforme,
+  type Nicho,
+  type PerfilLead,
+} from "./analisis";
 
 export interface AnalizarInput {
   marca: string; // nombre de la empresa/marca (del lead: company)
@@ -22,11 +35,7 @@ export interface AnalizarInput {
    * Úsalo desde el panel para clientes que ya contrataron.
    */
   profundo?: boolean;
-  /**
-   * Cuánto puede tardar el modelo. El envío automático corre en una ruta de 60s
-   * (por eso 50s por defecto), pero desde el panel hay 120s: ahí conviene dar
-   * más margen o se corta con "Request timed out" teniendo tiempo de sobra.
-   */
+  /** Cuánto esperar al modelo por intento (por defecto MODEL_TIMEOUT_MS). */
   timeoutMs?: number;
   /**
    * Informe corto para quien todavía no es cliente: se lo lleva algo real
@@ -43,27 +52,68 @@ export function hasIA(): boolean {
   return Boolean(KEY);
 }
 
+/** Corta por caracteres completos: un .slice() normal puede partir un emoji en
+ *  dos y el surrogate suelto hace que la API rechace el JSON ("no low surrogate
+ *  in string") — así se perdió el informe de Girly Pop Culture. */
+function recortar(s: string, n: number): string {
+  const cps = Array.from(s);
+  return cps.length > n ? cps.slice(0, n).join("") + "…" : s;
+}
+
+/** Red de seguridad: reemplaza cualquier surrogate suelto que se haya colado. */
+function bienFormado(s: string): string {
+  const t = s as string & { toWellFormed?: () => string };
+  return typeof t.toWellFormed === "function" ? t.toWellFormed() : s;
+}
+
+function haceDias(iso?: string): number | null {
+  if (!iso) return null;
+  const t = Date.parse(iso);
+  return Number.isFinite(t) ? Math.max(0, Math.round((Date.now() - t) / 86_400_000)) : null;
+}
+
+interface LecturaIG {
+  texto: string;
+  pistas: string;
+  estado: FuentesInforme["instagram"];
+  detalle?: string;
+}
+
 /**
  * Trae el perfil real de Instagram y lo formatea como evidencia para el prompt.
  * Sin esto el modelo analiza a ciegas y solo puede repetir lugares comunes del
  * nicho — que es exactamente lo que hacía que 3 marcas distintas recibieran
- * prácticamente el mismo informe.
+ * prácticamente el mismo informe. Si no se puede, devuelve el MOTIVO real.
  */
-async function perfilInstagram(redes?: string): Promise<{ texto: string; pistas: string }> {
-  const vacio = { texto: "", pistas: "" };
-  if (!redes || !hasInstagram()) return vacio;
-  const r = await businessDiscovery(redes).catch(() => null);
-  if (!r?.ok || !r.perfil) return vacio;
+async function perfilInstagram(redes?: string): Promise<LecturaIG> {
+  if (!redes?.trim()) return { texto: "", pistas: "", estado: "no_compartido" };
+  if (!hasInstagram()) return { texto: "", pistas: "", estado: "config", detalle: "Falta el token de Instagram." };
+  const r = await businessDiscovery(redes).catch(
+    (e): IgResultado => ({ ok: false, motivo: "red", error: e instanceof Error ? e.message : String(e) })
+  );
+  if (!r.ok || !r.perfil) {
+    console.warn(`[analizar] Instagram no leído (${r.motivo}): ${r.error}`);
+    return { texto: "", pistas: "", estado: r.motivo ?? "red", detalle: r.error };
+  }
   const p = r.perfil;
 
   const posts = (p.media ?? []).map((m, i) => {
     const inter =
       typeof m.like_count === "number"
         ? `${m.like_count} likes, ${m.comments_count ?? 0} comentarios`
-        : "sin métricas públicas";
-    const texto = (m.caption ?? "(sin texto)").replace(/\s+/g, " ").slice(0, 220);
-    return `  ${i + 1}. [${m.media_type ?? "?"}] ${inter}\n     "${texto}"`;
+        : "likes ocultos";
+    const dias = haceDias(m.timestamp);
+    const cuando = dias === null ? "fecha desconocida" : dias === 0 ? "hoy" : `hace ${dias} días`;
+    const tipo = m.media_product_type === "REELS" ? "REEL" : (m.media_type ?? "?");
+    const texto = recortar((m.caption ?? "(sin texto)").replace(/\s+/g, " "), 220);
+    return `  ${i + 1}. [${tipo} · ${cuando}] ${inter}\n     "${texto}"`;
   });
+
+  // Ritmo real: cuánto hace de la última y cuántos días cubren las últimas 6.
+  const fechas = (p.media ?? []).map((m) => haceDias(m.timestamp)).filter((d): d is number => d !== null);
+  const ritmo = fechas.length
+    ? `\nÚltima publicación: hace ${Math.min(...fechas)} días. Las últimas ${fechas.length} publicaciones cubren ${Math.max(...fechas) - Math.min(...fechas)} días.`
+    : "\n(Sin fechas de publicación: NO opines sobre frecuencia ni constancia.)";
 
   // Tasa de interacción: el dato que revela si la audiencia responde de verdad
   let engagement = "";
@@ -86,6 +136,7 @@ async function perfilInstagram(redes?: string): Promise<{ texto: string; pistas:
     p.biography ? `Biografía textual: "${p.biography}"` : "Biografía: VACÍA (dato relevante).",
     p.website ? `Enlace en bio: ${p.website}` : "Enlace en bio: NO tiene (dato relevante).",
     engagement,
+    ritmo,
     posts.length ? `\nÚltimas publicaciones:\n${posts.join("\n")}` : "\n(No devolvió publicaciones.)",
   ]
     .filter(Boolean)
@@ -93,12 +144,47 @@ async function perfilInstagram(redes?: string): Promise<{ texto: string; pistas:
 
   // Lo que dice de sí misma es la mejor pista para saber a qué sector pertenece:
   // el nombre de la marca casi nunca lo revela ("Bianco Bake Lab" no dice repostería).
-  const pistas = [p.name, p.biography, ...(p.media ?? []).map((m) => m.caption ?? "")]
-    .filter(Boolean)
-    .join(" ")
-    .slice(0, 1200);
+  const pistas = recortar(
+    [p.name, p.biography, ...(p.media ?? []).map((m) => m.caption ?? "")].filter(Boolean).join(" "),
+    1200
+  );
 
-  return { texto, pistas };
+  return { texto, pistas, estado: "leido" };
+}
+
+/** Lo que el modelo tiene que saber cuando NO pudo ver la cuenta, según el motivo real. */
+function avisoSinInstagram(ig: LecturaIG, redes?: string): string {
+  const comun = [
+    "REGLAS OBLIGATORIAS:",
+    "· NO cites su biografía, ni sus publicaciones, ni lo que dicen sus textos: no los has visto.",
+    "· NO inventes seguidores, likes, interacción, número de publicaciones ni porcentajes. Ninguna cifra.",
+    "· NO afirmes qué publica, cada cuánto, cómo se ve su feed ni qué le falta. No lo sabes.",
+    "· SÍ puedes trabajar con lo que el cliente escribió, con su web (si abajo aparece leída), con su nicho y con la data del sector.",
+    "· Y DILO en el resumen, en una frase: este diagnóstico se hizo sin acceso a su cuenta de Instagram.",
+  ];
+  if (ig.estado === "no_compartido") {
+    return ["⚠️ El cliente NO compartió Instagram.", ...comun].join("\n");
+  }
+  if (ig.estado === "usuario_invalido") {
+    return [
+      `⚠️ En el campo Instagram escribió "${redes}", que no es un usuario de Instagram. NO incluyas Instagram en canales ni hables de su cuenta.`,
+      ...comun,
+    ].join("\n");
+  }
+  if (ig.estado === "no_existe_o_personal") {
+    return [
+      `⚠️ Consultamos @${limpiarUsuario(redes ?? "")} en la API oficial de Meta y no apareció como cuenta profesional.`,
+      "Puede ser que el usuario esté mal escrito o que la cuenta no esté configurada como profesional: NO SABEMOS cuál de las dos.",
+      "· NUNCA afirmes que \"no es cuenta profesional\" como un hecho. Si lo mencionas, dilo como posibilidad (\"si tu cuenta no es profesional…\").",
+      ...comun,
+    ].join("\n");
+  }
+  // config / red: el problema es nuestro, no del cliente.
+  return [
+    "⚠️ No pudimos consultar su Instagram por una falla técnica de nuestro lado (no es culpa de su cuenta).",
+    "· NO digas nada sobre el tipo de cuenta ni sobre por qué no se pudo leer.",
+    ...comun,
+  ].join("\n");
 }
 
 // ── Contexto de negocio: paquetes REALES de Bushido para aterrizar la recomendación ──
@@ -156,11 +242,12 @@ REGLAS DE VOZ:
 ⚠️ EL FOCO MANDA — lee "Qué busca el cliente" ANTES de escribir nada:
 El análisis NO es siempre sobre redes sociales. Lo que el cliente eligió define el ÁNGULO de TODO el informe (resumen, fortalezas, carencias, oportunidades, gatillos, canales, métricas y propuesta). Las redes solo son el centro cuando pidió manejo de redes o no especificó. Guía:
 · "Manejo de redes" o sin especificar → presencia digital, ritmo de publicación, formatos, comunidad. (El enfoque por defecto.)
-· "UGC / creadores" → prueba social y voz de terceros: qué tan creíble se ve hoy la marca en boca ajena, si hay testimonios/reseñas, qué ángulos habría que testear y con qué perfil de creador. Métricas de UGC (qué ángulo convierte, costo por pieza que funciona).
+· "UGC / creadores" o "Creadores / UGC para mi marca" → prueba social y voz de terceros: qué tan creíble se ve hoy la marca en boca ajena, si hay testimonios/reseñas, qué ángulos habría que testear y con qué perfil de creador. Métricas de UGC (qué ángulo convierte, costo por pieza que funciona).
 · "Un videoclip" → identidad artística y narrativa: qué historia proyecta hoy el artista, coherencia visual entre sencillos, posicionamiento frente a su escena. Canales relevantes: YouTube y plataformas de música, no solo Instagram.
 · "Un comercial / campaña" → propuesta de valor y mensaje: qué promete la marca, qué la diferencia, qué hook usaría la campaña y cómo se amplifica (embudo, pauta).
 · "Cobertura de evento" → el evento como activo de contenido: qué se juega la marca ahí, qué piezas debe salir a producir, cómo se aprovecha antes/durante/después.
 · "Fotografía" → la imagen de marca: qué tan bien se ve el producto/persona hoy, consistencia visual, si el material actual vende o solo documenta, usos (catálogo, e-commerce, prensa, redes).
+· "Soy creador o freelance" → NO es un cliente de producción: es talento. Lee su marca personal: cómo consigue clientes, qué portafolio muestra, qué lo diferencia.
 En el resumen deja claro desde la primera frase que estás mirando su marca DESDE ese foco. Si el foco no es redes, no llenes el informe de recomendaciones de calendario de publicaciones: habla de lo que pidió.
 
 📊 SI RECIBES DATA DEL SECTOR ("LO QUE YA SABEMOS DE ESTA CATEGORÍA"):
@@ -180,18 +267,31 @@ QUÉ DEBES PRODUCIR:
 - emociones: 3 a 5 de la taxonomía fija, y por CADA una un argumento corto de por qué mueve la compra en ESTA marca. Taxonomía: ${EMOCIONES.join(", ")}. Usa solo esos valores.
 - canales (PRESENCIA DIGITAL): audita SOLO los canales relevantes PARA EL FOCO (para un videoclip pesa YouTube/Spotify; para fotografía, el catálogo o la web; para redes, IG/TikTok). Estado: activo | fuerte | irregular | débil | ausente.
   ⚠️ REGLA CRÍTICA DE CREDIBILIDAD — el cliente desconfía si le dices algo que él sabe que es falso, o si le respondes "no sé":
-  · Si el cliente TE COMPARTIÓ el perfil de una red (Instagram, TikTok…) → esa red está **"activo"**. NUNCA la marques "ausente", "débil" ni digas que no sabes si existe: él sabe que la tiene. La nota debe reconocer que el canal está en marcha y nombrar el potencial del nicho; la recomendación debe ser el siguiente paso concreto para potenciarlo. Habla de OPORTUNIDAD, no de diagnóstico que no puedes ver.
-  · Si el cliente NO te compartió esa red social → simplemente **NO la incluyas** en la lista de canales. No inventes ni preguntes: mejor un informe corto y certero que uno que adivina.
-  · "ausente" ÚNICAMENTE para "Sitio web" o "Google / reseñas" cuando el cliente no los reporta (esos sí suelen faltar en marcas pequeñas y son venta directa) → recomiéndalos como SERVICIO de Bushido (landing/catálogo de pedidos, Google Business + estrategia de reseñas).
-  · Si el cliente reporta sitio web → márcalo "activo" y recomienda cómo aprovecharlo mejor.
+  · Instagram: si abajo vienen DATOS REALES, juzga con ellos ("activo", "fuerte", "irregular" o "débil", con el número delante). Si lo compartió pero NO lo pudimos leer → "activo", sin opinar de su contenido: habla del potencial y del siguiente paso. Si lo que escribió no es un usuario de Instagram, no lo incluyas.
+  · TikTok: si lo compartió → "activo", pero NUNCA lo vimos: no opines de su contenido, solo de la oportunidad. Si no lo compartió → NO lo incluyas.
+  · Cualquier otra red que no compartió → NO la incluyas. Mejor un informe corto y certero que uno que adivina.
+  · Sitio web: si abajo viene "LECTURA DE SU SITIO WEB", opina SOLO de lo que ahí aparece (título, textos, si hay o no botones de reservar/comprar/contacto). Si reportó web pero no se pudo leer → "activo", sin opinar de su contenido ni de su diseño. Si no reportó web → "ausente" con la nota "No nos compartiste sitio web" (no afirmes que no existe) y recomiéndala como servicio.
+  · "Google / reseñas": NUNCA lo verificamos. Si lo incluyes, estado "por confirmar", di en la nota que no lo revisamos y preséntalo como oportunidad, NUNCA como carencia comprobada ("no tienes reseñas" está prohibido).
 - metricas: 3 métricas que la marca debería vigilar SEGÚN EL FOCO (no siempre son métricas de redes: para videoclip mira retención y fuentes de tráfico en YouTube; para comercial, CPA/ROAS y tasa de conversión; para fotografía, conversión del catálogo/ficha de producto; para UGC, qué ángulo convierte). NO inventes números ni porcentajes concretos: describe QUÉ medir y por qué importa.
 - propuesta: el sistema/servicio propuesto, conectando la data de la marca con la data de nicho de Bushido.
-- paquete: recomienda el servicio de Bushido que MEJOR resuelve LO QUE EL CLIENTE BUSCA (mira el campo "Qué busca / contexto"). NO recomiendes el paquete de redes por defecto: si pidió un comercial → "Empresarial" o "Mini comercial / campaña"; si un videoclip → el de Videoclip; si cobertura de evento → cotización de evento; si manejo de redes o no especifica → paquete de redes. Nombre y precio EXACTOS de la lista. Además:
-  · precioDesde: el precio de ENTRADA de esa familia de paquetes (ej. si recomiendas "Evolution", el "desde" es el de "Insight" $2.500.000/mes). Es el ancla que ve el cliente.
-  · incentivo: un bono por ARRANCAR ESTE MES que resuelva una CARENCIA concreta del diagnóstico o de la presencia digital (ej. montar Google Business + reseñas, sesión de estrategia y guiones del primer mes, foto editorial de marca). NUNCA un descuento en el precio y NUNCA publicaciones o reels extra por encima del plan: Bushido agrega valor, no rebaja ni infla el volumen. Frase corta y personalizada.
+- perfil: QUÉ ES quien pide el análisis (lista cerrada). Míralo ANTES de recomendar nada:
+  · "Creativo o freelance audiovisual" (fotógrafo, filmmaker, realizador, productora, editor, gaffer, storyboard…) y "Creador de contenido / UGC" (el que VENDE su contenido a marcas, con media kit o "colaboraciones") NO son clientes de producción: son colegas o talento. A ellos NUNCA les vendas un comercial, un videoclip, una cobertura ni piezas UGC: sería venderles lo que ellos mismos hacen. Su diagnóstico va sobre su MARCA PERSONAL (cómo consigue clientes, qué portafolio muestra) y la recomendación es "Estrategia Kansei · Auditoría express". En la propuesta invítalos al Gremio de Bushido (bushidoav.com/gremio), el banco de talento con el que Bushido trabaja en sus producciones.
+  · Si eligió "UGC / creadores" pero ES creador (no una marca que busca creadores), aplica la regla anterior: está buscando trabajo, no proveedores.
+- etapa: "Arrancando" | "En crecimiento" | "Establecida" según seguidores, publicaciones y lo que muestra su web. Si no tienes datos reales de su cuenta ni de su web, "Sin datos para saberlo" — no adivines.
+- paquete: recomienda el servicio de Bushido que MEJOR resuelve LO QUE EL CLIENTE BUSCA (mira el FOCO). Nombre y precio EXACTOS de la lista:
+  · "Manejo de redes" o no especificó → Growth Systems. El nivel depende de la ETAPA: "Arrancando" o "Sin datos para saberlo" → siempre "Insight"; "En crecimiento" → "Insight" o "Evolution"; "Dominance" solo para una marca "Establecida" que ya invierte en pauta. Con los mismos datos, la misma recomendación: no subas de nivel sin evidencia.
+  · "UGC / creadores" o "Creadores / UGC para mi marca" (una marca que busca creadores) → "Creator Matching" (Starter o Growth).
+  · "Soy creador o freelance" → "Estrategia Kansei · Auditoría express" + invitación al Gremio (ver perfil).
+  · "Un videoclip" → "Videoclip" (Básico o Con concepto).
+  · "Un comercial / campaña" → "Mini comercial" (Básico, Con concepto o Pack lanzamiento); si es una empresa que vende a otras empresas, "Video corporativo".
+  · "Cobertura de evento" → "Cobertura de eventos". NO inventes el evento: si no sabes cuál es, no lo describas.
+  · "Fotografía" → "Bushido Content Day" (imagen de marca o persona) o "Video de producto" (catálogo de producto).
+  · "Aún no sé" → "Estrategia Kansei · Auditoría express".
+  · precioDesde: el precio de ENTRADA de esa familia de paquetes (ej. si recomiendas "Evolution", el "desde" es el de "Insight" $2.500.000 / mes). Es el ancla que ve el cliente.
+  · incentivo: un bono por ARRANCAR ESTE MES que resuelva una CARENCIA concreta del diagnóstico o de la presencia digital (ej. sesión de estrategia y guiones del primer mes, foto editorial de marca, montar Google Business). NUNCA un descuento en el precio y NUNCA publicaciones o reels extra por encima del plan: Bushido agrega valor, no rebaja ni infla el volumen. Frase corta y personalizada.
 ${PAQUETES}
 
-Si no conoces la marca con certeza, infiere desde el nicho de forma honesta y prudente; es un borrador que un humano de Bushido revisa antes de enviar.`;
+⚠️ Este informe le llega DIRECTO al cliente, sin que nadie lo revise antes. Cada afirmación sobre SU marca tiene que salir de los datos de abajo (lo que escribió, su Instagram, su web o la data del sector). Lo que infieras desde el nicho, dilo como lectura del nicho ("en tu categoría suele pasar…"), nunca como algo que viste en su cuenta.`;
 
 // Bloques que SOLO existen cuando el cerebro conoce el sector. Se añaden al
 // esquema en tiempo de ejecución: si no hay data, el campo no existe y el
@@ -229,6 +329,8 @@ const SCHEMA_BASE = {
   properties: {
     nicho: { type: "string", description: "Nicho + sector en texto libre, ej: 'Repostería artesanal · gastronomía'" },
     categoria: { type: "string", enum: [...NICHOS], description: "La categoría de la lista que MEJOR agrupa esta marca (para la data). Si ninguna encaja, 'Otro'." },
+    perfil: { type: "string", enum: [...PERFILES], description: "Qué es quien pide el análisis. Un fotógrafo, filmmaker o productora es 'Creativo o freelance audiovisual'; quien vende contenido a marcas es 'Creador de contenido / UGC'." },
+    etapa: { type: "string", enum: [...ETAPAS], description: "Etapa de la marca según datos reales. Sin datos de su cuenta ni de su web: 'Sin datos para saberlo'." },
     resumen: { type: "string", description: "2-3 frases: el diagnóstico central, sin rodeos" },
     // ORDENADAS: la versión corta del informe solo muestra las 2 primeras
     // fortalezas y LA primera carencia. Si el orden es arbitrario, el prospecto
@@ -290,7 +392,7 @@ const SCHEMA_BASE = {
         additionalProperties: false,
         properties: {
           canal: { type: "string" },
-          estado: { type: "string", enum: ["activo", "fuerte", "irregular", "débil", "ausente"] },
+          estado: { type: "string", enum: ["activo", "fuerte", "irregular", "débil", "ausente", "por confirmar"] },
           nota: { type: "string", description: "Diagnóstico corto del canal" },
           recomendacion: { type: "string", description: "Qué hacer (servicio Bushido cuando aplica)" },
         },
@@ -299,7 +401,7 @@ const SCHEMA_BASE = {
     },
     metricas: {
       type: "array",
-      description: "3 métricas de redes a vigilar (sin inventar números)",
+      description: "3 métricas a vigilar SEGÚN EL FOCO (no siempre de redes), sin inventar números",
       items: {
         type: "object",
         additionalProperties: false,
@@ -317,8 +419,8 @@ const SCHEMA_BASE = {
       additionalProperties: false,
       properties: {
         nombre: { type: "string", description: "Nombre EXACTO de un paquete de Bushido" },
-        precio: { type: "string", description: "Precio EXACTO del tier recomendado, ej: '$3.200.000 / mes'" },
-        precioDesde: { type: "string", description: "Precio de entrada de esa familia (ancla 'desde'), ej: '$2.000.000 / mes'" },
+        precio: { type: "string", description: "Precio EXACTO del tier recomendado, copiado de la lista, ej: '$3.900.000 / mes'" },
+        precioDesde: { type: "string", description: "Precio de entrada de esa familia (ancla 'desde'), ej: '$2.500.000 / mes'" },
         porque: { type: "string", description: "Por qué ese paquete para esta etapa" },
         incentivo: { type: "string", description: "Bono por arrancar este mes que tapa una carencia (NO descuento)" },
       },
@@ -326,25 +428,41 @@ const SCHEMA_BASE = {
     },
   },
   required: [
-    "nicho", "categoria", "resumen", "fortalezas", "carencias", "oportunidades",
+    "nicho", "categoria", "perfil", "etapa", "resumen", "fortalezas", "carencias", "oportunidades",
     "buyerPersona", "gatillos", "emociones", "canales", "metricas",
     "propuesta", "paquete",
   ],
 } as const;
 
-/** El esquema del turno: con los campos de sector solo si hay data que los sostenga. */
-function esquema(conSector: boolean) {
-  if (!conSector) return SCHEMA_BASE;
+/**
+ * El esquema del turno: con los campos de sector solo si hay data que los
+ * sostenga, y con otra instrucción para las fortalezas cuando no vimos su
+ * cuenta (el abrebocas las titula "lo que ya estás haciendo bien": sin datos,
+ * esa pregunta solo se puede contestar inventando).
+ */
+function esquema(conSector: boolean, conDatos: boolean) {
+  const properties: Record<string, unknown> = { ...SCHEMA_BASE.properties };
+  if (!conDatos) {
+    properties.fortalezas = {
+      type: "array",
+      items: { type: "string" },
+      description:
+        "3 a 4 ventajas de partida, DE MAYOR A MENOR. NO viste su cuenta: básalas en lo que el cliente escribió, en su web (si la leímos) y en su categoría. Escríbelas como lo que TIENE A FAVOR ('tienes a favor…', 'tu categoría te da…'), NUNCA como algo que viste en su perfil.",
+    };
+  }
+  if (conSector) Object.assign(properties, CAMPOS_SECTOR);
   return {
     ...SCHEMA_BASE,
-    properties: { ...SCHEMA_BASE.properties, ...CAMPOS_SECTOR },
-    required: [...SCHEMA_BASE.required, "datoSector", "cierreGancho"],
+    properties,
+    required: conSector ? [...SCHEMA_BASE.required, "datoSector", "cierreGancho"] : [...SCHEMA_BASE.required],
   };
 }
 
 interface ModelOut {
   nicho: string;
   categoria: Nicho;
+  perfil: PerfilLead;
+  etapa: EtapaMarca;
   resumen: string;
   fortalezas: string[];
   carencias: string[];
@@ -401,85 +519,112 @@ async function investigar(client: Anthropic, input: AnalizarInput): Promise<stri
   }
 }
 
-/** Genera el análisis con Claude: investiga la web y luego estructura. null si no hay API key. */
+/**
+ * Cuánto puede esperar al modelo por intento. El SDK REINTENTA los timeouts,
+ * así que el peor caso es timeout × 2. Antes eran 50s × 2 dentro de una ruta
+ * de 60s: cuando el modelo tardaba, Vercel mataba la función sin dejar rastro
+ * (24 de los 30 leads sin informe). Ahora las rutas tienen 300s y esto cabe:
+ * 12s Instagram/web + 16s sector + 2 × 120s modelo = 268s.
+ */
+const MODEL_TIMEOUT_MS = Number(process.env.MODEL_TIMEOUT_MS || 120_000);
+
+/** Genera el análisis con Claude a partir de lo que SÍ pudimos leer. null si no hay API key. */
 export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | null> {
   if (!KEY) {
     console.warn("[analizar] SIN ANTHROPIC_API_KEY — configúrala en Vercel para el análisis automático.");
     return null;
   }
   const client = new Anthropic({ apiKey: KEY });
+  const t0 = Date.now();
 
-  // PASO 1: investigación web — SOLO en modo profundo (tarda ~35s). El análisis
-  // gratis va sin ella para que llegue rápido y sin riesgo de timeout.
-  const brief = input.profundo ? await investigar(client, input) : "";
+  // Si en el campo Instagram pegaron su web o su portafolio, eso es su web.
+  const webEnInstagram = pareceWebNoInstagram(input.redes);
+  const web = input.web || webEnInstagram || undefined;
 
-  // PASO 1b: el perfil REAL de Instagram (rápido, ~300ms). Esto es lo que
-  // separa un análisis específico de uno genérico: sin datos, el modelo solo
-  // puede decir obviedades del nicho.
-  const perfil = await perfilInstagram(input.redes);
+  // PASO 1: lo que se puede leer de verdad — Instagram, su web y (solo en modo
+  // profundo) la búsqueda en internet. En paralelo: ninguno depende del otro.
+  const [ig, sitio, brief] = await Promise.all([
+    perfilInstagram(input.redes),
+    web ? leerWeb(web) : Promise.resolve(null),
+    input.profundo ? investigar(client, input) : Promise.resolve(""),
+  ]);
+  console.log(
+    `[analizar] fuentes en ${Date.now() - t0}ms · instagram=${ig.estado} · web=${sitio ? (sitio.ok ? "leida" : `no (${sitio.error})`) : "no compartida"}`
+  );
 
-  // PASO 1c: lo que el cerebro ya sabe de ese sector. Va DESPUÉS de Instagram
-  // (no en paralelo) a propósito: la biografía y los textos de sus publicaciones
-  // son lo que permite acertarle a la categoría, y sin categoría correcta el
-  // cerebro no devuelve nada.
+  // PASO 2: lo que el cerebro ya sabe de ese sector. Va DESPUÉS de Instagram y
+  // de la web: su bio y sus textos son los que permiten acertarle a la
+  // categoría. El FOCO ("Un videoclip", "Cobertura de evento") NO entra: eso es
+  // lo que pide, no lo que es — y antes convertía a cualquiera en "Fotografía".
   const sector = await briefingDelSector(
-    [input.marca, input.contexto, input.web, perfil.pistas].filter(Boolean).join(" ")
+    [input.marca, ig.pistas, sitio?.ok ? sitio.pistas : ""].filter(Boolean).join(" ")
   );
   const briefing = briefingParaPrompt(sector);
 
-  // PASO 2: estructurar el análisis usando esos hechos
-  const userMsg = [
-    `Marca: ${input.marca}`,
-    `Instagram / redes: ${input.redes || "(no lo compartió)"}`,
-    `TikTok: ${input.tiktok || "(no lo compartió — NO lo incluyas en canales)"}`,
-    `Sitio web: ${input.web || "(no reporta sitio web)"}`,
-    ``,
-    `>>> FOCO DEL ANÁLISIS (lo que el cliente eligió): ${input.contexto || "(no especificó → enfoque general de redes)"}`,
-    `Todo el informe debe leerse desde ese foco, no solo desde redes sociales.`,
-    "",
-    // Sin datos reales el prompt le exige evidencia concreta al modelo y no le
-    // da ninguna: esa combinación es la que produce cifras inventadas. Aquí se
-    // le dice explícitamente qué NO puede afirmar.
-    perfil.texto ||
-      [
-        "⚠️ NO TENEMOS DATOS DE SU CUENTA. La API de Instagram no devolvió nada para esta marca",
-        "(suele pasar con cuentas personales, que no son profesionales). REGLAS OBLIGATORIAS:",
-        "· NO cites su biografía, ni sus publicaciones, ni lo que dicen sus textos: no los has visto.",
-        "· NO inventes seguidores, likes, interacción, número de publicaciones ni porcentajes. Ninguna cifra.",
-        "· NO afirmes qué publica, cada cuánto, ni qué le falta a su feed. No lo sabes.",
-        "· SÍ puedes trabajar con lo que el cliente escribió, con su nicho y con la data del sector.",
-        "· Y DILO: en el resumen deja claro, en una frase, que este diagnóstico se hizo sin acceso a",
-        "  las métricas de su cuenta y que con acceso el análisis va mucho más profundo. Ser honesto",
-        "  aquí vende más que fingir que viste algo: si le describes un perfil que no es el suyo, se da cuenta.",
-      ].join("\n"),
-    "",
-    briefing,
-    "",
-    brief
-      ? `INVESTIGACIÓN WEB (hechos reales — BÁSATE en esto, no inventes más allá de lo aquí verificado):\n${brief}`
-      : "",
-    "",
-    "Analiza esta marca y devuelve el informe estructurado. Recuerda la regla de honestidad de canales y recomienda el servicio que resuelve lo que el cliente busca.",
-  ]
-    .filter((l) => l !== "")
-    .join("\n");
+  const conDatos = ig.estado === "leido";
+  const lineaWeb = !web
+    ? "Sitio web: (no nos compartió sitio web)"
+    : sitio?.ok
+      ? `Sitio web: ${web} (leído — ver abajo)`
+      : `Sitio web: ${web} (lo compartió, pero NO lo pudimos abrir: ${sitio?.error ?? "sin detalle"}. No opines de su contenido.)`;
 
-  // Config que YA funcionaba en producción (no la aprietes: si el modelo se corta,
-  // el informe nunca llega). El timeout va holgado dentro de los 60s de la ruta.
+  // PASO 3: estructurar el análisis usando esos hechos
+  const userMsg = bienFormado(
+    [
+      `Marca: ${input.marca}`,
+      webEnInstagram
+        ? `Instagram: (no lo compartió — en ese campo escribió su web: ${webEnInstagram}. NO incluyas Instagram en canales)`
+        : `Instagram: ${input.redes || "(no lo compartió)"}`,
+      `TikTok: ${input.tiktok ? `${input.tiktok} (lo compartió, pero NO lo podemos ver: no opines de su contenido)` : "(no lo compartió — NO lo incluyas en canales)"}`,
+      lineaWeb,
+      ``,
+      `>>> FOCO DEL ANÁLISIS (lo que el cliente eligió): ${input.contexto || "(no especificó → enfoque general de redes)"}`,
+      `Todo el informe debe leerse desde ese foco, no solo desde redes sociales.`,
+      "",
+      // Sin datos reales el prompt le exige evidencia concreta al modelo y no le
+      // da ninguna: esa combinación es la que produce cifras inventadas. Aquí se
+      // le dice explícitamente qué NO puede afirmar, según el motivo real.
+      ig.texto || (webEnInstagram ? avisoSinInstagram({ ...ig, estado: "no_compartido" }) : avisoSinInstagram(ig, input.redes)),
+      "",
+      sitio?.ok ? sitio.texto ?? "" : "",
+      "",
+      briefing,
+      "",
+      brief
+        ? `INVESTIGACIÓN WEB (hechos reales — BÁSATE en esto, no inventes más allá de lo aquí verificado):\n${brief}`
+        : "",
+      "",
+      "Analiza esta marca y devuelve el informe estructurado. Recuerda: primero QUÉ ES (perfil), después la regla de honestidad de canales, y recomienda el servicio que resuelve lo que el cliente busca.",
+    ]
+      .filter((l) => l !== "")
+      .join("\n")
+  );
+
+  // Config que YA funcionaba en producción (modelo, thinking, effort, schema).
+  // Lo único que cambia es el tiempo: ver MODEL_TIMEOUT_MS.
   const t1 = Date.now();
   const res = await client.messages.create(
     {
       model: "claude-opus-4-8",
       max_tokens: 16000,
       thinking: { type: "adaptive" },
-      output_config: { format: { type: "json_schema", schema: esquema(Boolean(sector)) }, effort: "medium" },
+      output_config: {
+        format: { type: "json_schema", schema: esquema(Boolean(sector), conDatos) },
+        effort: "medium",
+      },
       system: SYSTEM,
       messages: [{ role: "user", content: userMsg }],
     },
-    { timeout: input.timeoutMs ?? 50000, maxRetries: 1 }
+    { timeout: input.timeoutMs ?? MODEL_TIMEOUT_MS, maxRetries: 1 }
   );
-  console.log(`[analizar] informe estructurado en ${Date.now() - t1}ms (profundo=${!!input.profundo})`);
+  console.log(
+    `[analizar] informe estructurado en ${Date.now() - t1}ms (total ${Date.now() - t0}ms, profundo=${!!input.profundo}, stop=${res.stop_reason})`
+  );
 
+  // Un corte o una negativa dejan el JSON incompleto: mejor un error claro que
+  // un "Unexpected end of JSON input" en el panel.
+  if (res.stop_reason === "max_tokens") throw new Error("El modelo se quedó sin espacio (max_tokens) antes de terminar el informe.");
+  if (res.stop_reason === "refusal") throw new Error("El modelo se negó a generar este informe.");
   const textBlock = res.content.find((b) => b.type === "text");
   if (!textBlock || textBlock.type !== "text") {
     throw new Error("El modelo no devolvió contenido de texto.");
@@ -489,10 +634,19 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
   // taxonomía plana (para consultar/comparar) derivada del detalle
   const emociones = (data.emociones ?? []).map((e) => e.emocion) as Emocion[];
 
+  const fuentes: FuentesInforme = {
+    instagram: webEnInstagram ? "usuario_invalido" : ig.estado,
+    instagramDetalle: ig.detalle,
+    web: !web ? "no_compartida" : sitio?.ok ? "leida" : "no_se_pudo",
+    webDetalle: sitio?.ok ? sitio.url : sitio?.error,
+    tiktok: input.tiktok ? "compartido_no_leido" : "no_compartido",
+    sector: Boolean(sector),
+  };
+
   return {
     marca: input.marca,
     redes: input.redes,
-    web: input.web,
+    web,
     fecha: String(new Date().getFullYear()),
     nicho: data.nicho,
     categoria: data.categoria,
@@ -517,8 +671,9 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
       : undefined,
     estado: "analizado",
     modo: input.abrebocas ? "abrebocas" : "completo",
-    // Si es false, el informe se escribió sin ver su cuenta: revísalo antes de
-    // mandarlo. Es el aviso que evita mandarle a alguien un perfil que no es.
-    conDatosReales: Boolean(perfil.texto),
+    // Si es false, el informe se escribió sin ver su cuenta: no cita métricas
+    // ni publicaciones y no debe alimentar la "data del sector".
+    conDatosReales: conDatos,
+    perfil: { tipo: data.perfil, etapa: data.etapa, fuentes },
   };
 }

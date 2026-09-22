@@ -6,7 +6,9 @@ import { sendClientWhatsApp } from "@/lib/whatsapp";
 import { marcarInforme } from "@/lib/leads";
 
 export const runtime = "nodejs";
-export const maxDuration = 120;
+// Igual que el automático: con Fluid Compute Hobby permite 300s. La búsqueda
+// web del modo profundo (~25s) + el modelo (hasta 2 × 120s) no cabían en 120.
+export const maxDuration = 300;
 
 // `nullish()` porque Supabase devuelve null (no undefined) en los campos vacíos:
 // con .optional() el panel fallaba con "Datos inválidos".
@@ -57,8 +59,9 @@ export async function POST(request: Request) {
       web: web ?? undefined,
       contexto: contexto ?? undefined,
       profundo: profundo ?? false,
-      // esta ruta tiene 120s (maxDuration): aprovéchalos en vez de cortar a los 50
-      timeoutMs: 100_000,
+      // Lo que ve un prospecto es el abrebocas (tú con la sesión del panel ves
+      // todo en el mismo link). El profundo es para clientes: va completo.
+      abrebocas: !profundo,
     });
   } catch (err) {
     console.error("generarAnalisis:", err);
@@ -105,7 +108,15 @@ export async function POST(request: Request) {
   }
 
   if (leadId) {
-    await marcarInforme(leadId, { ok: true, url });
+    // "enviado" solo si de verdad salió por algún canal: antes el chip decía
+    // "Informe enviado" también cuando solo se había generado para revisar.
+    const salio = envio.correo === "enviado" || envio.whatsapp === "enviado";
+    await marcarInforme(leadId, {
+      ok: true,
+      url,
+      origen: "panel",
+      ...(enviarCliente && salio ? { enviado: envio } : {}),
+    });
   }
   // `envio` solo viaja si de verdad se pidió enviar; si no, el panel creía que
   // ya se había mandado y escondía el botón "Enviar al cliente".

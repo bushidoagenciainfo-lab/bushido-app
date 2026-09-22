@@ -24,6 +24,8 @@ export interface IgMedia {
   like_count?: number;
   comments_count?: number;
   media_type?: string;
+  media_product_type?: string; // FEED | REELS | STORY…
+  timestamp?: string; // ISO — sin esto no se puede hablar de frecuencia
   permalink?: string;
 }
 
@@ -37,20 +39,57 @@ export interface IgPerfil {
   media?: IgMedia[];
 }
 
+/**
+ * Por qué no se pudo leer la cuenta. Importa distinguirlo: "no es profesional"
+ * es algo que se le puede decir al cliente; un fallo nuestro NO (el informe de
+ * Frenchie le dijo "no eres cuenta profesional" a una cuenta business de 18k
+ * seguidores porque el usuario venía con mayúscula).
+ */
+export type IgMotivo =
+  | "no_existe_o_personal" // (#110) Meta no la encuentra como Business/Creator
+  | "usuario_invalido" // lo escrito no es un usuario (una web, un correo…)
+  | "config" // token/permisos: problema nuestro
+  | "red"; // timeout o error de Meta
+
 export interface IgResultado {
   ok: boolean;
   perfil?: IgPerfil;
   error?: string;
+  motivo?: IgMotivo;
 }
 
-/** Quita @, espacios y URLs completas: deja el username limpio. */
+/**
+ * Deja el username limpio: sin @, sin URL, sin query (?igsh=…) y en minúsculas
+ * (los usuarios de Instagram lo son; con mayúscula Business Discovery no
+ * encuentra la cuenta). Si escribieron dos handles, toma el primero.
+ * Devuelve "" si lo escrito claramente no es un usuario de Instagram.
+ */
 export function limpiarUsuario(v: string): string {
-  return v
-    .trim()
+  const t = (v || "").trim();
+  if (!t || /\S+@\S+\.\S+/.test(t)) return ""; // vacío o un correo
+  // Una URL que no es de Instagram (web, portafolio, linktree) no es un usuario.
+  if (/^(https?:\/\/|www\.)/i.test(t) && !/instagram\.com\//i.test(t)) return "";
+  const partes = t
     .replace(/^https?:\/\/(www\.)?instagram\.com\//i, "")
-    .replace(/[/?].*$/, "")
-    .replace(/^@/, "")
+    .split(/[\s,;|]+/)
+    .filter(Boolean);
+  // "@a @b" → dos cuentas: la primera. "zoraida _cardenas" → un espacio que se
+  // coló: se une. "Marlon Cáceres" (un nombre, no un usuario) → no pasa el filtro.
+  const candidato = partes.length > 1 && !partes[0].startsWith("@") ? partes.join("") : partes[0] ?? "";
+  const u = candidato
+    .replace(/[/?#].*$/, "")
+    .replace(/^@+/, "")
+    .toLowerCase()
     .trim();
+  // Instagram: letras, números, punto y guion bajo; hasta 30 caracteres.
+  return /^[a-z0-9._]{1,30}$/.test(u) ? u : "";
+}
+
+/** ¿Lo que escribió en el campo Instagram es en realidad un link a otra web? */
+export function pareceWebNoInstagram(v?: string): string | null {
+  const t = (v || "").trim();
+  if (/^(https?:\/\/|www\.)/i.test(t) && !/instagram\.com/i.test(t)) return t;
+  return null;
 }
 
 /**
@@ -59,17 +98,21 @@ export function limpiarUsuario(v: string): string {
  */
 export async function businessDiscovery(usuario: string): Promise<IgResultado> {
   if (!hasInstagram()) {
-    return { ok: false, error: "Falta IG_USER_ID / IG_ACCESS_TOKEN." };
+    return { ok: false, motivo: "config", error: "Falta IG_USER_ID / IG_ACCESS_TOKEN." };
   }
   const username = limpiarUsuario(usuario);
-  if (!username || /\s/.test(username)) {
-    return { ok: false, error: `"${usuario}" no parece un usuario de Instagram.` };
+  if (!username) {
+    return {
+      ok: false,
+      motivo: "usuario_invalido",
+      error: `"${usuario}" no parece un usuario de Instagram.`,
+    };
   }
 
   const campos =
     `business_discovery.username(${username})` +
     `{username,name,biography,website,followers_count,media_count,` +
-    `media.limit(6){caption,like_count,comments_count,media_type,permalink}}`;
+    `media.limit(6){caption,like_count,comments_count,media_type,media_product_type,timestamp,permalink}}`;
   const url =
     `https://graph.facebook.com/${GRAPH}/${IG_USER_ID}` +
     `?fields=${encodeURIComponent(campos)}` +
@@ -88,26 +131,28 @@ export async function businessDiscovery(usuario: string): Promise<IgResultado> {
       if (data.error.code === 110 || /does not exist|cannot be found/i.test(m)) {
         return {
           ok: false,
+          motivo: "no_existe_o_personal",
           error: `@${username}: no existe o es cuenta personal (Business Discovery solo ve cuentas Business/Creator).`,
         };
       }
       if (/access token/i.test(m)) {
-        return { ok: false, error: `Token de Instagram inválido o vencido: ${m}` };
+        return { ok: false, motivo: "config", error: `Token de Instagram inválido o vencido: ${m}` };
       }
       // (#10) no es culpa de la cuenta consultada: es configuración nuestra
       if (data.error.code === 10 || /does not have permission/i.test(m)) {
         return {
           ok: false,
+          motivo: "config",
           error:
             "(#10) Al token le falta el permiso instagram_manage_insights (el que " +
             "habilita leer OTRAS cuentas). Regenera el token del usuario del sistema " +
             "marcándolo. Verifica en /api/admin/diag → bloque «instagram».",
         };
       }
-      return { ok: false, error: `@${username}: ${m}` };
+      return { ok: false, motivo: "red", error: `@${username}: ${m}` };
     }
     if (!data.business_discovery) {
-      return { ok: false, error: `@${username}: Meta no devolvió datos.` };
+      return { ok: false, motivo: "red", error: `@${username}: Meta no devolvió datos.` };
     }
     // Meta envuelve las publicaciones en { media: { data: [...] } }, no en un
     // array plano. Lo normalizamos aquí para que quien lo use reciba siempre
@@ -119,6 +164,7 @@ export async function businessDiscovery(usuario: string): Promise<IgResultado> {
   } catch (e) {
     return {
       ok: false,
+      motivo: "red",
       error: `@${username}: ${e instanceof Error ? e.message : "fallo de red"}`,
     };
   }

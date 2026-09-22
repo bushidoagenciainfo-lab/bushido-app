@@ -9,9 +9,11 @@ import { forwardToServer } from "@/lib/forward";
 
 export const runtime = "nodejs";
 // Esta ruta existe SOLO para el análisis pesado: así tiene su propio presupuesto
-// de tiempo completo, en vez de compartirlo con el guardado del lead y los avisos
-// (la búsqueda web sola tarda ~35s y hacía que /api/lead se pasara del límite).
-export const maxDuration = 60;
+// de tiempo, en vez de compartirlo con el guardado del lead y los avisos.
+// Con 60s Vercel mataba la función cuando el modelo tardaba (40–54s era lo
+// normal) y el lead quedaba sin informe y sin rastro. El proyecto usa Fluid
+// Compute (el panel ya corría con 120s), que en Hobby permite hasta 300s.
+export const maxDuration = 300;
 
 const schema = z.object({
   secret: z.string(),
@@ -49,9 +51,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Sin ANTHROPIC_API_KEY." }, { status: 503 });
   }
 
-  // Respondemos YA y hacemos el trabajo pesado después, con los 60s completos.
+  // Respondemos YA y hacemos el trabajo pesado después.
   after(async () => {
     const t0 = Date.now();
+    // Marca de "en curso": si la función se corta a la fuerza, el panel lo ve
+    // (antes un corte dejaba el lead sin chip, como si nunca hubiera pasado nada).
+    if (d.leadId) await marcarInforme(d.leadId, { ok: false, pendiente: true, origen: "automatico", error: "Generando…" });
     try {
       const analisis = await generarAnalisis({
         marca: d.marca,
@@ -70,32 +75,45 @@ export async function POST(request: Request) {
       const id = await storeAnalisis(analisis, d.leadId ?? undefined);
       const url = informeUrl(id);
       forwardToServer("analisis", { leadId: d.leadId, ...analisis }).catch(() => {});
-      // al cerebro, para que lo cruce con los demás nichos (no bloquea)
-      enviarAlOS("/api/sync", {
-        tipo: "analisis",
-        total: 1,
-        items: [{ id, lead_id: d.leadId, ...analisis }],
-      }).catch(() => {});
+      // Al cerebro, para que lo cruce con los demás nichos (no bloquea). SOLO si
+      // el informe se escribió viendo su cuenta: uno inferido desde el nicho
+      // volvería después como "data del sector" y se citaría como evidencia.
+      if (analisis.conDatosReales) {
+        enviarAlOS("/api/sync", {
+          tipo: "analisis",
+          total: 1,
+          items: [{ id, lead_id: d.leadId, ...analisis }],
+        }).catch(() => {});
+      }
 
+      const enviado: { correo?: string; whatsapp?: string } = {};
       if (d.email) {
-        await emailInformeListo({
+        enviado.correo = await emailInformeListo({
           email: d.email,
           nombre: d.nombre ?? undefined,
           marca: analisis.marca,
           url,
-        }).catch((e) => console.error("[informe] email falló:", e));
+        }).then(
+          () => "enviado",
+          (e) => {
+            console.error("[informe] email falló:", e);
+            return `falló: ${e instanceof Error ? e.message : String(e)}`;
+          }
+        );
       }
-      await sendClientWhatsApp({
+      const wa = await sendClientWhatsApp({
         phone: d.phone ?? undefined,
         params: [(d.nombre || "").split(" ")[0] || "hola", analisis.marca, url],
       });
-      if (d.leadId) await marcarInforme(d.leadId, { ok: true, url });
+      enviado.whatsapp = wa.ok ? "enviado" : `falló: ${String(wa.error ?? "sin detalle")}`;
+      if (d.leadId) await marcarInforme(d.leadId, { ok: true, url, enviado, origen: "automatico" });
       console.log(`[informe] LISTO en ${Date.now() - t0}ms · ${url}`);
     } catch (e) {
       console.error("[informe] error:", e);
       if (d.leadId) {
         await marcarInforme(d.leadId, {
           ok: false,
+          origen: "automatico",
           error: e instanceof Error ? e.message : String(e),
         });
       }

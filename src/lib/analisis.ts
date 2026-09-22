@@ -48,44 +48,62 @@ export type Nicho = (typeof NICHOS)[number];
  * son dos grupos distintos: dos grupos de 3 marcas no forman patrón, uno de 6
  * sí. La categoría manda sobre el nicho descriptivo, que sigue siendo libre.
  */
+// Cada clave se busca al INICIO de una palabra ("reposter" → repostería,
+// reposteros). Las que terminan en "=" deben ser la palabra COMPLETA: antes se
+// buscaban como pedazo de texto y "spa" salía de "espacio", "salud" de
+// "saludo", "moto" de "remoto" y "curso" de "concurso" — y con eso el informe
+// citaba el dato de un sector que no era el de la marca.
 const REGLAS: Array<{ cat: Nicho; claves: string[] }> = [
-  { cat: "Repostería", claves: ["reposter", "pasteler", "panader", "cake", "postre", "dulce", "brownie", "galleta"] },
-  { cat: "Gastronomía / restaurante", claves: ["gastronom", "restaurante", "comida", "cocina", "food", "bar ", "cafeter", "cafe", "pizzer", "hamburgues", "catering", "heladeria"] },
-  { cat: "Música / artista", claves: ["music", "artista", "cantante", "banda", "dj", "sello", "disquera", "reggaeton", "concierto"] },
+  { cat: "Repostería", claves: ["reposter", "pasteler", "panader", "cake=", "cakes=", "postre", "brownie", "galleta", "torta=", "tortas="] },
+  { cat: "Gastronomía / restaurante", claves: ["gastronom", "restaurante", "comida", "cocina=", "food=", "bar=", "bistro", "cafeter", "cafe=", "pizzer", "hamburgues", "catering", "heladeria", "vino=", "vinos=", "wine=", "brunch="] },
+  { cat: "Música / artista", claves: ["musica", "musical", "musico", "artista", "cantante", "banda=", "dj=", "disquera", "reggaeton", "concierto", "rapero", "productor musical", "sencillo="] },
   // Hotelería va ANTES que Moda: "hotel boutique" no es una tienda de ropa.
-  { cat: "Hotelería / turismo", claves: ["hotel", "turism", "hosped", "hostal", "viaje", "glamping", "finca "] },
-  { cat: "Moda / ropa", claves: ["moda", "ropa", "textil", "indument", "streetwear", "calzado", "zapat", "joyer", "accesorio"] },
-  { cat: "Belleza / estética", claves: ["belleza", "estetic", "peluquer", "barber", "spa", "uñas", "cosmetic", "skincare", "maquillaje"] },
-  { cat: "Fitness / salud", claves: ["fitness", "gimnasio", "gym", "salud", "nutric", "entrenador", "crossfit", "yoga", "medic", "odontolog", "psicolog"] },
-  { cat: "Fotografía", claves: ["fotograf", "foto ", "audiovisual", "video", "producci", "cinemat", "content creator"] },
-  { cat: "Inmobiliaria", claves: ["inmobili", "bienes raices", "finca raiz", "propiedad", "arriendo", "construct"] },
-  { cat: "Automotriz", claves: ["automotr", "carro", "vehicul", "taller mecanic", "moto", "concesionar", "llanta"] },
-  { cat: "Educación / cursos", claves: ["educac", "curso", "academia", "colegio", "universidad", "formacion", "capacitac", "instituto"] },
-  { cat: "Tecnología / software", claves: ["tecnolog", "software", "app ", "saas", "desarrollo web", "sistemas", "digital agency", "startup"] },
-  { cat: "Retail / producto", claves: ["retail", "tienda", "ecommerce", "e-commerce", "producto", "venta de", "distribuidor", "mayorista", "supermercado"] },
-  { cat: "Eventos", claves: ["evento", "boda", "matrimonio", "fiesta", "celebrac", "wedding", "logistica de evento"] },
-  { cat: "Servicios profesionales", claves: ["abogad", "juridic", "contab", "consultor", "asesor", "financier", "seguro", "arquitect", "ingenier"] },
+  { cat: "Hotelería / turismo", claves: ["hotel", "turism", "hosped", "hostal", "glamping", "tours="] },
+  { cat: "Moda / ropa", claves: ["moda=", "ropa=", "textil", "indument", "streetwear", "calzado", "zapat", "joyer", "joyas=", "accesorios="] },
+  { cat: "Belleza / estética", claves: ["belleza", "estetica", "peluquer", "barber", "spa=", "unas=", "cosmetic", "skincare", "maquillaje", "makeup=", "mua="] },
+  { cat: "Fitness / salud", claves: ["fitness", "gimnasio", "gym=", "salud=", "nutricion", "entrenador", "crossfit", "yoga=", "medico", "medica", "odontolog", "psicolog", "clinica="] },
+  { cat: "Fotografía", claves: ["fotograf", "audiovisual", "filmmaker", "videografo", "cinematograf", "productora", "realizador", "videoclip", "cinema=", "colorista", "color grading"] },
+  { cat: "Inmobiliaria", claves: ["inmobili", "bienes raices", "finca raiz", "arriendo", "constructora"] },
+  { cat: "Automotriz", claves: ["automotr", "carro=", "carros=", "vehicul", "taller mecanic", "moto=", "motos=", "concesionar", "llanta"] },
+  { cat: "Educación / cursos", claves: ["educac", "curso=", "cursos=", "academia", "colegio", "universidad", "capacitac", "instituto="] },
+  { cat: "Tecnología / software", claves: ["tecnolog", "software", "app=", "saas=", "desarrollo web", "startup"] },
+  { cat: "Retail / producto", claves: ["retail=", "tienda=", "ecommerce", "e-commerce", "distribuidor", "mayorista", "supermercado"] },
+  { cat: "Eventos", claves: ["boda=", "bodas=", "matrimonio", "wedding", "organizacion de eventos", "logistica de eventos"] },
+  { cat: "Servicios profesionales", claves: ["abogad", "juridic", "contable", "contador", "contadora", "contabilidad", "consultor", "asesoria", "financier", "aseguradora", "arquitect", "ingenier"] },
 ];
 
+const escapar = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const PATRONES = REGLAS.map((r) => ({
+  cat: r.cat,
+  res: r.claves.map((k) =>
+    k.endsWith("=")
+      ? new RegExp(`(^|[^a-z0-9])${escapar(k.slice(0, -1))}($|[^a-z0-9])`)
+      : new RegExp(`(^|[^a-z0-9])${escapar(k)}`)
+  ),
+}));
+
+// Rango de las marcas diacríticas combinables (U+0300–U+036F): tras NFD, quitar
+// eso quita las tildes. Se arma con fromCharCode para que el rango sea explícito.
+const TILDES = new RegExp(`[${String.fromCharCode(0x300)}-${String.fromCharCode(0x36f)}]`, "g");
+const sinTildes = (s: string) => s.toLowerCase().normalize("NFD").replace(TILDES, "");
+
 export function normalizarCategoria(...textos: Array<string | null | undefined>): Nicho {
-  const t = textos
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
+  const t = sinTildes(textos.filter(Boolean).join(" "));
   if (!t.trim()) return "Otro";
 
   // Si ya viene una categoría válida escrita igual, respétala.
-  const exacta = NICHOS.find(
-    (n) => n.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === t.trim()
-  );
+  const exacta = NICHOS.find((n) => sinTildes(n) === t.trim());
   if (exacta) return exacta;
 
-  for (const r of REGLAS) {
-    if (r.claves.some((k) => t.includes(k))) return r.cat;
+  // Gana la categoría con MÁS claves distintas presentes (antes ganaba la
+  // primera que apareciera, aunque fuera por una palabra suelta en un caption).
+  // En empate decide el orden de la lista.
+  let mejor: { cat: Nicho; n: number } = { cat: "Otro", n: 0 };
+  for (const p of PATRONES) {
+    const n = p.res.filter((re) => re.test(t)).length;
+    if (n > mejor.n) mejor = { cat: p.cat, n };
   }
-  return "Otro";
+  return mejor.cat;
 }
 
 // Cada emoción con el ARGUMENTO de por qué mueve la compra en esta marca
@@ -108,7 +126,39 @@ export interface BuyerPersona {
 
 // Auditoría de presencia digital: cada canal con su estado y qué hacer.
 // Aquí afloran las carencias-servicio: "no tiene web", "no tiene reseñas", etc.
+// "por confirmar" = el canal existe o puede existir pero NO lo verificamos
+// (Google/reseñas nunca se consulta; TikTok no se puede leer).
 export type EstadoCanal = "activo" | "fuerte" | "irregular" | "débil" | "ausente" | "por confirmar";
+
+/** Qué es quien llenó el pop-up. Un filmmaker no es un cliente de producción. */
+export const PERFILES = [
+  "Marca / negocio",
+  "Marca personal / influencer",
+  "Artista / músico",
+  "Creativo o freelance audiovisual",
+  "Creador de contenido / UGC",
+] as const;
+export type PerfilLead = (typeof PERFILES)[number];
+
+export const ETAPAS = ["Arrancando", "En crecimiento", "Establecida", "Sin datos para saberlo"] as const;
+export type EtapaMarca = (typeof ETAPAS)[number];
+
+/** De dónde salió cada dato del informe: sirve para auditarlo y para el panel. */
+export interface FuentesInforme {
+  instagram: "leido" | "no_existe_o_personal" | "usuario_invalido" | "config" | "red" | "no_compartido";
+  instagramDetalle?: string;
+  web: "leida" | "no_se_pudo" | "no_compartida";
+  webDetalle?: string;
+  tiktok: "compartido_no_leido" | "no_compartido";
+  sector: boolean;
+}
+
+export interface LecturaPerfil {
+  tipo: PerfilLead;
+  etapa: EtapaMarca;
+  fuentes: FuentesInforme;
+}
+
 export interface Canal {
   canal: string; // "Instagram", "Sitio web", "Google / reseñas", "TikTok", "YouTube"...
   estado: EstadoCanal;
@@ -126,7 +176,7 @@ export interface Metrica {
 export interface PaqueteRecomendado {
   nombre: string;
   precio: string; // precio real del tier (referencia)
-  precioDesde?: string; // ancla que se muestra: precio de entrada de la familia, ej "$2.000.000 / mes"
+  precioDesde?: string; // ancla que se muestra: precio de entrada de la familia, ej "$2.500.000 / mes"
   porque: string;
   incentivo?: string; // bono por arrancar ya, personalizado a una carencia (NO descuento)
 }
@@ -180,6 +230,8 @@ export interface Analisis {
    * Los informes viejos no lo traen: por eso es opcional, no false por defecto.
    */
   conDatosReales?: boolean;
+  /** Qué tipo de lead es, en qué etapa está y qué fuentes se pudieron leer. */
+  perfil?: LecturaPerfil;
   // — propuesta —
   propuesta: string;
   paquete: PaqueteRecomendado;

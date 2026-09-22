@@ -69,6 +69,16 @@ function extras(a: Analisis) {
   };
 }
 
+/** Segunda tanda (tipo de lead, etapa y fuentes): columna `perfil` jsonb. */
+function extras2(a: Analisis) {
+  return { perfil: a.perfil ?? null };
+}
+
+/** ¿Supabase rechazó el insert porque falta una columna? */
+function faltaColumna(error: { code?: string; message: string } | null): boolean {
+  return Boolean(error && (error.code === "PGRST204" || /column .* does not exist|Could not find the .* column/i.test(error.message)));
+}
+
 // mapea una fila de la tabla de vuelta al `Analisis` que consume ReportView
 function fromRow(r: Record<string, unknown>): Analisis {
   return {
@@ -102,6 +112,7 @@ function fromRow(r: Record<string, unknown>): Analisis {
     modo: (r.modo as Analisis["modo"]) ?? "completo",
     conDatosReales:
       typeof r.con_datos_reales === "boolean" ? r.con_datos_reales : undefined,
+    perfil: (r.perfil as Analisis["perfil"]) ?? undefined,
   };
 }
 
@@ -122,21 +133,25 @@ async function localDir(): Promise<string | null> {
 export async function storeAnalisis(a: Analisis, leadId?: string): Promise<string> {
   if (hasDb()) {
     const base = toRow(a, leadId);
-    let { data, error } = await db()
-      .from("analisis")
-      .insert({ ...base, ...extras(a) })
-      .select("id")
-      .single();
-
-    // Si la tabla aún no tiene las columnas nuevas, Supabase responde PGRST204
-    // ("column not found"). Reintentamos sin ellas: mejor un informe sin el
-    // dato de sector que ningún informe.
-    if (error && (error.code === "PGRST204" || /column .* does not exist/i.test(error.message))) {
+    // Del más completo al más básico: si la tabla aún no tiene una columna
+    // nueva, Supabase responde PGRST204 y se reintenta sin esa tanda. Así una
+    // columna que falta no se lleva por delante el dato de sector.
+    const intentos = [
+      { ...base, ...extras(a), ...extras2(a) },
+      { ...base, ...extras(a) },
+      base,
+    ];
+    let data: { id: unknown } | null = null;
+    let error: { code?: string; message: string } | null = null;
+    for (const [i, fila] of intentos.entries()) {
+      ({ data, error } = await db().from("analisis").insert(fila).select("id").single());
+      if (!faltaColumna(error)) break;
       console.warn(
-        `[analisis] faltan columnas nuevas en Supabase (${error.message}). ` +
-          `Guardo sin el dato de sector — corre la migración de GUIA-BUSHIDO-OS.md.`
+        `[analisis] falta una columna en Supabase (${error?.message}). ` +
+          (i === 0
+            ? "Guardo sin `perfil` — corre supabase/analisis-perfil.sql."
+            : "Guardo sin el dato de sector — corre la migración de GUIA-BUSHIDO-OS.md.")
       );
-      ({ data, error } = await db().from("analisis").insert(base).select("id").single());
     }
     if (error) throw new Error(`Supabase insert (analisis) falló: ${error.message}`);
     if (!data) throw new Error("Supabase insert (analisis) no devolvió id.");
@@ -153,7 +168,7 @@ export async function storeAnalisis(a: Analisis, leadId?: string): Promise<strin
     } catch {
       all = {};
     }
-    all[id] = { ...toRow(a, leadId), ...extras(a), id, created_at: new Date().toISOString() };
+    all[id] = { ...toRow(a, leadId), ...extras(a), ...extras2(a), id, created_at: new Date().toISOString() };
     await fs.writeFile(file, JSON.stringify(all, null, 2), "utf8");
   }
   return id;

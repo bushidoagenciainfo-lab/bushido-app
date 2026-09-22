@@ -116,11 +116,11 @@ export default function AnalisisModal() {
             }
             submitLabel="Quiero mi análisis"
             successTitle="¡Recibido!"
-            successText="Tu informe llega al correo en unos minutos. No es un texto genérico: cruzamos tu cuenta con nuestra base de análisis de marcas de tu sector."
+            successText="Tu informe llega a tu correo y WhatsApp en unos minutos. Lo escribimos leyendo tu Instagram (si es cuenta profesional) y tu web: con tus datos, no con frases genéricas."
             legal
             fields={[
               { name: "name", label: "Nombre", required: true, placeholder: "Tu nombre" },
-              { name: "company", label: "Empresa / marca", required: true, placeholder: "Nombre de tu marca" },
+              { name: "company", label: "Empresa / marca", required: true, placeholder: "Tu marca (o tu nombre)" },
               { name: "email", label: "Email", type: "email", required: true, full: true, placeholder: "tu@correo.com" },
               { name: "phone", label: "WhatsApp", type: "tel", required: true, full: true, prefix: "+57", placeholder: "300 000 0000" },
               { name: "social", label: "Instagram", required: true, full: true, placeholder: "@tumarca (o el link)" },
@@ -134,12 +134,13 @@ export default function AnalisisModal() {
                 placeholder: "Elige (opcional)",
                 options: [
                   "Manejo de redes",
-                  "UGC / creadores",
+                  "Creadores / UGC para mi marca",
                   "Un videoclip",
                   "Un comercial / campaña",
                   "Cobertura de evento",
                   "Fotografía",
                   "Aún no sé",
+                  "Soy creador o freelance",
                 ],
               },
             ]}

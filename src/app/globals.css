@@ -3027,6 +3027,8 @@ body:has(.admin) input, body:has(.admin) textarea, body:has(.admin-login) input 
 .al-informe.ok { color: #6FBF8E; background: rgba(111,191,142,.08); border: 1px solid rgba(111,191,142,.3); }
 .al-informe.bad { color: var(--sepp); background: rgba(213,50,46,.07); border: 1px solid rgba(213,50,46,.3); }
 .al-informe a { color: inherit; text-decoration: underline; }
+.al-informe.wait { color: #D9B45A; background: rgba(217,180,90,.08); border: 1px solid rgba(217,180,90,.3); }
+.al-informe-previo { margin-top: 4px; opacity: .75; font-size: .92em; }
 
 /* alcance concreto de cada plan, dentro de su fila del drawer */
 .row-incluye {

@@ -37,10 +37,21 @@ export default async function InformePage({
           <div className="informe-nota">
             {analisis.conDatosReales === false && (
               <p className="informe-alerta">
-                ⚠️ Este informe se escribió <strong>sin poder leer su cuenta</strong>{" "}
-                (Instagram no devolvió datos — suele ser una cuenta personal, no
-                profesional). No cita métricas ni publicaciones reales. Revísalo
-                antes de mandarlo.
+                ⚠️ Este informe se escribió <strong>sin poder leer su Instagram</strong>
+                {analisis.perfil?.fuentes.instagramDetalle
+                  ? ` (${analisis.perfil.fuentes.instagramDetalle})`
+                  : ""}
+                . No cita métricas ni publicaciones reales.
+              </p>
+            )}
+            {analisis.perfil && (
+              <p>
+                Lead: <strong>{analisis.perfil.tipo}</strong> · etapa{" "}
+                <strong>{analisis.perfil.etapa}</strong> · Instagram:{" "}
+                {analisis.perfil.fuentes.instagram} · web: {analisis.perfil.fuentes.web}
+                {analisis.perfil.fuentes.webDetalle ? ` (${analisis.perfil.fuentes.webDetalle})` : ""} ·
+                TikTok: {analisis.perfil.fuentes.tiktok} · dato de sector:{" "}
+                {analisis.perfil.fuentes.sector ? "sí" : "no"}
               </p>
             )}
             {analisis.modo === "abrebocas" && (
