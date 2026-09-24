@@ -112,7 +112,7 @@ export async function businessDiscovery(usuario: string): Promise<IgResultado> {
   const campos =
     `business_discovery.username(${username})` +
     `{username,name,biography,website,followers_count,media_count,` +
-    `media.limit(6){caption,like_count,comments_count,media_type,media_product_type,timestamp,permalink}}`;
+    `media.limit(12){caption,like_count,comments_count,media_type,media_product_type,timestamp,permalink}}`;
   const url =
     `https://graph.facebook.com/${GRAPH}/${IG_USER_ID}` +
     `?fields=${encodeURIComponent(campos)}` +

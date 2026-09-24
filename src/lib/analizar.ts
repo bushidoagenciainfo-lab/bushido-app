@@ -6,7 +6,14 @@
 // pipeline sigue funcionando, solo no se genera el informe automático).
 
 import Anthropic from "@anthropic-ai/sdk";
-import { businessDiscovery, hasInstagram, limpiarUsuario, pareceWebNoInstagram, type IgResultado } from "./instagram";
+import {
+  businessDiscovery,
+  hasInstagram,
+  limpiarUsuario,
+  pareceWebNoInstagram,
+  type IgMedia,
+  type IgResultado,
+} from "./instagram";
 import { leerWeb } from "./web";
 import { verificarTiktok, type VerificacionTiktok } from "./tiktok";
 import { briefingDelSector, briefingParaPrompt } from "./os-briefing";
@@ -78,6 +85,7 @@ interface LecturaIG {
   pistas: string;
   estado: FuentesInforme["instagram"];
   detalle?: string;
+  website?: string; // el enlace de su bio: si no nos dio web, se lee ese
 }
 
 /**
@@ -98,36 +106,67 @@ async function perfilInstagram(redes?: string): Promise<LecturaIG> {
   }
   const p = r.perfil;
 
-  const posts = (p.media ?? []).map((m, i) => {
-    const inter =
-      typeof m.like_count === "number"
-        ? `${m.like_count} likes, ${m.comments_count ?? 0} comentarios`
-        : "likes ocultos";
+  const media = p.media ?? [];
+  const interaccion = (m: IgMedia) =>
+    typeof m.like_count === "number" ? m.like_count + (m.comments_count ?? 0) : null;
+  const valores = media.map(interaccion).filter((v): v is number => v !== null);
+
+  // MEDIANA, no promedio: un solo post viral (o pautado) infla el promedio y
+  // hacía que el informe le dijera "interacción fuerte, por encima del sector"
+  // a una cuenta cuya publicación típica está en rango flojo (caso @bushido.aa:
+  // 4,38 % de promedio contra 0,93 % de mediana).
+  const ordenados = [...valores].sort((a, b) => a - b);
+  const mediana = ordenados.length
+    ? ordenados.length % 2
+      ? ordenados[(ordenados.length - 1) / 2]
+      : (ordenados[ordenados.length / 2 - 1] + ordenados[ordenados.length / 2]) / 2
+    : 0;
+  // Los multiplicadores se calculan aquí: el modelo los copia, no los calcula
+  // (escribió "14 veces tu promedio" donde eran 5).
+  const veces = (v: number) => (mediana > 0 ? v / mediana : 0);
+  const fmt = (n: number) => n.toLocaleString("es-CO", { maximumFractionDigits: 1 });
+
+  const posts = media.map((m, i) => {
+    const v = interaccion(m);
     const dias = haceDias(m.timestamp);
     const cuando = dias === null ? "fecha desconocida" : dias === 0 ? "hoy" : `hace ${dias} días`;
+    const esVideo = m.media_product_type === "REELS" || m.media_type === "VIDEO";
     const tipo = m.media_product_type === "REELS" ? "REEL" : (m.media_type ?? "?");
+    const inter =
+      v === null
+        ? "likes ocultos"
+        : `${m.like_count} likes, ${m.comments_count ?? 0} comentarios` +
+          (mediana > 0 ? ` = ${fmt(veces(v))}x la mediana` : "") +
+          (veces(v) >= 3 ? " ⚠️ ATÍPICO (puede ser viral o pautado: no lo tomes como su rendimiento normal)" : "") +
+          (esVideo ? " · video: sin reproducciones" : "");
     const texto = recortar((m.caption ?? "(sin texto)").replace(/\s+/g, " "), 220);
     return `  ${i + 1}. [${tipo} · ${cuando}] ${inter}\n     "${texto}"`;
   });
 
-  // Ritmo real: cuánto hace de la última y cuántos días cubren las últimas 6.
-  const fechas = (p.media ?? []).map((m) => haceDias(m.timestamp)).filter((d): d is number => d !== null);
+  // Ritmo real: cuánto hace de la última y cuántos días cubren las leídas.
+  const fechas = media.map((m) => haceDias(m.timestamp)).filter((d): d is number => d !== null);
   const ritmo = fechas.length
     ? `\nÚltima publicación: hace ${Math.min(...fechas)} días. Las últimas ${fechas.length} publicaciones cubren ${Math.max(...fechas) - Math.min(...fechas)} días.`
     : "\n(Sin fechas de publicación: NO opines sobre frecuencia ni constancia.)";
 
   // Tasa de interacción: el dato que revela si la audiencia responde de verdad
   let engagement = "";
-  const conLikes = (p.media ?? []).filter((m) => typeof m.like_count === "number");
-  if (p.followers_count && conLikes.length) {
-    const prom =
-      conLikes.reduce((s, m) => s + (m.like_count ?? 0) + (m.comments_count ?? 0), 0) /
-      conLikes.length;
-    const pct = (prom / p.followers_count) * 100;
+  if (p.followers_count && valores.length) {
+    const promedio = valores.reduce((s, v) => s + v, 0) / valores.length;
+    const pctMediana = (mediana / p.followers_count) * 100;
+    const pctPromedio = (promedio / p.followers_count) * 100;
+    const atipicos = valores.filter((v) => veces(v) >= 3).length;
     engagement =
-      `\nInteracción promedio: ${prom.toFixed(0)} por publicación = ${pct.toFixed(2)}% de sus seguidores.` +
-      `\n(Referencia del sector: <1% es flojo, 1-3% normal, >3% fuerte. Úsalo para juzgar, y dilo con nombre propio.)`;
+      `\nInteracción MEDIANA: ${fmt(mediana)} por publicación = ${pctMediana.toFixed(2)}% de sus seguidores. ← USA ESTA para juzgar.` +
+      `\n(Promedio: ${fmt(promedio)} = ${pctPromedio.toFixed(2)}%${atipicos ? `, inflado por ${atipicos} publicación(es) atípica(s)` : ""}.)` +
+      `\n(Referencia del sector sobre la MEDIANA: <1% es flojo, 1-3% normal, >3% fuerte. Úsalo para juzgar, y dilo con nombre propio.)`;
   }
+
+  const avisoMuestra =
+    `\n⚠️ Solo viste estas ${media.length} publicaciones de ${p.media_count ?? "?"} en total.` +
+    ` Toda afirmación sobre su feed va acotada a ellas ("en tus últimas ${media.length} publicaciones…"):` +
+    ` NUNCA "nunca", "en ningún lado" ni "no hay una sola". Todos los números y "x veces" ya vienen calculados arriba: cópialos, no hagas cuentas.` +
+    `\n⚠️ De los videos/reels NO tenemos reproducciones (Meta no las da de cuentas ajenas): NO compares reels contra fotos o carruseles por likes ni concluyas que "los reels no te rinden".`;
 
   const texto = [
     "DATOS REALES DE SU INSTAGRAM (obtenidos ahora de la API oficial de Meta —",
@@ -138,7 +177,8 @@ async function perfilInstagram(redes?: string): Promise<LecturaIG> {
     p.website ? `Enlace en bio: ${p.website}` : "Enlace en bio: NO tiene (dato relevante).",
     engagement,
     ritmo,
-    posts.length ? `\nÚltimas publicaciones:\n${posts.join("\n")}` : "\n(No devolvió publicaciones.)",
+    posts.length ? `\nÚltimas ${posts.length} publicaciones:\n${posts.join("\n")}` : "\n(No devolvió publicaciones.)",
+    posts.length ? avisoMuestra : "",
   ]
     .filter(Boolean)
     .join("\n");
@@ -146,11 +186,11 @@ async function perfilInstagram(redes?: string): Promise<LecturaIG> {
   // Lo que dice de sí misma es la mejor pista para saber a qué sector pertenece:
   // el nombre de la marca casi nunca lo revela ("Bianco Bake Lab" no dice repostería).
   const pistas = recortar(
-    [p.name, p.biography, ...(p.media ?? []).map((m) => m.caption ?? "")].filter(Boolean).join(" "),
+    [p.name, p.biography, ...media.map((m) => m.caption ?? "")].filter(Boolean).join(" "),
     1200
   );
 
-  return { texto, pistas, estado: "leido" };
+  return { texto, pistas, estado: "leido", website: p.website };
 }
 
 /** Lo que el modelo tiene que saber cuando NO pudo ver la cuenta, según el motivo real. */
@@ -228,10 +268,11 @@ Si una frase tuya podría estar en el informe de una repostería Y en el de un a
 CÓMO SE VE UN DIAGNÓSTICO REAL:
 - Cita EVIDENCIA concreta del perfil: números de seguidores, la biografía textual, lo que dicen sus últimas publicaciones, su tasa de interacción. Nombra lo que viste.
   · Flojo: "Le falta constancia en las publicaciones".
-  · Real: "Con 2.600 seguidores promedias 40 interacciones por post (1,5%): la gente que ya te sigue sí responde, el problema es que no estás llegando a nadie nuevo".
-- Señala la CONTRADICCIÓN: casi toda marca dice una cosa y hace otra. Encuéntrala. Si la bio promete "envíos a todo el país" pero ninguna publicación habla de eso, dilo.
+  · Real: "Con 2.600 seguidores, tu publicación típica tiene 40 interacciones (1,5 %): la gente que ya te sigue sí responde, el problema es que no estás llegando a nadie nuevo".
+- Señala la CONTRADICCIÓN: casi toda marca dice una cosa y hace otra. Encuéntrala. Si la bio promete "envíos a todo el país" pero ninguna de las publicaciones que viste habla de eso, dilo ("en tus últimas 12 publicaciones no aparece").
 - Di lo INCÓMODO. Si el contenido se ve amateur, si el precio no se justifica con lo que muestra, si lleva 200 publicaciones sin resultado, dilo con respeto pero sin rodeos. Un diagnóstico que solo halaga no vale nada y el cliente lo nota.
 - Si algo NO se puede saber con los datos disponibles, dilo abiertamente en vez de rellenar con suposiciones bonitas.
+- NO nombres ciudad, barrio ni país salvo que aparezca en su bio, en su web, en sus textos o en lo que escribió el cliente. Si no lo sabes, habla de "tu ciudad" o "tu zona".
 - Las fortalezas también deben ser específicas: "producto fotogénico" no dice nada; "las fotos de producto sobre fondo blanco tienen un nivel que la mayoría de tu competencia no tiene" sí.
 
 REGLAS DE VOZ:
@@ -254,7 +295,7 @@ En el resumen deja claro desde la primera frase que estás mirando su marca DESD
 📊 SI RECIBES DATA DEL SECTOR ("LO QUE YA SABEMOS DE ESTA CATEGORÍA"):
 Es lo único del informe que un competidor no puede improvisar: demuestra que detrás hay un sistema, no un texto bonito. Úsala así:
 1. En el diagnóstico, teje UNO O DOS datos CON LA EVIDENCIA Y EL NÚMERO delante. La forma es siempre la misma: cuántas marcas del sector hemos analizado, cuál es el patrón, y dónde queda ESTA marca frente a él.
-   · Bien: "De las 8 marcas de repostería que hemos analizado, la carencia más repetida es que muestran el producto pero nunca el proceso. Tu cuenta la comparte: en 12 publicaciones no hay una sola del taller."
+   · Bien: "De las 8 marcas de repostería que hemos analizado, la carencia más repetida es que muestran el producto pero nunca el proceso. Tu cuenta la comparte: en tus últimas 12 publicaciones no aparece el taller."
    · Bien (contraste): "…y tú eres de las pocas que no: tus últimos 4 posts sí muestran el proceso. Esa es tu ventaja y no la estás capitalizando."
    · Mal: "El sector suele tener problemas de contenido." (sin número, sin evidencia, sin comparación → bórralo)
 2. El CIERRE-GANCHO es UNA transferencia: una palanca que funciona en OTRO sector y que casi nadie usa en el suyo. Nombra la OPORTUNIDAD, nunca la ejecución. Se cierra diciendo que cómo aplicarla a su marca es parte de lo que trabajamos con clientes. No des el paso a paso: si después de leerlo el cliente puede ejecutarlo solo, lo escribiste mal.
@@ -276,7 +317,7 @@ QUÉ DEBES PRODUCIR:
 - metricas: 3 métricas que la marca debería vigilar SEGÚN EL FOCO (no siempre son métricas de redes: para videoclip mira retención y fuentes de tráfico en YouTube; para comercial, CPA/ROAS y tasa de conversión; para fotografía, conversión del catálogo/ficha de producto; para UGC, qué ángulo convierte). NO inventes números ni porcentajes concretos: describe QUÉ medir y por qué importa.
 - propuesta: el sistema/servicio propuesto, conectando la data de la marca con la data de nicho de Bushido.
 - perfil: QUÉ ES quien pide el análisis (lista cerrada). Míralo ANTES de recomendar nada:
-  · "Creativo o freelance audiovisual" (fotógrafo, filmmaker, realizador, productora, editor, gaffer, storyboard…) y "Creador de contenido / UGC" (el que VENDE su contenido a marcas, con media kit o "colaboraciones") NO son clientes de producción: son colegas o talento. A ellos NUNCA les vendas un comercial, un videoclip, una cobertura ni piezas UGC: sería venderles lo que ellos mismos hacen. Su diagnóstico va sobre su MARCA PERSONAL (cómo consigue clientes, qué portafolio muestra) y la recomendación es "Estrategia Kansei · Auditoría express". En la propuesta invítalos al Gremio de Bushido (bushidoav.com/gremio), el banco de talento con el que Bushido trabaja en sus producciones.
+  · "Creativo o freelance audiovisual" (fotógrafo, filmmaker, realizador, editor, gaffer, storyboard… y también AGENCIAS o PRODUCTORAS audiovisuales, aunque sean empresas: son competencia, no clientes) y "Creador de contenido / UGC" (el que VENDE su contenido a marcas, con media kit o "colaboraciones") NO son clientes de producción: son colegas o talento. A ellos NUNCA les vendas un comercial, un videoclip, una cobertura ni piezas UGC: sería venderles lo que ellos mismos hacen. Su diagnóstico va sobre su MARCA PERSONAL (cómo consigue clientes, qué portafolio muestra) y la recomendación es "Estrategia Kansei · Auditoría express". En la propuesta invítalos al Gremio de Bushido (bushidoav.com/gremio), el banco de talento con el que Bushido trabaja en sus producciones.
   · Si eligió "UGC / creadores" pero ES creador (no una marca que busca creadores), aplica la regla anterior: está buscando trabajo, no proveedores.
 - etapa: "Arrancando" | "En crecimiento" | "Establecida" según seguidores, publicaciones y lo que muestra su web. Si no tienes datos reales de su cuenta ni de su web, "Sin datos para saberlo" — no adivines.
 - paquete: recomienda el servicio de Bushido que MEJOR resuelve LO QUE EL CLIENTE BUSCA (mira el FOCO). Nombre y precio EXACTOS de la lista:
@@ -330,7 +371,7 @@ const SCHEMA_BASE = {
   properties: {
     nicho: { type: "string", description: "Nicho + sector en texto libre, ej: 'Repostería artesanal · gastronomía'" },
     categoria: { type: "string", enum: [...NICHOS], description: "La categoría de la lista que MEJOR agrupa esta marca (para la data). Si ninguna encaja, 'Otro'." },
-    perfil: { type: "string", enum: [...PERFILES], description: "Qué es quien pide el análisis. Un fotógrafo, filmmaker o productora es 'Creativo o freelance audiovisual'; quien vende contenido a marcas es 'Creador de contenido / UGC'." },
+    perfil: { type: "string", enum: [...PERFILES], description: "Qué es quien pide el análisis. Un fotógrafo, filmmaker, agencia o productora audiovisual es 'Creativo o freelance audiovisual' (aunque sea una empresa); quien vende contenido a marcas es 'Creador de contenido / UGC'." },
     etapa: { type: "string", enum: [...ETAPAS], description: "Etapa de la marca según datos reales. Sin datos de su cuenta ni de su web: 'Sin datos para saberlo'." },
     resumen: { type: "string", description: "2-3 frases: el diagnóstico central, sin rodeos" },
     // ORDENADAS: la versión corta del informe solo muestra las 2 primeras
@@ -552,16 +593,22 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
 
   // Si en el campo Instagram pegaron su web o su portafolio, eso es su web.
   const webEnInstagram = pareceWebNoInstagram(input.redes);
-  const web = input.web || webEnInstagram || undefined;
+  const webDada = input.web || webEnInstagram || undefined;
 
   // PASO 1: lo que se puede leer de verdad — Instagram, su web y (solo en modo
   // profundo) la búsqueda en internet. En paralelo: ninguno depende del otro.
-  const [ig, sitio, tt, brief] = await Promise.all([
+  const [ig, sitioDado, tt, brief] = await Promise.all([
     perfilInstagram(input.redes),
-    web ? leerWeb(web) : Promise.resolve(null),
+    webDada ? leerWeb(webDada) : Promise.resolve(null),
     input.tiktok ? verificarTiktok(input.tiktok) : Promise.resolve(null),
     input.profundo ? investigar(client, input) : Promise.resolve(""),
   ]);
+  // Si no nos dio web pero la tiene en la bio de Instagram, se lee esa (antes
+  // el informe decía "tienes bushidoav.com en la bio pero no nos lo
+  // compartiste"). Un link a WhatsApp no es una web.
+  const webDeBio = !webDada && ig.website && !/wa\.me|whatsapp\.com|api\.whatsapp/i.test(ig.website) ? ig.website : undefined;
+  const web = webDada || webDeBio;
+  const sitio = webDada ? sitioDado : webDeBio ? await leerWeb(webDeBio) : null;
   console.log(
     `[analizar] fuentes en ${Date.now() - t0}ms · instagram=${ig.estado} · web=${sitio ? (sitio.ok ? "leida" : `no (${sitio.error})`) : "no compartida"} · tiktok=${tt ? `${tt.estado}${tt.detalle ? ` (${tt.detalle})` : ""}` : "no compartido"}`
   );
@@ -577,9 +624,9 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
 
   const conDatos = ig.estado === "leido";
   const lineaWeb = !web
-    ? "Sitio web: (no nos compartió sitio web)"
+    ? "Sitio web: (no nos compartió sitio web ni hay una web en su bio)"
     : sitio?.ok
-      ? `Sitio web: ${web} (leído — ver abajo)`
+      ? `Sitio web: ${web}${webDeBio ? " (no nos la dio: es el enlace de su bio)" : ""} (leído — ver abajo)`
       : `Sitio web: ${web} (lo compartió, pero NO lo pudimos abrir: ${sitio?.error ?? "sin detalle"}. No opines de su contenido.)`;
 
   // PASO 3: estructurar el análisis usando esos hechos
