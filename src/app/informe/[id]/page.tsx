@@ -50,7 +50,8 @@ export default async function InformePage({
                 <strong>{analisis.perfil.etapa}</strong> · Instagram:{" "}
                 {analisis.perfil.fuentes.instagram} · web: {analisis.perfil.fuentes.web}
                 {analisis.perfil.fuentes.webDetalle ? ` (${analisis.perfil.fuentes.webDetalle})` : ""} ·
-                TikTok: {analisis.perfil.fuentes.tiktok} · dato de sector:{" "}
+                TikTok: {analisis.perfil.fuentes.tiktok}
+                {analisis.perfil.fuentes.tiktokDetalle ? ` (${analisis.perfil.fuentes.tiktokDetalle})` : ""} · dato de sector:{" "}
                 {analisis.perfil.fuentes.sector ? "sí" : "no"}
               </p>
             )}

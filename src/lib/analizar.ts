@@ -8,6 +8,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { businessDiscovery, hasInstagram, limpiarUsuario, pareceWebNoInstagram, type IgResultado } from "./instagram";
 import { leerWeb } from "./web";
+import { verificarTiktok, type VerificacionTiktok } from "./tiktok";
 import { briefingDelSector, briefingParaPrompt } from "./os-briefing";
 import {
   EMOCIONES,
@@ -268,7 +269,7 @@ QUÉ DEBES PRODUCIR:
 - canales (PRESENCIA DIGITAL): audita SOLO los canales relevantes PARA EL FOCO (para un videoclip pesa YouTube/Spotify; para fotografía, el catálogo o la web; para redes, IG/TikTok). Estado: activo | fuerte | irregular | débil | ausente.
   ⚠️ REGLA CRÍTICA DE CREDIBILIDAD — el cliente desconfía si le dices algo que él sabe que es falso, o si le respondes "no sé":
   · Instagram: si abajo vienen DATOS REALES, juzga con ellos ("activo", "fuerte", "irregular" o "débil", con el número delante). Si lo compartió pero NO lo pudimos leer → "activo", sin opinar de su contenido: habla del potencial y del siguiente paso. Si lo que escribió no es un usuario de Instagram, no lo incluyas.
-  · TikTok: si lo compartió → "activo", pero NUNCA lo vimos: no opines de su contenido, solo de la oportunidad. Si no lo compartió → NO lo incluyas.
+  · TikTok: solo sabemos si la cuenta EXISTE (abajo lo dice); NUNCA vemos sus videos ni sus números. Si está verificada o no se pudo verificar → "activo", sin opinar de su contenido: habla de la oportunidad del formato en su nicho. Si NO apareció en TikTok → "por confirmar" y en la nota pídele revisar el usuario, sin afirmar que no existe. Si no lo compartió → NO lo incluyas.
   · Cualquier otra red que no compartió → NO la incluyas. Mejor un informe corto y certero que uno que adivina.
   · Sitio web: si abajo viene "LECTURA DE SU SITIO WEB", opina SOLO de lo que ahí aparece (título, textos, si hay o no botones de reservar/comprar/contacto). Si reportó web pero no se pudo leer → "activo", sin opinar de su contenido ni de su diseño. Si no reportó web → "ausente" con la nota "No nos compartiste sitio web" (no afirmes que no existe) y recomiéndala como servicio.
   · "Google / reseñas": NUNCA lo verificamos. Si lo incluyes, estado "por confirmar", di en la nota que no lo revisamos y preséntalo como oportunidad, NUNCA como carencia comprobada ("no tienes reseñas" está prohibido).
@@ -519,6 +520,18 @@ async function investigar(client: Anthropic, input: AnalizarInput): Promise<stri
   }
 }
 
+/** La línea de TikTok del mensaje: qué sabemos de verdad de esa cuenta. */
+function lineaTiktok(valor: string | undefined, tt: VerificacionTiktok | null): string {
+  if (!valor || !tt) return "TikTok: (no lo compartió — NO lo incluyas en canales)";
+  if (tt.estado === "verificado") {
+    return `TikTok: @${tt.usuario} — confirmamos que la cuenta existe${tt.nombre ? ` (nombre visible: "${tt.nombre}")` : ""}. NO tenemos sus métricas ni sus videos: no opines de su contenido.`;
+  }
+  if (tt.estado === "no_encontrado") {
+    return `TikTok: escribió "${valor}", pero esa cuenta NO apareció en TikTok (puede estar mal escrita, haber cambiado o ser privada). Inclúyelo como "por confirmar" y pídele revisar el usuario; no afirmes que no existe.`;
+  }
+  return `TikTok: ${valor} (lo compartió; no pudimos verificarlo ahora. No opines de su contenido.)`;
+}
+
 /**
  * Cuánto puede esperar al modelo por intento. El SDK REINTENTA los timeouts,
  * así que el peor caso es timeout × 2. Antes eran 50s × 2 dentro de una ruta
@@ -543,13 +556,14 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
 
   // PASO 1: lo que se puede leer de verdad — Instagram, su web y (solo en modo
   // profundo) la búsqueda en internet. En paralelo: ninguno depende del otro.
-  const [ig, sitio, brief] = await Promise.all([
+  const [ig, sitio, tt, brief] = await Promise.all([
     perfilInstagram(input.redes),
     web ? leerWeb(web) : Promise.resolve(null),
+    input.tiktok ? verificarTiktok(input.tiktok) : Promise.resolve(null),
     input.profundo ? investigar(client, input) : Promise.resolve(""),
   ]);
   console.log(
-    `[analizar] fuentes en ${Date.now() - t0}ms · instagram=${ig.estado} · web=${sitio ? (sitio.ok ? "leida" : `no (${sitio.error})`) : "no compartida"}`
+    `[analizar] fuentes en ${Date.now() - t0}ms · instagram=${ig.estado} · web=${sitio ? (sitio.ok ? "leida" : `no (${sitio.error})`) : "no compartida"} · tiktok=${tt ? `${tt.estado}${tt.detalle ? ` (${tt.detalle})` : ""}` : "no compartido"}`
   );
 
   // PASO 2: lo que el cerebro ya sabe de ese sector. Va DESPUÉS de Instagram y
@@ -575,7 +589,7 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
       webEnInstagram
         ? `Instagram: (no lo compartió — en ese campo escribió su web: ${webEnInstagram}. NO incluyas Instagram en canales)`
         : `Instagram: ${input.redes || "(no lo compartió)"}`,
-      `TikTok: ${input.tiktok ? `${input.tiktok} (lo compartió, pero NO lo podemos ver: no opines de su contenido)` : "(no lo compartió — NO lo incluyas en canales)"}`,
+      lineaTiktok(input.tiktok, tt),
       lineaWeb,
       ``,
       `>>> FOCO DEL ANÁLISIS (lo que el cliente eligió): ${input.contexto || "(no especificó → enfoque general de redes)"}`,
@@ -639,7 +653,8 @@ export async function generarAnalisis(input: AnalizarInput): Promise<Analisis | 
     instagramDetalle: ig.detalle,
     web: !web ? "no_compartida" : sitio?.ok ? "leida" : "no_se_pudo",
     webDetalle: sitio?.ok ? sitio.url : sitio?.error,
-    tiktok: input.tiktok ? "compartido_no_leido" : "no_compartido",
+    tiktok: tt ? tt.estado : "no_compartido",
+    tiktokDetalle: tt ? [tt.usuario && `@${tt.usuario}`, tt.nombre, tt.detalle].filter(Boolean).join(" · ") || undefined : undefined,
     sector: Boolean(sector),
   };
 

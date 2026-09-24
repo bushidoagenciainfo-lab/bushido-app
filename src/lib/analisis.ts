@@ -149,7 +149,9 @@ export interface FuentesInforme {
   instagramDetalle?: string;
   web: "leida" | "no_se_pudo" | "no_compartida";
   webDetalle?: string;
-  tiktok: "compartido_no_leido" | "no_compartido";
+  // "compartido_no_leido" = informes anteriores a la verificación por oEmbed.
+  tiktok: "verificado" | "no_encontrado" | "no_verificado" | "compartido_no_leido" | "no_compartido";
+  tiktokDetalle?: string;
   sector: boolean;
 }
 

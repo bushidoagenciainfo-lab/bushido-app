@@ -9,6 +9,7 @@ import {
   alertaBushidoWhatsApp,
 } from "@/lib/whatsapp";
 import { businessDiscovery } from "@/lib/instagram";
+import { verificarTiktok } from "@/lib/tiktok";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -25,6 +26,8 @@ export async function GET(request: Request) {
   const wabaId = new URL(request.url).searchParams.get("waba") || process.env.WHATSAPP_WABA_ID;
   // ?ig=usuario → prueba Business Discovery contra ese perfil
   const igTest = new URL(request.url).searchParams.get("ig");
+  // ?tt=usuario → verifica esa cuenta de TikTok con oEmbed (desde el servidor)
+  const ttTest = new URL(request.url).searchParams.get("tt");
 
   // ── 1. Variables de entorno presentes ──
   const env = {
@@ -466,6 +469,9 @@ export async function GET(request: Request) {
     ig.prueba = await businessDiscovery(igTest || "bushido.aa");
   }
   out.instagram = ig;
+
+  // ── 9. TikTok: solo se puede confirmar que la cuenta existe (oEmbed público) ──
+  out.tiktok = await verificarTiktok(ttTest || "bushido.aa");
 
   return NextResponse.json(out, { status: 200 });
 }
