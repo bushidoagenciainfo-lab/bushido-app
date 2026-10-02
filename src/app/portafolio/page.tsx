@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import PortfolioArc from "@/components/PortfolioArc";
 import PortfolioGrid from "@/components/PortfolioGrid";
-import AnalisisButton from "@/components/AnalisisButton";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = { title: "Portafolio · Bushido", description: "Trabajos de Bushido con artistas y marcas: música, moda y contenido. Producción audiovisual con criterio cinematográfico." };
@@ -38,18 +37,6 @@ export default function PortafolioPage() {
           <PortfolioGrid />
         </section>
 
-        <section>
-          <div className="price-cta">
-            <div className="price-cta-text">
-              ¿Quieres ver el showreel <em>completo</em>?
-              <br />
-              Está reservado para clientes que dejan sus datos.
-            </div>
-            <AnalisisButton className="btn btn-primary">
-              Pedir acceso <span className="arrow">→</span>
-            </AnalisisButton>
-          </div>
-        </section>
       </main>
       <Footer />
     </>

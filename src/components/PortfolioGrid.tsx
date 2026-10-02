@@ -12,6 +12,45 @@ export default function PortfolioGrid() {
 
   return (
     <section style={{ paddingTop: 20 }}>
+      {/* El trabajo en movimiento va ARRIBA: Bushido vende video, no solo fotos. */}
+      {(filter === "todos" || filter === "moda") && (
+        <div className="reels-sueltos top" id="reels">
+          <div className="rs-head">
+            <div className="rs-num">En movimiento</div>
+            <h2>
+              Reels <em>publicados</em>.
+            </h2>
+            <p>
+              Campañas que salieron en video para adidas y Nike. Ábrelas en
+              Instagram — están publicadas.
+            </p>
+          </div>
+          <div className="rs-grid">
+            {REELS.map((r) => (
+              <a
+                key={r.url}
+                className="rs-card"
+                href={r.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => track("reel", r.titulo)}
+              >
+                <span className="rs-play" aria-hidden="true">
+                  ▶
+                </span>
+                <span className="rs-body">
+                  <span className="rs-client">{r.cliente}</span>
+                  <span className="rs-title">{r.titulo}</span>
+                </span>
+                <span className="rs-go" aria-hidden="true">
+                  ↗
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="filter-bar">
         {PORTFOLIO_FILTERS.map((f) => (
           <button
@@ -19,6 +58,7 @@ export default function PortfolioGrid() {
             type="button"
             className={"filter-btn" + (filter === f.key ? " active" : "")}
             onClick={() => setFilter(f.key)}
+            aria-pressed={filter === f.key}
           >
             {f.label}
           </button>
@@ -39,9 +79,13 @@ export default function PortfolioGrid() {
               setAbierto(p);
             }}
           >
-            <div
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               className="art"
-              style={{ backgroundImage: `url('/portafolio/g/${p.id}/01.jpg')` }}
+              src={`/portafolio/g/${p.id}/cover.webp`}
+              alt={`${p.title} · ${p.client} — ${p.label} producido por Bushido`}
+              loading="lazy"
+              decoding="async"
             />
             <div className="scrim" />
             <div className="badge">{p.label}</div>
@@ -71,45 +115,6 @@ export default function PortfolioGrid() {
           </button>
         ))}
       </div>
-
-      {/* Campañas que salieron solo en video (sin galería de fotos propia) */}
-      {(filter === "todos" || filter === "moda") && (
-        <div className="reels-sueltos">
-          <div className="rs-head">
-            <div className="rs-num">También en movimiento</div>
-            <h2>
-              Reels <em>publicados</em>.
-            </h2>
-            <p>
-              Campañas que salieron en video para las marcas. Ábrelas en
-              Instagram — están publicadas.
-            </p>
-          </div>
-          <div className="rs-grid">
-            {REELS.map((r) => (
-              <a
-                key={r.url}
-                className="rs-card"
-                href={r.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => track("reel", r.titulo)}
-              >
-                <span className="rs-play" aria-hidden="true">
-                  ▶
-                </span>
-                <span className="rs-body">
-                  <span className="rs-client">{r.cliente}</span>
-                  <span className="rs-title">{r.titulo}</span>
-                </span>
-                <span className="rs-go" aria-hidden="true">
-                  ↗
-                </span>
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
 
       <Lightbox item={abierto} onClose={() => setAbierto(null)} />
     </section>

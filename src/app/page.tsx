@@ -1,7 +1,13 @@
+import Link from "next/link";
 import Hero from "@/components/Hero";
+import FeaturedWork from "@/components/FeaturedWork";
+import Metodo from "@/components/Metodo";
 import LeadForm from "@/components/LeadForm";
+import AnalisisButton from "@/components/AnalisisButton";
 import Footer from "@/components/Footer";
-import { SOCIAL, EMAIL, WHATSAPP } from "@/lib/site";
+import {
+  SOCIAL, EMAIL, WHATSAPP, BRANDS, HERO_PROOF, TESTIMONIOS, SERVICE_GROUPS, SERVICES, waUrl,
+} from "@/lib/site";
 
 const JSONLD = {
   "@context": "https://schema.org",
@@ -18,7 +24,18 @@ const JSONLD = {
   sameAs: [SOCIAL.instagram, SOCIAL.tiktok, SOCIAL.youtube],
 };
 
+/** Precio de entrada de cada familia de servicios (ignora los "a cotizar"). */
+function desdeGrupo(key: string): string | null {
+  const precios = SERVICES.filter((s) => s.grupo === key)
+    .map((s) => s.packages[0].price)
+    .map((p) => ({ p, n: Number(p.replace(/\D/g, "")) }))
+    .filter((x) => x.n > 0)
+    .sort((a, b) => a.n - b.n);
+  return precios[0]?.p ?? null;
+}
+
 export default function Home() {
+  const proofHref = HERO_PROOF.url || "/portafolio";
   return (
     <>
       <script
@@ -27,6 +44,17 @@ export default function Home() {
       />
       <main>
         <Hero />
+
+        {/* ── Marcas y artistas: la prueba antes que la filosofía ── */}
+        <section className="brands" aria-label="Marcas y artistas con los que hemos trabajado">
+          <div className="brands-track">
+            <span>{BRANDS.join(" · ")}</span>
+            <span className="dup" aria-hidden="true">{BRANDS.join(" · ")}</span>
+          </div>
+        </section>
+
+        {/* ── Trabajo seleccionado ── */}
+        <FeaturedWork />
 
         {/* ── Frase de Bushido (manifiesto) ── */}
         <section className="manifest">
@@ -38,46 +66,104 @@ export default function Home() {
           </p>
         </section>
 
-        {/* ── El método: la web vende el sistema, no servicios sueltos ── */}
-        <section className="metodo">
-          <div className="metodo-head">
-            <div className="section-num">El sistema</div>
-            <h2>
-              Producir es lo último que <em>hacemos</em>.
-            </h2>
-            <p>
-              La mayoría de agencias vende contenido. Un reel suelto no es
-              estrategia, es un gasto. Lo valioso no es producir videos: es saber
-              cuáles vale la pena producir.
-            </p>
+        {/* ── El sistema: 4 pasos + proceso completo plegado ── */}
+        <Metodo />
+
+        {/* ── La prueba: caso con cifras + el informe que entregamos ── */}
+        <section className="prueba">
+          <div className="section-num">La prueba</div>
+          <div className="prueba-grid">
+            <div className="prueba-caso">
+              <div className="pc-n">43,4M</div>
+              <div className="pc-l">vistas orgánicas con una sola pieza · sin pauta</div>
+              <p>
+                2,7 millones de cuentas alcanzadas y 1,7 millones de me gusta. No
+                fue suerte: fue investigar el nicho antes de encender la cámara y
+                producir exactamente lo que faltaba.
+              </p>
+              <a
+                className="pc-link"
+                href={proofHref}
+                target={HERO_PROOF.url ? "_blank" : undefined}
+                rel={HERO_PROOF.url ? "noopener noreferrer" : undefined}
+              >
+                {HERO_PROOF.url ? "Ver la pieza ↗" : "Ver el trabajo →"}
+              </a>
+            </div>
+            <div className="prueba-informe">
+              <div className="pi-tag">Así se ve el análisis que te entregamos</div>
+              <h3>
+                Un informe con tus <em>gatillos</em>, las emociones que mueven a tu nicho y un plan.
+              </h3>
+              <p>
+                El análisis gratis no es un PDF genérico: lee tu Instagram y tu web,
+                te dice qué está frenando tu contenido y qué paquete tiene sentido
+                para tu caso.
+              </p>
+              <div className="pi-actions">
+                <Link href="/informe/demo" className="btn btn-ghost">
+                  Ver un informe de ejemplo <span className="arrow">→</span>
+                </Link>
+                <AnalisisButton className="btn btn-primary">
+                  Pedir el mío gratis <span className="arrow">→</span>
+                </AnalisisButton>
+              </div>
+            </div>
           </div>
-          <ol className="metodo-pasos">
-            {[
-              ["01", "Analizamos", "Tu marca, tu competencia y cómo se comporta tu audiencia de verdad."],
-              ["02", "Detectamos", "Qué está saturado, qué nadie está haciendo, dónde hay espacio."],
-              ["03", "Construimos hipótesis", "Una apuesta concreta, no una corazonada."],
-              ["04", "Diseñamos la narrativa", "Concepto, guion y formato salen de la evidencia."],
-              ["05", "Producimos", "Aquí entra la cámara. Recién aquí."],
-              ["06", "Medimos", "Retención, guardados, alcance nuevo. Lo que indica compra."],
-              ["07", "Aprendemos", "Qué funcionó y por qué. Eso entra a tu tablero."],
-              ["08", "Volvemos a empezar", "Cada ciclo arranca sabiendo más que el anterior."],
-            ].map(([n, titulo, texto]) => (
-              <li key={n}>
-                <span className="mp-num">{n}</span>
-                <div>
-                  <strong>{titulo}</strong>
-                  <span>{texto}</span>
-                </div>
-              </li>
-            ))}
-          </ol>
-          <p className="metodo-cierre">
-            Por eso cada cliente nuevo hace al sistema más inteligente — y esa
-            inteligencia trabaja para todos los demás.
-          </p>
+
+          {TESTIMONIOS.length > 0 && (
+            <div className="testimonios">
+              {TESTIMONIOS.map((t) => (
+                <figure className="testimonio" key={t.nombre}>
+                  <blockquote>“{t.cita}”</blockquote>
+                  <figcaption>
+                    {t.nombre} · {t.cargo}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          )}
         </section>
 
-        {/* ── Cotización ── */}
+        {/* ── Servicios en una pantalla, en español y con precio de entrada ── */}
+        <section className="svcres">
+          <div className="svcres-head">
+            <div>
+              <div className="section-num">Servicios</div>
+              <h2>
+                Lo que <em>armamos</em> para ti.
+              </h2>
+            </div>
+            <Link href="/servicios" className="fw-all">
+              Ver todos los precios →
+            </Link>
+          </div>
+          <div className="svcres-grid">
+            {SERVICE_GROUPS.map((g, i) => {
+              const desde = desdeGrupo(g.key);
+              return (
+                <Link key={g.key} href={`/servicios#g-${g.key}`} className="svcres-card">
+                  <span className="sc-num">0{i + 1}</span>
+                  <h3>{g.label}</h3>
+                  <p>{g.corto}</p>
+                  <span className="sc-from">
+                    {desde ? (
+                      <>
+                        Desde <b>{desde}</b>
+                      </>
+                    ) : (
+                      <b>A cotizar</b>
+                    )}
+                  </span>
+                  <span className="sc-go">Ver paquetes y precios →</span>
+                </Link>
+              );
+            })}
+          </div>
+          <p className="svcres-note">Precios base en COP · públicos, sin cotizaciones misteriosas.</p>
+        </section>
+
+        {/* ── Cierre doble: cotizar o explorar ── */}
         <section className="brief" id="cotizacion">
           <div className="brief-wrap">
             <div className="brief-copy">
@@ -101,6 +187,26 @@ export default function Home() {
                   Respuesta en 24h · <span>casi siempre antes</span>
                 </li>
               </ul>
+              <p className="brief-wa">
+                ¿Prefieres hablar?{" "}
+                <a href={waUrl("Hola Bushido, quiero cotizar un proyecto.")} target="_blank" rel="noopener noreferrer">
+                  Escríbenos por WhatsApp ↗
+                </a>
+              </p>
+
+              <div className="brief-alt">
+                <div className="ba-tag">¿Aún no sabes qué necesitas?</div>
+                <h3>
+                  Empieza por el <em>análisis gratis</em>.
+                </h3>
+                <p>
+                  Te decimos qué está frenando tu contenido y qué paquete tiene
+                  sentido, antes de que gastes un peso.
+                </p>
+                <AnalisisButton className="btn btn-ghost">
+                  Pedir mi análisis <span className="arrow">→</span>
+                </AnalisisButton>
+              </div>
             </div>
 
             <LeadForm
@@ -112,8 +218,8 @@ export default function Home() {
                 </>
               }
               submitLabel="Pedir cotización"
-              successTitle="¡Listo!"
-              successText="Recibimos tu solicitud. Te enviamos la propuesta en menos de 24h."
+              successTitle="Listo."
+              successText="Recibimos tu solicitud. Te enviamos la propuesta en menos de 24 horas."
               legal
               fields={[
                 { name: "name", label: "Nombre", required: true, placeholder: "Tu nombre" },

@@ -46,7 +46,7 @@ async function enviarAProspectos(lead: LeadInput): Promise<void> {
     return;
   }
   // Sin nombre de negocio ni red no hay nada que analizar del otro lado.
-  const nombre = lead.company || lead.name;
+  const nombre = lead.company || lead.social || lead.name;
   if (!nombre || (!lead.social && !lead.tiktok)) return;
 
   try {
@@ -74,7 +74,8 @@ const schema = z.object({
   name: z.string().trim().max(120).optional(),
   company: z.string().trim().max(160).optional(),
   email: z.string().trim().email().max(160).optional().or(z.literal("")),
-  phone: z.string().trim().max(40).optional(),
+  // teléfono: 7 a 15 dígitos (con indicativo); vacío permitido donde no es obligatorio
+  phone: z.string().trim().max(40).regex(/^$|^\+?\d[\d\s-]{5,19}$/, "Teléfono inválido").optional(),
   social: z.string().trim().max(300).optional(),
   tiktok: z.string().trim().max(300).optional(),
   web: z.string().trim().max(300).optional(),
@@ -93,7 +94,7 @@ const schema = z.object({
 
 // minimal required fields per lead kind
 const REQUIRED: Record<string, (keyof LeadInput)[]> = {
-  analisis: ["name", "email", "phone", "company", "social"],
+  analisis: ["name", "email", "phone", "social"], // company ya no se pide: la marca sale del Instagram
   contacto: ["name", "email", "phone"],
   talento: ["name", "email", "role"],
   descarga: ["email"],
@@ -192,7 +193,7 @@ export async function POST(request: Request) {
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
             secret,
-            marca: lead.company || lead.name || "Marca",
+            marca: lead.company || lead.social?.replace(/^@/, "") || lead.name || "Marca",
             redes: lead.social,
             tiktok: lead.tiktok,
             web: lead.web,

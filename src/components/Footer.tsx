@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { EMAIL, SOCIAL } from "@/lib/site";
+import { EMAIL, NAV, SOCIAL, WHATSAPP_DISPLAY, waUrl } from "@/lib/site";
 
 export default function Footer() {
   return (
@@ -32,12 +32,27 @@ export default function Footer() {
       </div>
 
       <div className="foot-right">
-        © 2026 Bushido · <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
+        <a className="foot-wa" href={waUrl("Hola Bushido, quiero hablar de un proyecto.")} target="_blank" rel="noopener noreferrer">
+          WhatsApp {WHATSAPP_DISPLAY}
+        </a>
+        <br />
+        © 2026 Bushido · Bogotá · <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
         <span className="foot-legal">
           <Link href="/terminos">Términos de servicio</Link>
           <Link href="/politica-datos">Política de datos</Link>
         </span>
       </div>
+
+      <nav className="foot-nav" aria-label="Mapa del sitio">
+        <Link href="/">Inicio</Link>
+        {NAV.map((n) => (
+          <Link key={n.href} href={n.href}>
+            {n.label}
+          </Link>
+        ))}
+        <Link href="/equipos">Equipos</Link>
+        <Link href="/descargables">Descargables</Link>
+      </nav>
     </footer>
   );
 }

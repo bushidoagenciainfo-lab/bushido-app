@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PortfolioItem } from "@/lib/site";
-import { openAnalisis } from "@/lib/ui";
+import { waUrl } from "@/lib/site";
 import { track } from "@/lib/track";
 
 const nn = (n: number) => String(n).padStart(2, "0");
@@ -153,7 +153,7 @@ export default function Lightbox({
                 }
                 onClick={() => setI(k + 1)}
                 style={{
-                  backgroundImage: `url('${s.tipo === "video" ? foto(item.id, 1) : s.src}')`,
+                  backgroundImage: `url('${s.tipo === "video" ? `/portafolio/g/${item.id}/cover.webp` : s.src}')`,
                 }}
                 aria-label={s.tipo === "video" ? `Video ${k + 1}` : `Foto ${k + 1}`}
               >
@@ -186,16 +186,16 @@ export default function Lightbox({
           ) : (
             <span className="lb-note">Fotografía y video · producción Bushido</span>
           )}
-          <button
-            type="button"
+          {/* El que ve una pieza y quiere algo así quiere HABLAR, no llenar un formulario de análisis */}
+          <a
             className="btn btn-primary"
-            onClick={() => {
-              onClose();
-              openAnalisis("portafolio");
-            }}
+            href={waUrl(`Hola Bushido, vi el trabajo de ${item.title} (${item.client}) en su portafolio y quiero algo así para mi marca.`)}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => track("cta", "whatsapp", { origen: "lightbox", pieza: item.title })}
           >
-            Quiero algo así <span className="arrow">→</span>
-          </button>
+            Quiero algo así <span className="arrow">↗</span>
+          </a>
         </footer>
       </div>
     </div>

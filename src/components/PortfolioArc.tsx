@@ -7,7 +7,9 @@ import Lightbox from "./Lightbox";
 
 const SPACING = 15; // grados entre piezas
 const RADIUS = 440;
-const N = PORTFOLIO.length;
+// Solo las piezas destacadas: el arco es la vitrina; la grilla de abajo tiene las 56.
+const ITEMS = PORTFOLIO.filter((p) => p.featured);
+const N = ITEMS.length;
 
 function place(theta: number) {
   const rad = (theta * Math.PI) / 180;
@@ -79,7 +81,7 @@ export default function PortfolioArc() {
       {/* DESKTOP: arco scrub */}
       <div className="arc-wrap" ref={wrapRef}>
         <div className="arc-stage">
-          {PORTFOLIO.map((p, i) => {
+          {ITEMS.map((p, i) => {
             const s0 = place(baseTheta(i));
             return (
               <button
@@ -93,9 +95,10 @@ export default function PortfolioArc() {
                 onClick={() => { track("portafolio", p.title); setAbierto(p); }}
                 aria-label={p.title}
               >
-                <div className="a-img" style={{ backgroundImage: `url('/portafolio/g/${p.id}/01.jpg')` }} />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img className="a-img" src={`/portafolio/g/${p.id}/cover.webp`} alt={`${p.title} · ${p.client} — ${p.label} producido por Bushido`} loading={i < 6 ? "eager" : "lazy"} decoding="async" />
                 <div className="a-scrim" />
-                <div className="a-lock">{p.fotos} fotos</div>
+                <div className="a-lock">{p.videos ? "▶ video" : p.reels?.length ? "▶ reel" : `${p.fotos} fotos`}</div>
                 <div className="a-body">
                   <div className="a-cat">{p.label}</div>
                   <div className="a-title">{p.title}</div>
@@ -112,9 +115,10 @@ export default function PortfolioArc() {
 
       {/* MÓVIL: fila con scroll */}
       <div className="arc-mobile">
-        {PORTFOLIO.map((p) => (
+        {ITEMS.map((p) => (
           <button key={p.id} type="button" className="am-card" onClick={() => { track("portafolio", p.title); setAbierto(p); }} aria-label={p.title}>
-            <div className="a-img" style={{ backgroundImage: `url('/portafolio/g/${p.id}/01.jpg')` }} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="a-img" src={`/portafolio/g/${p.id}/cover.webp`} alt={`${p.title} · ${p.client}`} loading="lazy" decoding="async" />
             <div className="a-scrim" />
             <div className="a-body">
               <div className="a-cat">{p.label}</div>

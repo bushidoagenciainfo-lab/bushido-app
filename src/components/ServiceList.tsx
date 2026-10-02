@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SERVICES, SERVICE_GROUPS, type Service } from "@/lib/site";
-import { openAnalisis } from "@/lib/ui";
+import Link from "next/link";
+import { SERVICES, SERVICE_GROUPS, ESCASEZ, waUrl, type Service } from "@/lib/site";
+import { track } from "@/lib/track";
 
 /** Valor numérico de un precio, o null si es "Cotización por proyecto" y similares. */
 function precioNum(p: string): number | null {
@@ -10,11 +11,30 @@ function precioNum(p: string): number | null {
   return n ? Number(n) : null;
 }
 
+const TODAS = SERVICE_GROUPS.map((g) => g.key as string);
+
 export default function ServiceList() {
   const [active, setActive] = useState<Service | null>(null);
-  // Categoría desplegada. Arranca abierta la primera para que no se vea vacío.
-  const [openCat, setOpenCat] = useState<string | null>(SERVICE_GROUPS[0].key);
+  // En desktop arrancan TODAS las categorías abiertas (nada escondido detrás de
+  // un "+"); en móvil solo la primera, o la que venga en el hash (#g-growth).
+  const [openCats, setOpenCats] = useState<string[]>(TODAS);
   const open = active !== null;
+
+  useEffect(() => {
+    const hash = window.location.hash.replace("#g-", "");
+    const movil = window.matchMedia("(max-width: 820px)").matches;
+    // El estado inicial se decide en el cliente (hash + tamaño de pantalla), así que
+    // se aplica en el siguiente tick para no disparar un render en cascada.
+    const t = window.setTimeout(() => {
+      if (hash && TODAS.includes(hash)) {
+        setOpenCats(movil ? [hash] : TODAS);
+        document.getElementById(`g-${hash}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else if (movil) {
+        setOpenCats([TODAS[0]]);
+      }
+    }, 0);
+    return () => window.clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     document.body.classList.toggle("drawer-open", open);
@@ -25,15 +45,32 @@ export default function ServiceList() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
+  const toggle = (key: string) =>
+    setOpenCats((c) => (c.includes(key) ? c.filter((k) => k !== key) : [...c, key]));
+
+  const paqueteDestacado = active?.packages.find((p) => p.featured) ?? active?.packages[0];
+  const cotizarHref = active
+    ? `/contacto?servicio=${encodeURIComponent(active.slug)}${paqueteDestacado ? `&paquete=${encodeURIComponent(paqueteDestacado.name)}` : ""}#form`
+    : "/contacto#form";
+  const waHref = active
+    ? waUrl(
+        `Hola Bushido, me interesa ${active.title} ${active.titleEm}${
+          paqueteDestacado ? ` · ${paqueteDestacado.name} (${paqueteDestacado.price})` : ""
+        }. ¿Me cuentan cómo arrancamos?`
+      )
+    : waUrl("Hola Bushido, quiero cotizar un proyecto.");
+
   return (
     <>
+      <p className="svc-escasez">{ESCASEZ}</p>
+
       <div className="svc-cats">
         {SERVICE_GROUPS.map((g) => {
           const items = SERVICES.filter((s) => s.grupo === g.key).sort((a, b) =>
             a.num.localeCompare(b.num)
           );
           if (!items.length) return null;
-          const abierta = openCat === g.key;
+          const abierta = openCats.includes(g.key);
           // El "desde" ignora los servicios que solo se cotizan (sin cifra).
           const conCifra = items
             .map((s) => ({ p: s.packages[0].price, n: precioNum(s.packages[0].price) }))
@@ -41,11 +78,11 @@ export default function ServiceList() {
             .sort((a, b) => a.n - b.n);
           const desde = conCifra.length ? `desde ${conCifra[0].p}` : "a cotizar";
           return (
-            <div className={"svc-cat" + (abierta ? " open" : "")} key={g.key}>
+            <div className={"svc-cat" + (abierta ? " open" : "")} key={g.key} id={`g-${g.key}`}>
               <button
                 type="button"
                 className="svc-cat-head"
-                onClick={() => setOpenCat(abierta ? null : g.key)}
+                onClick={() => toggle(g.key)}
                 aria-expanded={abierta}
               >
                 <div className="scc-text">
@@ -53,7 +90,9 @@ export default function ServiceList() {
                   <span>{g.hint}</span>
                 </div>
                 <div className="scc-right">
-                  <span className="scc-count">{items.length} servicios</span>
+                  <span className="scc-count">
+                    {items.length} {items.length === 1 ? "servicio" : "servicios"}
+                  </span>
                   <span className="scc-from">{desde}</span>
                   <span className="scc-toggle" aria-hidden="true">
                     {abierta ? "−" : "+"}
@@ -64,7 +103,15 @@ export default function ServiceList() {
               {abierta && (
                 <div className="services-tiles">
                   {items.map((s) => (
-                    <button key={s.slug} type="button" className="svc-tile" onClick={() => setActive(s)}>
+                    <button
+                      key={s.slug}
+                      type="button"
+                      className="svc-tile"
+                      onClick={() => {
+                        track("servicio", s.slug);
+                        setActive(s);
+                      }}
+                    >
                       <div className="num">
                         {s.num} / {s.cat}
                       </div>
@@ -141,9 +188,27 @@ export default function ServiceList() {
 
               <p className="d-note">{active.note}</p>
 
-              <button className="btn btn-primary" onClick={openAnalisis}>
-                Pedir propuesta <span className="arrow">→</span>
-              </button>
+              <p className="drawer-escasez">{ESCASEZ}</p>
+
+              {/* Dos caminos: propuesta formal (form con el servicio ya elegido) o WhatsApp directo */}
+              <div className="drawer-ctas">
+                <Link
+                  href={cotizarHref}
+                  className="btn btn-primary"
+                  onClick={() => track("cta", "cotizar", { origen: "drawer", servicio: active.slug })}
+                >
+                  Pedir propuesta <span className="arrow">→</span>
+                </Link>
+                <a
+                  href={waHref}
+                  className="btn btn-ghost"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => track("cta", "whatsapp", { origen: "drawer", servicio: active.slug })}
+                >
+                  Preguntar por WhatsApp <span className="arrow">↗</span>
+                </a>
+              </div>
               <p className="legal-note" style={{ textAlign: "center", marginTop: 12 }}>
                 Precio base en COP · el valor final se afina en la conversación.
               </p>

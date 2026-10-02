@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import type { LeadKind } from "@/lib/leads";
+import { waUrl } from "@/lib/site";
+import { track } from "@/lib/track";
 
 /** Indicativos para el selector del teléfono. Colombia primero, luego el resto. */
 const INDICATIVOS = [
@@ -50,6 +53,8 @@ interface Props {
   successText: string;
   legal?: boolean;
   compact?: boolean;
+  /** Valores iniciales (p.ej. servicio preseleccionado desde el drawer). */
+  defaults?: Record<string, string>;
 }
 
 type Status = "idle" | "loading" | "done" | "error";
@@ -64,29 +69,54 @@ export default function LeadForm({
   successText,
   legal,
   compact,
+  defaults,
 }: Props) {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
   const [prefixCodes, setPrefixCodes] = useState<Record<string, string>>({});
+  // El selector de país aparece solo si la persona lo pide ("¿Otro país?").
+  const [otroPais, setOtroPais] = useState<Record<string, boolean>>({});
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setStatus("loading");
     setError("");
     const form = e.currentTarget;
     const fd = new FormData(form);
     const payload: Record<string, string> = { kind };
+
+    // Validación en cliente: lo justo para no mandar basura al servidor.
+    for (const f of fields) {
+      const v = ((fd.get(f.name) as string) || "").trim();
+      if (f.required && !v) {
+        setError(`Falta ${f.label.toLowerCase()}.`);
+        setStatus("error");
+        form.querySelector<HTMLElement>(`[name="${f.name}"]`)?.focus();
+        return;
+      }
+      if (f.type === "email" && v && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) {
+        setError("Revisa el correo: parece incompleto.");
+        setStatus("error");
+        return;
+      }
+      if (f.prefix && v) {
+        const digitos = v.replace(/\D/g, "");
+        if (digitos.length < 7 || digitos.length > 15) {
+          setError("Revisa el WhatsApp: debe tener entre 7 y 15 dígitos.");
+          setStatus("error");
+          return;
+        }
+      }
+    }
+
+    setStatus("loading");
     fields.forEach((f) => {
       let v = (fd.get(f.name) as string) || "";
-      // el campo ya muestra el prefijo (+57): si la persona lo escribe otra vez,
-      // lo quitamos aquí para no guardar "+57 +57300..."
       // El teléfono se guarda SIEMPRE con indicativo de país (el que eligió en
       // el selector), para que funcione con clientes de fuera de Colombia.
       if (f.prefix && v) {
-        const ind = ((fd.get(`${f.name}_ind`) as string) || f.prefix).replace(/\D/g, "");
+        const ind = ((fd.get(`${f.name}_ind`) as string) || prefixCodes[f.name] || f.prefix).replace(/\D/g, "");
         v = v.replace(/\D/g, "");
         while (ind && v.startsWith(ind + ind)) v = v.slice(ind.length);
-        // si ya lo escribió con indicativo, no lo dupliques
         if (ind && v.startsWith(ind) && v.length > ind.length + 6) v = v.slice(ind.length);
         v = ind + v;
       }
@@ -106,6 +136,7 @@ export default function LeadForm({
         setStatus("error");
         return;
       }
+      track("conversion", kind, payload.project ? { project: payload.project } : undefined);
       setStatus("done");
       form.reset();
     } catch {
@@ -115,6 +146,10 @@ export default function LeadForm({
   }
 
   if (status === "done") {
+    const waMsg =
+      kind === "analisis"
+        ? "Hola Bushido, acabo de pedir el análisis gratis en la web y quiero adelantar la conversación."
+        : "Hola Bushido, acabo de enviar el formulario en la web y quiero adelantar la conversación.";
     return (
       <div className="form-card">
         <div className="form-success" style={{ display: "block" }}>
@@ -125,6 +160,20 @@ export default function LeadForm({
           </div>
           <h4>{successTitle}</h4>
           <p>{successText}</p>
+          <div className="fs-actions">
+            <a
+              className="btn btn-primary"
+              href={waUrl(waMsg)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => track("cta", "whatsapp", { origen: "exito-" + kind })}
+            >
+              ¿Hablamos ya? WhatsApp <span className="arrow">↗</span>
+            </a>
+            <Link className="btn btn-ghost" href="/portafolio">
+              Ver el trabajo <span className="arrow">→</span>
+            </Link>
+          </div>
           <button type="button" className="again" onClick={() => setStatus("idle")}>
             Enviar otra solicitud
           </button>
@@ -147,6 +196,8 @@ export default function LeadForm({
   }
   if (buffer.length) rows.push(buffer);
 
+  const def = (name: string) => defaults?.[name];
+
   const renderField = (f: LeadField) => (
     <div className="field" key={f.name}>
       <label htmlFor={`f-${f.name}`}>
@@ -160,7 +211,12 @@ export default function LeadForm({
         ) : null}
       </label>
       {f.as === "select" ? (
-        <select id={`f-${f.name}`} name={f.name} required={f.required} defaultValue="">
+        <select
+          id={`f-${f.name}`}
+          name={f.name}
+          required={f.required}
+          defaultValue={def(f.name) && f.options?.includes(def(f.name)!) ? def(f.name) : ""}
+        >
           <option value="" disabled>
             {f.placeholder || "Selecciona uno"}
           </option>
@@ -169,30 +225,64 @@ export default function LeadForm({
           ))}
         </select>
       ) : f.as === "textarea" ? (
-        <textarea id={`f-${f.name}`} name={f.name} placeholder={f.placeholder} rows={3} />
+        <textarea id={`f-${f.name}`} name={f.name} placeholder={f.placeholder} rows={3} defaultValue={def(f.name)} />
       ) : f.prefix ? (
-        <div className="prefix-wrap">
-          <div className="prefix-display">
-            <span>{prefixCodes[f.name] || f.prefix}</span>
-            <svg className="prefix-chev" viewBox="0 0 10 6" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M1 1l4 4 4-4"/></svg>
-            <select
-              className="prefix-over"
-              name={`${f.name}_ind`}
-              value={prefixCodes[f.name] || f.prefix}
-              onChange={(e) => setPrefixCodes((c) => ({ ...c, [f.name]: e.target.value }))}
-              aria-label="País"
-            >
-              {INDICATIVOS.map((p) => (
-                <option key={p.cod + p.pais} value={p.cod}>
-                  {p.cod} · {p.pais}
-                </option>
-              ))}
-            </select>
+        <>
+          <div className="prefix-wrap">
+            <div className="prefix-display">
+              <span>{prefixCodes[f.name] || f.prefix}</span>
+              {otroPais[f.name] && (
+                <>
+                  <svg className="prefix-chev" viewBox="0 0 10 6" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M1 1l4 4 4-4"/></svg>
+                  <select
+                    className="prefix-over"
+                    name={`${f.name}_ind`}
+                    value={prefixCodes[f.name] || f.prefix}
+                    onChange={(e) => setPrefixCodes((c) => ({ ...c, [f.name]: e.target.value }))}
+                    aria-label="País"
+                  >
+                    {INDICATIVOS.map((p) => (
+                      <option key={p.cod + p.pais} value={p.cod}>
+                        {p.cod} · {p.pais}
+                      </option>
+                    ))}
+                  </select>
+                </>
+              )}
+            </div>
+            <input
+              id={`f-${f.name}`}
+              name={f.name}
+              type={f.type || "text"}
+              inputMode="numeric"
+              autoComplete="tel-national"
+              enterKeyHint="next"
+              placeholder={f.placeholder}
+              required={f.required}
+              defaultValue={def(f.name)}
+            />
           </div>
-          <input id={`f-${f.name}`} name={f.name} type={f.type || "text"} inputMode="numeric" placeholder={f.placeholder} required={f.required} />
-        </div>
+          {!otroPais[f.name] && (
+            <button
+              type="button"
+              className="prefix-otro"
+              onClick={() => setOtroPais((o) => ({ ...o, [f.name]: true }))}
+            >
+              ¿Otro país?
+            </button>
+          )}
+        </>
       ) : (
-        <input id={`f-${f.name}`} name={f.name} type={f.type || "text"} placeholder={f.placeholder} required={f.required} />
+        <input
+          id={`f-${f.name}`}
+          name={f.name}
+          type={f.type || "text"}
+          placeholder={f.placeholder}
+          required={f.required}
+          defaultValue={def(f.name)}
+          autoComplete={f.type === "email" ? "email" : f.name === "name" ? "name" : undefined}
+          enterKeyHint="next"
+        />
       )}
     </div>
   );
@@ -217,7 +307,7 @@ export default function LeadForm({
           style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }} />
 
         {status === "error" && (
-          <div style={{ color: "var(--sepp)", fontFamily: "var(--mono)", fontSize: 12 }}>{error}</div>
+          <div className="field-error" role="alert">{error}</div>
         )}
 
         <div className="form-actions">

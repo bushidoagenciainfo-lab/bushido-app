@@ -1,11 +1,36 @@
 import type { Metadata } from "next";
 import LeadForm from "@/components/LeadForm";
 import Footer from "@/components/Footer";
-import { WHATSAPP, WHATSAPP_DISPLAY, EMAIL } from "@/lib/site";
+import { WHATSAPP, WHATSAPP_DISPLAY, EMAIL, SERVICES } from "@/lib/site";
 
 export const metadata: Metadata = { title: "Contacto · Bushido", description: "Hablemos de tu proyecto audiovisual. Escríbenos por WhatsApp o correo y recibe una propuesta a la medida en menos de 24 horas." };
 
-export default function ContactoPage() {
+// Qué opción del select corresponde a cada servicio (llega desde el drawer: ?servicio=slug).
+const PROYECTO_POR_SLUG: Record<string, string> = {
+  videoclip: "Videoclip musical",
+  eventos: "Cobertura de evento",
+  reels: "Reels / contenido de marca",
+  redes: "Reels / contenido de marca",
+  comercial: "Mini comercial / campaña",
+  corporativo: "Video corporativo",
+  producto: "Video de producto",
+  fotografia: "Fotografía editorial",
+};
+
+export default async function ContactoPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ servicio?: string; paquete?: string }>;
+}) {
+  const { servicio, paquete } = await searchParams;
+  const svc = servicio ? SERVICES.find((s) => s.slug === servicio) : undefined;
+  const defaults: Record<string, string> | undefined = svc
+    ? {
+        project: PROYECTO_POR_SLUG[svc.slug] ?? "Otro / múltiples",
+        message: `Me interesa ${svc.title} ${svc.titleEm}${paquete ? ` · paquete ${paquete}` : ""}.`,
+      }
+    : undefined;
+
   return (
     <>
       <main>
@@ -58,7 +83,7 @@ export default function ContactoPage() {
             </div>
           </div>
 
-          <div className="brief-wrap" style={{ maxWidth: 1200 }}>
+          <div className="brief-wrap" id="form" style={{ maxWidth: 1200 }}>
             <div className="brief-copy">
               <div className="section-num">Formulario</div>
               <h2
@@ -78,6 +103,11 @@ export default function ContactoPage() {
                 Rellena estos campos y te contactamos con una propuesta. Es el
                 camino más rápido si ya sabes lo que necesitas.
               </p>
+              {svc && (
+                <p className="form-pre">
+                  Servicio elegido: {svc.title} {svc.titleEm}{paquete ? ` · ${paquete}` : ""}
+                </p>
+              )}
             </div>
 
             <LeadForm
@@ -89,7 +119,8 @@ export default function ContactoPage() {
                 </>
               }
               submitLabel="Enviar"
-              successTitle="¡Listo!"
+              defaults={defaults}
+              successTitle="Listo."
               successText="Recibimos tu brief. Te contactamos en menos de 24h con una propuesta."
               legal
               fields={[

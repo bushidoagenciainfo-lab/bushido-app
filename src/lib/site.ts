@@ -155,10 +155,12 @@ export interface ServicePackage {
 // La web se organiza por SOLUCIONES, no por servicios sueltos: primero la
 // inteligencia (el cerebro), después el sistema, la producción y la difusión.
 export const SERVICE_GROUPS = [
-  { key: "intelligence", label: "Intelligence", hint: "El cerebro · research, auditoría y método" },
-  { key: "growth", label: "Growth Systems", hint: "No son paquetes de redes: son sistemas de crecimiento" },
-  { key: "produccion", label: "Creative Production", hint: "La ejecución de una estrategia, no piezas sueltas" },
-  { key: "amplification", label: "Amplification", hint: "Creators, influencers y pauta" },
+  // Nombres en español y con el beneficio claro: el cliente es un dueño de marca
+  // colombiano, no un director de agencia. La jerga vive dentro del drawer.
+  { key: "intelligence", label: "Inteligencia", hint: "Sabemos qué vale la pena producir · investigación y estrategia", corto: "Investigamos tu marca y tu nicho antes de producir." },
+  { key: "growth", label: "Crecimiento en redes", hint: "Contenido mensual que vende, no reels sueltos", corto: "Un sistema mensual de contenido con estrategia y medición." },
+  { key: "produccion", label: "Producción", hint: "Videoclips, eventos, campañas, foto y video de producto", corto: "Videoclips, eventos, comerciales, foto y video de producto." },
+  { key: "amplification", label: "Amplificación", hint: "Creadores, influencers y pauta para llegar más lejos", corto: "Creadores, influencers y pauta para que el contenido llegue." },
 ] as const;
 export type ServiceGroup = (typeof SERVICE_GROUPS)[number]["key"];
 
@@ -458,3 +460,50 @@ export const SOCIAL = {
   tiktok: "https://www.tiktok.com/@bushido.aa",
   youtube: "https://www.youtube.com/@BushidoAgenciaAudiovisual",
 };
+
+// ═══════════ Auditoría oct 2026 · datos nuevos para la home y los CTA ═══════════
+
+/** Marcas y artistas con los que ya se trabajó (franja bajo el hero). Orden = peso. */
+export const BRANDS = [
+  "adidas", "Nike", "New Era", "Red Bull", "Feid", "J Balvin", "Sam Smith",
+  "Blessd", "Forbes Colombia", "Cerveza Águila", "New Balance", "Estéreo Picnic",
+];
+
+/** Los 6 trabajos que se muestran en la home (ids de PORTFOLIO). Mezcla video + foto. */
+export const HOME_FEATURED = [
+  "ferxxo", "adidas-samba-diadelosmuertos", "veneno", "cinema-bts", "nike-procity", "trucoperro",
+];
+
+/**
+ * La pieza que respalda los números del hero (43,4M vistas · 2,7M cuentas · 1,7M me gusta).
+ * ⚠️ Maick: pon aquí el link público del reel y el nombre de la pieza/cliente.
+ * Mientras `url` esté vacío, el bloque enlaza al portafolio.
+ */
+export const HERO_PROOF = {
+  url: "",
+  pieza: "",
+};
+
+/**
+ * Testimonios reales (nombre + cargo + cita). Se muestran solo si hay al menos uno.
+ * ⚠️ Maick: completar con clientes reales (Bianco Bake Lab, Mindo, un manager de artista).
+ */
+export const TESTIMONIOS: { cita: string; nombre: string; cargo: string }[] = [];
+
+/** Escasez honesta (sin descuentos): se muestra en servicios y en el drawer. */
+export const ESCASEZ = "Tomamos pocas marcas nuevas al mes para producir con criterio.";
+
+/** Link de WhatsApp con mensaje prellenado. */
+export function waUrl(mensaje: string): string {
+  return `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
+}
+
+/** Mensaje de WhatsApp según la página en la que está el visitante. */
+export function waMensaje(pathname: string): string {
+  if (pathname.startsWith("/servicios")) return "Hola Bushido, estoy viendo sus servicios y quiero cotizar un proyecto.";
+  if (pathname.startsWith("/portafolio")) return "Hola Bushido, vi su portafolio y quiero algo así para mi marca.";
+  if (pathname.startsWith("/equipos")) return "Hola Bushido, quiero consultar disponibilidad de equipos.";
+  if (pathname.startsWith("/gremio")) return "Hola Bushido, quiero saber cómo entrar al gremio.";
+  if (pathname.startsWith("/descargables")) return "Hola Bushido, descargué sus recursos y tengo una pregunta.";
+  return "Hola Bushido, quiero hablar de un proyecto.";
+}

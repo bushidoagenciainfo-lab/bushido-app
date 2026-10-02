@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import Footer from "@/components/Footer";
 import DescargaCard, { type Gift } from "@/components/DescargaCard";
 
-export const metadata: Metadata = { title: "Descargables Bushido" };
+export const metadata: Metadata = {
+  title: "Descargables Bushido",
+  description: "LUTs, presets de foto, tipografías y overlays que usamos en producciones reales. Gratis para la comunidad audiovisual en Colombia.",
+};
 
 // Para ENTREGAR el archivo: pon el zip en bushido-app/public/descargables/ con
 // el nombre de `file`. Mientras no exista el archivo (file sin definir), la

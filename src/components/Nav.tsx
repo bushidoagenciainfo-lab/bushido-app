@@ -2,11 +2,21 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { NAV } from "@/lib/site";
 import { openAnalisis } from "@/lib/ui";
+import { track } from "@/lib/track";
+
+// Rutas que solo aparecen en el menú móvil (en desktop viven dentro de Gremio).
+const EXTRA = [
+  { href: "/equipos", label: "Equipos" },
+  { href: "/descargables", label: "Descargables" },
+];
 
 export default function Nav() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname() || "/";
+  const activa = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
 
   return (
     <>
@@ -17,13 +27,21 @@ export default function Nav() {
         <ul className="nav-links">
           {NAV.map((n) => (
             <li key={n.href}>
-              <Link href={n.href}>{n.label}</Link>
+              <Link href={n.href} aria-current={activa(n.href) ? "page" : undefined}>
+                {n.label}
+              </Link>
             </li>
           ))}
         </ul>
-        <button type="button" className="nav-cta" onClick={openAnalisis}>
-          Análisis gratis →
-        </button>
+        {/* Dos intenciones, dos botones: cotizar (venta directa) y análisis (lead magnet) */}
+        <div className="nav-ctas">
+          <button type="button" className="nav-cta nav-cta--ghost" onClick={() => openAnalisis("nav")}>
+            Análisis gratis
+          </button>
+          <Link href="/contacto#form" className="nav-cta" onClick={() => track("cta", "cotizar", { origen: "nav" })}>
+            Cotizar →
+          </Link>
+        </div>
         <button
           type="button"
           className="nav-mobile-btn"
@@ -43,20 +61,30 @@ export default function Nav() {
             <path d="M6 6l12 12M18 6L6 18" />
           </svg>
         </button>
-        <Link href="/" onClick={() => setMenuOpen(false)}>
+        <Link href="/" onClick={() => setMenuOpen(false)} aria-current={pathname === "/" ? "page" : undefined}>
           Inicio
         </Link>
-        {NAV.map((n) => (
-          <Link key={n.href} href={n.href} onClick={() => setMenuOpen(false)}>
+        {[...NAV, ...EXTRA].map((n) => (
+          <Link key={n.href} href={n.href} onClick={() => setMenuOpen(false)} aria-current={activa(n.href) ? "page" : undefined}>
             {n.label}
           </Link>
         ))}
+        <Link
+          href="/contacto#form"
+          className="mm-cotizar"
+          onClick={() => {
+            setMenuOpen(false);
+            track("cta", "cotizar", { origen: "menu" });
+          }}
+        >
+          Cotizar mi proyecto →
+        </Link>
         <button
           type="button"
           style={{ color: "var(--sepp)" }}
           onClick={() => {
             setMenuOpen(false);
-            openAnalisis();
+            openAnalisis("menu");
           }}
         >
           Análisis gratis →
