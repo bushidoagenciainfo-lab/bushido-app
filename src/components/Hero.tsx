@@ -3,24 +3,26 @@ import AnalisisButton from "./AnalisisButton";
 import HeroVideo from "./HeroVideo";
 import { HERO_PROOF } from "@/lib/site";
 
-// ── Fondo del hero ──────────────────────────────────────────────────
-// false = fotograma REAL del portafolio (STILL) con velo y grano.
-// true  = video a pantalla completa (public/hero/hero.mp4).
-// Cuando Maick tenga el clip definitivo: pon USE_VIDEO en true y reemplaza el .mp4.
-const USE_VIDEO = false;
-const STILL = "/hero/still.jpg"; // 1920px, generado desde Contenido_Aud/Conciertos/Ferxxo
+// ── Fondo del hero (un solo interruptor manda) ────────────────────────
+// "gradient" = degradado cinematográfico (provisional, sin imagen).
+// "still"    = fotograma fijo (STILL). Pon la foto nueva en public/hero/still.jpg (1920 px).
+// "video"    = video a pantalla completa (public/hero/hero.mp4).
+const HERO_BG: "gradient" | "still" | "video" = "gradient";
+const STILL = "/hero/still.jpg";
 
 export default function Hero() {
   const proofHref = HERO_PROOF.url || "/portafolio";
   const proofExterno = Boolean(HERO_PROOF.url);
   return (
-    <section className="hero-v2 hero-vid" id="top">
+    <section className={"hero-v2 hero-vid" + (HERO_BG === "gradient" ? " hero-vid--flat" : "")} id="top">
       <div className="hero-vid-bg" aria-hidden="true">
-        {USE_VIDEO ? (
+        {HERO_BG === "video" ? (
           <HeroVideo />
-        ) : (
+        ) : HERO_BG === "still" ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img className="hero-still" src={STILL} alt="" fetchPriority="high" decoding="async" />
+        ) : (
+          <div className="hero-vid-gradient" />
         )}
         <div className="hero-vid-overlay" />
         <div className="hero-vid-grain" />
