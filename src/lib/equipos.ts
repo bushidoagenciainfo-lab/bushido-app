@@ -169,7 +169,7 @@ export const EQUIPOS: Equipo[] = [
   },
   {
     "slug": "linterna",
-    "name": "Linterna",
+    "name": "Globo Aputure Lantern",
     "cat": "Accesorios"
   },
   {
@@ -189,7 +189,7 @@ export const EQUIPOS: Equipo[] = [
   },
   {
     "slug": "snoop",
-    "name": "Snoop",
+    "name": "Snoot",
     "cat": "Accesorios"
   },
   {
@@ -336,7 +336,6 @@ export const EQUIPOS: Equipo[] = [
   { "slug": "nanlite-fc-120b", "name": "Nanlite FC-120B Bi-Color", "cat": "Iluminación", "w": 135 },
   { "slug": "nanlite-fc-500c", "name": "Nanlite FC-500C RGB", "cat": "Iluminación", "w": 540 },
   { "slug": "aputure-light-dome", "name": "Softbox Aputure Light Dome", "cat": "Accesorios" },
-  { "slug": "aputure-lantern", "name": "Globo Aputure Lantern", "cat": "Accesorios" },
   { "slug": "light-bank-inflable", "name": "Light bank con inflador", "cat": "Accesorios" },
   { "slug": "nanlite-softbox-sb-rp", "name": "Softbox Nanlite SB RP 90 y 120", "cat": "Accesorios" },
   { "slug": "nanlite-proyector-pjbm36", "name": "Proyector Nanlite PJ-BM-36", "cat": "Accesorios", "desc": "Montura Bowens" },
