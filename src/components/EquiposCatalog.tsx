@@ -51,10 +51,10 @@ export default function EquiposCatalog() {
   const coverFor = (cat: string) =>
     COVERS[cat] || EQUIPOS.find((e) => e.cat === cat)?.slug || "";
 
-  // con potencia (w) → de menor a mayor; sin potencia (modificadores) al final
+  // de menor a mayor según rank (Iluminación: vatios); sin rank al final
   const items = openCat
     ? EQUIPOS.filter((e) => e.cat === openCat).sort(
-        (a, b) => (a.w ?? Infinity) - (b.w ?? Infinity)
+        (a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity)
       )
     : [];
 
