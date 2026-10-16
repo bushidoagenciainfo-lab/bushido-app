@@ -1,7 +1,7 @@
 // Auto-generado desde catalogo_rental. Sin precios (se negocia por WhatsApp).
-export interface Equipo { slug: string; name: string; cat: string; }
+export interface Equipo { slug: string; name: string; cat: string; desc?: string; }
 
-export const EQUIPO_CATS: string[] = ["Accesorios","Cámaras","Grip","Iluminación","Monitores","Movimiento","Transporte","Wireless","Ópticas"];
+export const EQUIPO_CATS: string[] = ["Accesorios","Cámaras","Eléctrico","Grip","Iluminación","Monitores","Movimiento","Transporte","Wireless","Ópticas"];
 
 export const EQUIPOS: Equipo[] = [
   {
@@ -26,13 +26,15 @@ export const EQUIPOS: Equipo[] = [
   },
   {
     "slug": "canon-r5",
-    "name": "Canon R5",
-    "cat": "Cámaras"
+    "name": "Canon EOS R5",
+    "cat": "Cámaras",
+    "desc": "Kit: monitor 5.2\", 3 CFexpress B 128 GB, baterías V-Mount, follow focus, matte box y filtros ND. Sin lentes."
   },
   {
     "slug": "red-komodo",
-    "name": "RED Komodo",
-    "cat": "Cámaras"
+    "name": "RED Komodo 6K",
+    "cat": "Cámaras",
+    "desc": "Kit: monitor 5.2\", 3 CFast 256 GB, baterías V-Mount, follow focus, matte box y ND variable. Sin lentes."
   },
   {
     "slug": "a7rii",
@@ -46,8 +48,9 @@ export const EQUIPOS: Equipo[] = [
   },
   {
     "slug": "z-cam",
-    "name": "Z-cam",
-    "cat": "Cámaras"
+    "name": "Z CAM E2-S6 Super 35",
+    "cat": "Cámaras",
+    "desc": "Kit 6K: monitor 5.2\", 3 CFast 256 GB, baterías V-Mount, follow focus, matte box y filtros ND. Sin lentes."
   },
   {
     "slug": "benro-bv4",
@@ -136,7 +139,7 @@ export const EQUIPOS: Equipo[] = [
   },
   {
     "slug": "1200",
-    "name": "Aputure 1200d",
+    "name": "Nanlux Evoke 1200B Bi-Color",
     "cat": "Iluminación"
   },
   {
@@ -146,12 +149,12 @@ export const EQUIPOS: Equipo[] = [
   },
   {
     "slug": "300bi",
-    "name": "Aputure 300 Bi",
+    "name": "Amaran 300C RGB",
     "cat": "Iluminación"
   },
   {
     "slug": "650c",
-    "name": "Aputure 600c",
+    "name": "Nanlux Dyno 650C RGBW",
     "cat": "Iluminación"
   },
   {
@@ -191,7 +194,7 @@ export const EQUIPOS: Equipo[] = [
   },
   {
     "slug": "atomos",
-    "name": "Atomos",
+    "name": "Atomos Ninja V 5.2\"",
     "cat": "Monitores"
   },
   {
@@ -206,12 +209,12 @@ export const EQUIPOS: Equipo[] = [
   },
   {
     "slug": "monitor",
-    "name": "Monitor",
+    "name": "Elvid StudioVision 28\"",
     "cat": "Monitores"
   },
   {
     "slug": "osse-g7",
-    "name": "Osse G7",
+    "name": "Osee G7 3000 nits 7\"",
     "cat": "Monitores"
   },
   {
@@ -286,12 +289,12 @@ export const EQUIPOS: Equipo[] = [
   },
   {
     "slug": "lentes-xeins",
-    "name": "Lentes XEINS",
+    "name": "Rokinon Xeen PL (14–135mm)",
     "cat": "Ópticas"
   },
   {
     "slug": "rokinon-ds-kit",
-    "name": "Rokinon DS Kit",
+    "name": "Rokinon Cine DS EF (14–135mm)",
     "cat": "Ópticas"
   },
   {
@@ -313,5 +316,31 @@ export const EQUIPOS: Equipo[] = [
     "slug": "teradek",
     "name": "teradek",
     "cat": "Wireless"
-  }
+  },
+  // ── Agregados desde el catálogo Cinephilia (oct 2026) ──
+  { "slug": "sony-fx30", "name": "Sony FX30 Cinema Camera", "cat": "Cámaras", "desc": "Kit: monitor 5.2\", 3 CFexpress A 128 GB, baterías V-Mount, follow focus, matte box y filtros ND. Sin lentes." },
+  { "slug": "dzofilm-tango-18-90", "name": "DZOFilm Tango 18-90mm T2.9", "cat": "Ópticas", "desc": "Zoom S35 · montura PL y EF" },
+  { "slug": "tilta-nucleus-nano-2", "name": "Tilta Nucleus Nano 2", "cat": "Movimiento", "desc": "Follow focus inalámbrico + power handle" },
+  { "slug": "manfrotto-befree", "name": "Manfrotto Befree", "cat": "Grip", "desc": "Trípode · carga máx. 3.5 kg" },
+  { "slug": "benro-aero-2", "name": "Benro Aero 2", "cat": "Grip", "desc": "Trípode · carga máx. 2.5 kg" },
+  { "slug": "tilta-ct12", "name": "Tilta CT 12 75mm", "cat": "Grip", "desc": "Trípode · carga máx. 12 kg" },
+  { "slug": "flycam-flowline", "name": "Flycam Flowline", "cat": "Movimiento", "desc": "Chaleco de soporte · carga máx. 7 kg" },
+  { "slug": "proaim-polaris-dolly", "name": "Proaim Polaris Dolly", "cat": "Movimiento", "desc": "Dolly portátil con Kupo Slider Stand y tubos de 2 m" },
+  { "slug": "magnet-camera-mount", "name": "Plataforma de montaje para carro", "cat": "Grip", "desc": "8 chupas, 2 riatas, 2 centurys, cabeza Manfrotto 502 y ballhead" },
+  { "slug": "nanlite-pavotube-t8-7x", "name": "Nanlite PavoTube T8-7X", "cat": "Iluminación", "desc": "Tubo RGB pixel · paquete x4" },
+  { "slug": "nanlite-pavotube-ii-15xr", "name": "Nanlite PavoTube II 15XR", "cat": "Iluminación", "desc": "Tubo RGB pixel · paquete x4" },
+  { "slug": "nanlite-pavotube-ii-30xr", "name": "Nanlite PavoTube II 30XR", "cat": "Iluminación", "desc": "Tubo RGB pixel · paquete x4" },
+  { "slug": "amaran-100d", "name": "Aputure Amaran 100D", "cat": "Iluminación" },
+  { "slug": "nanlite-forza-60b-fresnel", "name": "Nanlite Forza 60B II Bi-Color", "cat": "Iluminación", "desc": "Incluye Fresnel" },
+  { "slug": "nanlite-forza-60b-proyector", "name": "Nanlite Forza 60B II + proyector", "cat": "Iluminación", "desc": "Incluye kit de fijación y proyector" },
+  { "slug": "nanlite-fc-120b", "name": "Nanlite FC-120B Bi-Color", "cat": "Iluminación" },
+  { "slug": "nanlite-fc-500c", "name": "Nanlite FC-500C RGB", "cat": "Iluminación" },
+  { "slug": "aputure-light-dome", "name": "Softbox Aputure Light Dome", "cat": "Accesorios" },
+  { "slug": "aputure-lantern", "name": "Globo Aputure Lantern", "cat": "Accesorios" },
+  { "slug": "light-bank-inflable", "name": "Light bank con inflador", "cat": "Accesorios" },
+  { "slug": "nanlite-softbox-sb-rp", "name": "Softbox Nanlite SB RP 90 y 120", "cat": "Accesorios" },
+  { "slug": "nanlite-proyector-pjbm36", "name": "Proyector Nanlite PJ-BM-36", "cat": "Accesorios", "desc": "Montura Bowens" },
+  { "slug": "marco-8x8", "name": "Marco 8x8 pies con textiles", "cat": "Grip", "desc": "Tela negra, difusor 1/2 y checkboard" },
+  { "slug": "paquete-grip", "name": "Paquete de grip completo", "cat": "Grip", "desc": "C-stands, centurys, banderas, floppies, mantellinas, combos, sacos de arena y juego de madera" },
+  { "slug": "paquete-electrico", "name": "Paquete eléctrico", "cat": "Eléctrico", "desc": "18 extensiones (caja, 10 m, 5 m, 6 m), 7 duplex, 2 multitomas de 8 y extensión 30 A bifásica" }
 ];

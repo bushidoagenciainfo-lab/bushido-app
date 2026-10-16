@@ -173,6 +173,7 @@ export default function EquiposCatalog() {
                   </div>
                   <div className="eq-body">
                     <div className="eq-name">{e.name}</div>
+                    {e.desc && <div className="eq-desc">{e.desc}</div>}
                     <button type="button" className="eq-add" onClick={() => toggle(e.slug)}>
                       {on ? <>Quitar ✓</> : <>Agregar <span aria-hidden="true">+</span></>}
                     </button>
