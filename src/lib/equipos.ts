@@ -16,8 +16,8 @@ export const EQUIPOS: Equipo[] = [
   },
   {
     "slug": "pelican",
-    "name": "pelican",
-    "cat": "Accesorios"
+    "name": "Pelican grip",
+    "cat": "Grip"
   },
   {
     "slug": "tilta-tilta-mb-t12-matte-box",
@@ -99,8 +99,8 @@ export const EQUIPOS: Equipo[] = [
   },
   {
     "slug": "manfrotto-mgv220",
-    "name": "Manfrotto MGV220",
-    "cat": "Grip"
+    "name": "Manfrotto MVG220 (gimbal)",
+    "cat": "Movimiento"
   },
   {
     "slug": "matellines",
@@ -165,7 +165,7 @@ export const EQUIPOS: Equipo[] = [
   {
     "slug": "galletas",
     "name": "Galletas (banderas)",
-    "cat": "Iluminación"
+    "cat": "Grip"
   },
   {
     "slug": "linterna",
@@ -280,7 +280,7 @@ export const EQUIPOS: Equipo[] = [
   {
     "slug": "century",
     "name": "Century stand",
-    "cat": "Ópticas"
+    "cat": "Grip"
   },
   {
     "slug": "lens-baby-kit",
