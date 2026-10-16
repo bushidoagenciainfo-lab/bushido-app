@@ -160,7 +160,7 @@ export const EQUIPOS: Equipo[] = [
   {
     "slug": "caja-de-luz",
     "name": "Caja de luz (softbox)",
-    "cat": "Iluminación"
+    "cat": "Accesorios"
   },
   {
     "slug": "galletas",
@@ -170,7 +170,7 @@ export const EQUIPOS: Equipo[] = [
   {
     "slug": "linterna",
     "name": "Linterna",
-    "cat": "Iluminación"
+    "cat": "Accesorios"
   },
   {
     "slug": "nanlite-forza-720b-bi-color-led",
@@ -190,7 +190,7 @@ export const EQUIPOS: Equipo[] = [
   {
     "slug": "snoop",
     "name": "Snoop",
-    "cat": "Iluminación"
+    "cat": "Accesorios"
   },
   {
     "slug": "atomos",
