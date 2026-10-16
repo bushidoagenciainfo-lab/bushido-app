@@ -1,5 +1,5 @@
 // Auto-generado desde catalogo_rental. Sin precios (se negocia por WhatsApp).
-export interface Equipo { slug: string; name: string; cat: string; desc?: string; }
+export interface Equipo { slug: string; name: string; cat: string; desc?: string; /** potencia aprox. en vatios, ordena Iluminación */ w?: number; }
 
 export const EQUIPO_CATS: string[] = ["Accesorios","Cámaras","Eléctrico","Grip","Iluminación","Monitores","Movimiento","Transporte","Wireless","Ópticas"];
 
@@ -120,42 +120,42 @@ export const EQUIPOS: Equipo[] = [
   {
     "slug": "15c",
     "name": "15c",
-    "cat": "Iluminación"
+    "cat": "Iluminación", "w": 18
   },
   {
     "slug": "6c",
     "name": "6c",
-    "cat": "Iluminación"
+    "cat": "Iluminación", "w": 6
   },
   {
     "slug": "amaran-60x",
     "name": "amaran 60x",
-    "cat": "Iluminación"
+    "cat": "Iluminación", "w": 65
   },
   {
     "slug": "100xs",
     "name": "Aputure 100x",
-    "cat": "Iluminación"
+    "cat": "Iluminación", "w": 130
   },
   {
     "slug": "1200",
     "name": "Nanlux Evoke 1200B Bi-Color",
-    "cat": "Iluminación"
+    "cat": "Iluminación", "w": 1200
   },
   {
     "slug": "200xs",
     "name": "Aputure 200x",
-    "cat": "Iluminación"
+    "cat": "Iluminación", "w": 230
   },
   {
     "slug": "300bi",
     "name": "Amaran 300C RGB",
-    "cat": "Iluminación"
+    "cat": "Iluminación", "w": 350
   },
   {
     "slug": "650c",
     "name": "Nanlux Dyno 650C RGBW",
-    "cat": "Iluminación"
+    "cat": "Iluminación", "w": 650
   },
   {
     "slug": "caja-de-luz",
@@ -175,17 +175,17 @@ export const EQUIPOS: Equipo[] = [
   {
     "slug": "nanlite-forza-720b-bi-color-led",
     "name": "Nanlite Forza 720B Bi-Color LED",
-    "cat": "Iluminación"
+    "cat": "Iluminación", "w": 800
   },
   {
     "slug": "nanlite-pavobulb-10c-bi-color-rgbww-led-bulb",
     "name": "Nanlite PavoBulb 10C Bi-Color RGBWW LED Bulb",
-    "cat": "Iluminación"
+    "cat": "Iluminación", "w": 10
   },
   {
     "slug": "nanlite-pavotube-ii-30c-rgb-led-tube",
     "name": "Nanlite PavoTube II 30C RGB LED Tube",
-    "cat": "Iluminación"
+    "cat": "Iluminación", "w": 36
   },
   {
     "slug": "snoop",
@@ -327,14 +327,14 @@ export const EQUIPOS: Equipo[] = [
   { "slug": "flycam-flowline", "name": "Flycam Flowline", "cat": "Movimiento", "desc": "Chaleco de soporte · carga máx. 7 kg" },
   { "slug": "proaim-polaris-dolly", "name": "Proaim Polaris Dolly", "cat": "Movimiento", "desc": "Dolly portátil con Kupo Slider Stand y tubos de 2 m" },
   { "slug": "magnet-camera-mount", "name": "Plataforma de montaje para carro", "cat": "Grip", "desc": "8 chupas, 2 riatas, 2 centurys, cabeza Manfrotto 502 y ballhead" },
-  { "slug": "nanlite-pavotube-t8-7x", "name": "Nanlite PavoTube T8-7X", "cat": "Iluminación", "desc": "Tubo RGB pixel · paquete x4" },
-  { "slug": "nanlite-pavotube-ii-15xr", "name": "Nanlite PavoTube II 15XR", "cat": "Iluminación", "desc": "Tubo RGB pixel · paquete x4" },
-  { "slug": "nanlite-pavotube-ii-30xr", "name": "Nanlite PavoTube II 30XR", "cat": "Iluminación", "desc": "Tubo RGB pixel · paquete x4" },
-  { "slug": "amaran-100d", "name": "Aputure Amaran 100D", "cat": "Iluminación" },
-  { "slug": "nanlite-forza-60b-fresnel", "name": "Nanlite Forza 60B II Bi-Color", "cat": "Iluminación", "desc": "Incluye Fresnel" },
-  { "slug": "nanlite-forza-60b-proyector", "name": "Nanlite Forza 60B II + proyector", "cat": "Iluminación", "desc": "Incluye kit de fijación y proyector" },
-  { "slug": "nanlite-fc-120b", "name": "Nanlite FC-120B Bi-Color", "cat": "Iluminación" },
-  { "slug": "nanlite-fc-500c", "name": "Nanlite FC-500C RGB", "cat": "Iluminación" },
+  { "slug": "nanlite-pavotube-t8-7x", "name": "Nanlite PavoTube T8-7X", "cat": "Iluminación", "desc": "Tubo RGB pixel · paquete x4", "w": 8 },
+  { "slug": "nanlite-pavotube-ii-15xr", "name": "Nanlite PavoTube II 15XR", "cat": "Iluminación", "desc": "Tubo RGB pixel · paquete x4", "w": 18 },
+  { "slug": "nanlite-pavotube-ii-30xr", "name": "Nanlite PavoTube II 30XR", "cat": "Iluminación", "desc": "Tubo RGB pixel · paquete x4", "w": 36 },
+  { "slug": "amaran-100d", "name": "Aputure Amaran 100D", "cat": "Iluminación", "w": 130 },
+  { "slug": "nanlite-forza-60b-fresnel", "name": "Nanlite Forza 60B II Bi-Color", "cat": "Iluminación", "desc": "Incluye Fresnel", "w": 88 },
+  { "slug": "nanlite-forza-60b-proyector", "name": "Nanlite Forza 60B II + proyector", "cat": "Iluminación", "desc": "Incluye kit de fijación y proyector", "w": 88 },
+  { "slug": "nanlite-fc-120b", "name": "Nanlite FC-120B Bi-Color", "cat": "Iluminación", "w": 135 },
+  { "slug": "nanlite-fc-500c", "name": "Nanlite FC-500C RGB", "cat": "Iluminación", "w": 540 },
   { "slug": "aputure-light-dome", "name": "Softbox Aputure Light Dome", "cat": "Accesorios" },
   { "slug": "aputure-lantern", "name": "Globo Aputure Lantern", "cat": "Accesorios" },
   { "slug": "light-bank-inflable", "name": "Light bank con inflador", "cat": "Accesorios" },

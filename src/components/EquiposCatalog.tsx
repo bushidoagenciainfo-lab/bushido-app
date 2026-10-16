@@ -51,7 +51,12 @@ export default function EquiposCatalog() {
   const coverFor = (cat: string) =>
     COVERS[cat] || EQUIPOS.find((e) => e.cat === cat)?.slug || "";
 
-  const items = openCat ? EQUIPOS.filter((e) => e.cat === openCat) : [];
+  // con potencia (w) → de menor a mayor; sin potencia (modificadores) al final
+  const items = openCat
+    ? EQUIPOS.filter((e) => e.cat === openCat).sort(
+        (a, b) => (a.w ?? Infinity) - (b.w ?? Infinity)
+      )
+    : [];
 
   function toggle(slug: string) {
     setSelected((prev) =>
